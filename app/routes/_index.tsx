@@ -9,6 +9,17 @@ export const meta: MetaFunction = () => {
 
 import Signin from "../components/Signin";
 
+
+import { Features } from "../lib/features"; // Adjust the import path as necessary
+import { useLoaderData } from "@remix-run/react";
+
+export const loader = async () => {
+  return process.env;
+}
+
+
 export default function Index() {
-return <Signin />;
+  const loaderData = useLoaderData<Features>();
+  const enableEmail = loaderData.FEATURE_EMAIL_LOGIN === 'true';
+  return <Signin enableEmail={enableEmail}/>;
 }
