@@ -10,7 +10,7 @@ export const meta: MetaFunction = () => {
 import Signin from "../components/Signin";
 
 
-import { Features } from "../lib/features"; // Adjust the import path as necessary
+import { Environment } from "../lib/environment"; // Adjust the import path as necessary
 import { useLoaderData } from "@remix-run/react";
 
 export const loader = async () => {
@@ -19,7 +19,7 @@ export const loader = async () => {
 
 
 export default function Index() {
-  const loaderData = useLoaderData<Features>();
+  const loaderData = useLoaderData<Environment>();
   const enableEmail = loaderData.FEATURE_EMAIL_LOGIN === 'true';
   return <Signin enableEmail={enableEmail}/>;
 }
