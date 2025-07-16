@@ -23,7 +23,7 @@ export const links: LinksFunction = () => [
   }
 ];
 import { withEmotionCache } from '@emotion/react';
-import { unstable_useEnhancedEffect as useEnhancedEffect } from '@mui/material';
+import { CssBaseline, unstable_useEnhancedEffect as useEnhancedEffect } from '@mui/material';
 
 interface DocumentProps {
   children: React.ReactNode;
@@ -60,6 +60,7 @@ const Document = withEmotionCache(({ children, title }: DocumentProps, emotionCa
         <Meta />
         <Links />
         <meta name="emotion-insertion-point" content="emotion-insertion-point" />
+        <CssBaseline/>
       </head>
       <body>
         {children}
