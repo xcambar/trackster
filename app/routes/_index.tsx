@@ -1,5 +1,4 @@
 import type { MetaFunction } from "@remix-run/node";
-import Button from "@mui/material/Button";
 
 export const meta: MetaFunction = () => {
   return [
@@ -8,13 +7,8 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export default function Index() {
-return (
-  <div>
-    <h1>Welcome to Remix!</h1>
-    <p>This is the index page of your Remix application.</p>
-  <Button variant="contained">Hello world</Button>
-  </div>
+import Signin from "../components/Signin";
 
-)
+export default function Index() {
+return <Signin />;
 }
