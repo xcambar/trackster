@@ -1,4 +1,5 @@
 import type { MetaFunction } from "@remix-run/node";
+import { getEnvironment, EnvironmentVariables } from "../lib/environment";
 
 export const meta: MetaFunction = () => {
   return [
@@ -10,16 +11,17 @@ export const meta: MetaFunction = () => {
 import Signin from "../components/Signin";
 
 
-import { Environment } from "../lib/environment"; // Adjust the import path as necessary
 import { useLoaderData } from "@remix-run/react";
 
 export const loader = async () => {
-  return process.env;
+  return {
+    FEATURE_EMAIL_LOGIN: getEnvironment("FEATURE_EMAIL_LOGIN")
+  };
 }
 
 
 export default function Index() {
-  const loaderData = useLoaderData<Environment>();
+  const loaderData = useLoaderData<EnvironmentVariables>();
   const enableEmail = loaderData.FEATURE_EMAIL_LOGIN === 'true';
   return <Signin enableEmail={enableEmail}/>;
 }

@@ -3,6 +3,8 @@ import { createCookieSessionStorage } from "@remix-run/node";
 import { StravaProfile, StravaStrategy } from "~/lib/strava/oauth/strategy";
 import { OAuth2Tokens } from "arctic";
 
+import { getEnvironment } from "~/lib/environment";
+
 type StravaTokens = OAuth2Tokens & { data: { athlete: StravaProfile } };
 
 /**
@@ -45,18 +47,16 @@ authenticator.use(
     {
       cookie: "oauth2", // Optional, can also be an object with more options
 
-      clientId: process.env.STRAVA_CLIENT_ID || "MISSING_CLIENT_ID",
-      clientSecret: process.env.STRAVA_CLIENT_SECRET || "MISSING_CLIENT_SECRET",
+      clientId: getEnvironment("STRAVA_CLIENT_ID"),
+      clientSecret: getEnvironment("STRAVA_CLIENT_SECRET"),
+      redirectURI: getEnvironment("STRAVA_REDIRECT_URI"),
 
-      authorizationEndpoint: process.env.STRAVA_AUTHORIZATION_ENDPOINT || "https://MISSING_AUTHORIZATION_ENDPOINT",
-      tokenEndpoint: process.env.STRAVA_TOKEN_ENDPOINT || "https://MISSING_TOKEN_ENDPOINT",
-      redirectURI: process.env.STRAVA_REDIRECT_URI || "http://MISSING_REDIRECT_URI",
+      authorizationEndpoint: getEnvironment("STRAVA_AUTHORIZATION_ENDPOINT"),
+      tokenEndpoint: getEnvironment("STRAVA_TOKEN_ENDPOINT"),
 
       scopes: ["read_all,profile:read_all,activity:read_all"],
-      //codeChallengeMethod: CodeChallengeMethod.S256,
     },
     async ({ tokens/*, request */}) => {
-      console.log("OAuth2 Strategy: tokens", tokens);
       return await getUser(tokens as StravaTokens);
     }
   ),
