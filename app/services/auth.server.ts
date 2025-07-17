@@ -1,11 +1,10 @@
 import { Authenticator } from "remix-auth";
-import { createCookieSessionStorage } from "@remix-run/node";
 import { StravaProfile, StravaStrategy } from "~/lib/strava/oauth/strategy";
 import { OAuth2Tokens } from "arctic";
 
 import { getEnvironment } from "~/lib/environment";
 
-type StravaTokens = OAuth2Tokens & { data: { athlete: StravaProfile } };
+export type StravaTokens = OAuth2Tokens & { data: { athlete: StravaProfile; }; };
 
 /**
  * * This function retrieves the user profile from the Strava tokens.
@@ -25,18 +24,6 @@ async function getUser(tokens: StravaTokens/*, request: Request*/): Promise<Stra
     profile_medium: tokens.data.athlete.profile_medium
   };
 }
-
-// Create a session storage
-export const { getSession, commitSession, destroySession } = createCookieSessionStorage<StravaProfile>({
-  cookie: {
-    name: "__session",
-    httpOnly: true,
-    path: "/",
-    sameSite: "lax",
-    secrets: ["s3cr3t"], // replace this with an actual secret
-    secure: process.env.NODE_ENV === "production",
-  },
-});
 
 // Create an instance of the authenticator, pass a generic with what
 // strategies will return
