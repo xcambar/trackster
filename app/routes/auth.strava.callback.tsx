@@ -1,27 +1,21 @@
-import React from "react";
 import type { ActionFunctionArgs } from "@remix-run/node";
 import { authenticator } from "~/services/auth.server";
-import { useLoaderData } from "@remix-run/react";
+import { getSession, commitSession } from "~/services/session.server";
+import { redirect } from "~/lib/strava/oauth/lib/redirect";
 
 export const loader = async ({ request }: ActionFunctionArgs) => {
   let user;
+  const session = await getSession(request.headers.get("Cookie"));
+  let headers = {};
   try {
     user = await authenticator.authenticate("strava", request);
+    session.set("id", user.id);
   } catch (error) {
     console.log("Error during Strava authentication:", error);
+    session.flash("warning", "Please login again.");
   }
-  return user;
+  headers = {
+    "Set-Cookie": await commitSession(session),
+  };
+  return redirect("/", { headers });
 };
-
-const PrettyPrint: React.FC = () => {
-  const data = useLoaderData<typeof loader>();
-  return (
-    <div>
-      <h1>Strava Authentication Callback</h1>
-      <p>If you see this, the authentication process has been completed.</p>
-      <code>{JSON.stringify(data, null, 2)}</code>
-    </div>
-  );
-};
-
-export default PrettyPrint;
