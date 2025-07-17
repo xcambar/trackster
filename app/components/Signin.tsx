@@ -87,7 +87,7 @@ const SignIn: React.FC<SignInProps> = ({enableEmail}) => {
           </div>
         )}
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          <ConnectWithStrava onClick={() => alert("Sign in with Strava")} />
+          <ConnectWithStrava/>
         </Box>
       </Card>
     </SignInContainer>
