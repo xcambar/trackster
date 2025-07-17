@@ -10,6 +10,7 @@ export const loader = async ({ request }: ActionFunctionArgs) => {
   try {
     user = await authenticator.authenticate("strava", request);
     session.set("id", user.id);
+    session.flash("success", "You are logged in successfully.");
   } catch (error) {
     console.log("Error during Strava authentication:", error);
     session.flash("warning", "Please login again.");
