@@ -3,10 +3,6 @@ import { Button, createTheme } from '@mui/material';
 import StravaIcon from './CustomIcons';
 import { ThemeProvider } from '@mui/material/styles';
 
-interface ButtonProps {
-  onClick: () => void;
-}
-
 // Extend MUI's theme to include a custom color for Strava
 declare module '@mui/material/Button' {
   interface ButtonPropsColorOverrides {
@@ -27,13 +23,13 @@ const stravaTheme = createTheme(theme,{
 }
 )
 
-const ConnectWithStrava: React.FC<ButtonProps> = ({onClick}) => (
+const ConnectWithStrava: React.FC = () => (
   <ThemeProvider theme={stravaTheme}>
     <Button
       fullWidth
       color="strava"
       variant="outlined"
-      onClick={onClick}
+      href='/login/strava'
       startIcon={<StravaIcon />}
     >
       Connect with Strava
