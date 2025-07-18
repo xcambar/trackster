@@ -35,7 +35,7 @@ export const loader = async ({ request }: ActionFunctionArgs) => {
     },
     {
       headers: { "Set-Cookie": await commitSession(session) },
-    },
+    }
   );
 };
 
@@ -52,7 +52,7 @@ export default function Index() {
               severity={severity as AlertColor}
               message={message}
             />
-          ),
+          )
       )}
       {loaderData.isLoggedIn ? (
         <p>You are already logged in.</p>

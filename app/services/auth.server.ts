@@ -16,7 +16,7 @@ export type StravaTokens = OAuth2Tokens & { data: { athlete: StravaProfile } };
  * @returns A promise that resolves to a StravaProfile object containing the user's Strava profile information.
  */
 async function getUser(
-  tokens: StravaTokens /*, request: Request*/,
+  tokens: StravaTokens /*, request: Request*/
 ): Promise<StravaProfile> {
   return await {
     id: tokens.data.athlete.id,
@@ -24,6 +24,7 @@ async function getUser(
     firstname: tokens.data.athlete.firstname,
     lastname: tokens.data.athlete.lastname,
     profile_medium: tokens.data.athlete.profile_medium,
+    created_at: tokens.data.athlete.created_at,
   };
 }
 
@@ -47,7 +48,7 @@ authenticator.use(
     },
     async ({ tokens /*, request */ }) => {
       return await getUser(tokens as StravaTokens);
-    },
+    }
   ),
-  "strava",
+  "strava"
 );

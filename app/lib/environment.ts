@@ -6,6 +6,7 @@ export type EnvironmentVariables = {
   STRAVA_TOKEN_ENDPOINT: string;
   STRAVA_REDIRECT_URI: string;
   STRAVA_API_BASE_URL: string;
+  SUPABASE_ANON_KEY: string;
   SUPABASE_SECRET_KEY: string;
   SUPABASE_URL: string;
   COOKIE_SECRET: string;
