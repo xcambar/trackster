@@ -4,7 +4,7 @@ describe("Loading environment variables securely", () => {
   it("should throw an error if the environment variable is not set", () => {
     //@ts-expect-error We're intentionally testing a missing variable
     expect(() => getEnvironment("NON_EXISTENT_VARIABLE")).toThrow(
-      "Environment variable NON_EXISTENT_VARIABLE is not set",
+      "Environment variable NON_EXISTENT_VARIABLE is not set"
     );
   });
 

@@ -79,7 +79,7 @@ export class StateStore {
 
   toSetCookie(
     cookieName = "oauth2",
-    options: Omit<SetCookieInit, "value"> = {},
+    options: Omit<SetCookieInit, "value"> = {}
   ) {
     const id = crypto.randomUUID();
     return new SetCookie({
