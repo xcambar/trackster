@@ -1,4 +1,4 @@
-import * as React from 'react';
+import * as React from "react";
 import {
   Links,
   Meta,
@@ -7,7 +7,7 @@ import {
   ScrollRestoration,
   useRouteError,
   isRouteErrorResponse,
-} from '@remix-run/react';
+} from "@remix-run/react";
 import type { LinksFunction } from "@remix-run/node";
 
 export const links: LinksFunction = () => [
@@ -20,10 +20,13 @@ export const links: LinksFunction = () => [
   {
     rel: "stylesheet",
     href: "https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap",
-  }
+  },
 ];
-import { withEmotionCache } from '@emotion/react';
-import { CssBaseline, unstable_useEnhancedEffect as useEnhancedEffect } from '@mui/material';
+import { withEmotionCache } from "@emotion/react";
+import {
+  CssBaseline,
+  unstable_useEnhancedEffect as useEnhancedEffect,
+} from "@mui/material";
 
 interface DocumentProps {
   children: React.ReactNode;
@@ -35,48 +38,51 @@ interface DocumentProps {
 // It allows us to inject styles and meta tags into the HTML document
 // It also handles the Emotion cache for server-side rendering
 // This is necessary for MUI to work correctly with Remix
-const Document = withEmotionCache(({ children, title }: DocumentProps, emotionCache) => {
+const Document = withEmotionCache(
+  ({ children, title }: DocumentProps, emotionCache) => {
+    // Only executed on client
+    useEnhancedEffect(() => {
+      // re-link sheet container
+      emotionCache.sheet.container = document.head;
+      // re-inject tags
+      const tags = emotionCache.sheet.tags;
+      emotionCache.sheet.flush();
+      tags.forEach((tag) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (emotionCache.sheet as any)._insertTag(tag);
+      });
+    }, []);
 
-  // Only executed on client
-  useEnhancedEffect(() => {
-    // re-link sheet container
-    emotionCache.sheet.container = document.head;
-    // re-inject tags
-    const tags = emotionCache.sheet.tags;
-    emotionCache.sheet.flush();
-    tags.forEach((tag) => {
-      // eslint-disable-next-line no-underscore-dangle
-      (emotionCache.sheet as any)._insertTag(tag);
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  return (
-    <html lang="en">
-      <head>
-        <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width,initial-scale=1" />
-        {title ? <title>{title}</title> : null}
-        <Meta />
-        <Links />
-        <meta name="emotion-insertion-point" content="emotion-insertion-point" />
-        <CssBaseline/>
-      </head>
-      <body>
-        {children}
-        <ScrollRestoration />
-        <Scripts />
-      </body>
-    </html>
-  );
-});
+    return (
+      <html lang="en">
+        <head>
+          <meta charSet="utf-8" />
+          <meta name="viewport" content="width=device-width,initial-scale=1" />
+          {title ? <title>{title}</title> : null}
+          <Meta />
+          <Links />
+          <meta
+            name="emotion-insertion-point"
+            content="emotion-insertion-point"
+          />
+          <CssBaseline />
+        </head>
+        <body>
+          {children}
+          <ScrollRestoration />
+          <Scripts />
+        </body>
+      </html>
+    );
+  }
+);
 
 // https://remix.run/docs/en/main/route/component
 // https://remix.run/docs/en/main/file-conventions/routes
 export default function App() {
   return (
     <Document>
-        <Outlet />
+      <Outlet />
     </Document>
   );
 }
@@ -89,10 +95,17 @@ export function ErrorBoundary() {
     let message;
     switch (error.status) {
       case 401:
-        message = <p>Oops! Looks like you tried to visit a page that you do not have access to.</p>;
+        message = (
+          <p>
+            Oops! Looks like you tried to visit a page that you do not have
+            access to.
+          </p>
+        );
         break;
       case 404:
-        message = <p>Oops! Looks like you tried to visit a page that does not exist.</p>;
+        message = (
+          <p>Oops! Looks like you tried to visit a page that does not exist.</p>
+        );
         break;
 
       default:
@@ -101,10 +114,10 @@ export function ErrorBoundary() {
 
     return (
       <Document title={`${error.status} ${error.statusText}`}>
-          <h1>
-            {error.status}: {error.statusText}
-          </h1>
-          {message}
+        <h1>
+          {error.status}: {error.statusText}
+        </h1>
+        {message}
       </Document>
     );
   }
@@ -113,12 +126,15 @@ export function ErrorBoundary() {
     console.error(error);
     return (
       <Document title="Error!">
-          <div>
-            <h1>There was an error</h1>
-            <p>{error.message}</p>
-            <hr />
-            <p>Hey, developer, you should replace this with what you want your users to see.</p>
-          </div>
+        <div>
+          <h1>There was an error</h1>
+          <p>{error.message}</p>
+          <hr />
+          <p>
+            Hey, developer, you should replace this with what you want your
+            users to see.
+          </p>
+        </div>
       </Document>
     );
   }

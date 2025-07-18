@@ -1,5 +1,5 @@
-import React from 'react';
-import SvgIcon, { SvgIconProps } from '@mui/material/SvgIcon';
+import React from "react";
+import SvgIcon, { SvgIconProps } from "@mui/material/SvgIcon";
 
 const CustomIcon: React.FC<SvgIconProps> = (props) => (
   <SvgIcon {...props}>
@@ -16,11 +16,11 @@ const CustomIcon: React.FC<SvgIconProps> = (props) => (
         <g>
           <polygon
             points="226.172,26.001 90.149,288.345 170.29,288.345 226.172,184.036 281.605,288.345     361.116,288.345   "
-            style={{fill:"#FF5500"}}
+            style={{ fill: "#FF5500" }}
           />
           <polygon
             points="361.116,288.345 321.675,367.586 281.605,288.345 220.871,288.345 321.675,485.999     421.851,288.345   "
-            style={{fill:"#FFAF8A"}}
+            style={{ fill: "#FFAF8A" }}
           />
         </g>
       </g>

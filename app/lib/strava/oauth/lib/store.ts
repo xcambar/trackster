@@ -20,98 +20,98 @@ import { Cookie, SetCookie, type SetCookieInit } from "@mjackson/headers";
  * object, this is useful when we need to get the store from the cookie.
  */
 export class StateStore {
-	states = new Set<string>();
-	codeVerifiers = new Map<string, string>();
+  states = new Set<string>();
+  codeVerifiers = new Map<string, string>();
 
-	state: string | undefined;
-	codeVerifier: string | undefined;
+  state: string | undefined;
+  codeVerifier: string | undefined;
 
-	constructor(params = new URLSearchParams()) {
-		for (const [state, verifier] of params) {
-			if (state === "state") continue;
-			this.states.add(state);
-			this.codeVerifiers.set(state, verifier);
-		}
-	}
+  constructor(params = new URLSearchParams()) {
+    for (const [state, verifier] of params) {
+      if (state === "state") continue;
+      this.states.add(state);
+      this.codeVerifiers.set(state, verifier);
+    }
+  }
 
-	/**
-	 * Append a new state and code verifier to the store
-	 */
-	set(state: string, verifier?: string) {
-		this.state = state;
-		this.codeVerifier = verifier;
+  /**
+   * Append a new state and code verifier to the store
+   */
+  set(state: string, verifier?: string) {
+    this.state = state;
+    this.codeVerifier = verifier;
 
-		this.states.add(state);
-		if (verifier) this.codeVerifiers.set(state, verifier);
-	}
+    this.states.add(state);
+    if (verifier) this.codeVerifiers.set(state, verifier);
+  }
 
-	/**
-	 * Check if the store has the given state
-	 */
-	has(state?: string) {
-		if (state) return this.states.has(state);
-		return this.states.size > 0;
-	}
+  /**
+   * Check if the store has the given state
+   */
+  has(state?: string) {
+    if (state) return this.states.has(state);
+    return this.states.size > 0;
+  }
 
-	/**
-	 * Get the code verifier for the given state
-	 */
-	get(state: string) {
-		return this.codeVerifiers.get(state);
-	}
+  /**
+   * Get the code verifier for the given state
+   */
+  get(state: string) {
+    return this.codeVerifiers.get(state);
+  }
 
-	/**
-	 * Convert the store to a string
-	 *
-	 * This is useful when we need to store the store in a cookie
-	 */
-	toString() {
-		if (!this.state) return "";
-		if (!this.codeVerifier) return "";
+  /**
+   * Convert the store to a string
+   *
+   * This is useful when we need to store the store in a cookie
+   */
+  toString() {
+    if (!this.state) return "";
+    if (!this.codeVerifier) return "";
 
-		const params = new URLSearchParams();
+    const params = new URLSearchParams();
 
-		params.set("state", this.state);
-		params.set(this.state, this.codeVerifier);
+    params.set("state", this.state);
+    params.set(this.state, this.codeVerifier);
 
-		return params.toString();
-	}
+    return params.toString();
+  }
 
-	toSetCookie(
-		cookieName = "oauth2",
-		options: Omit<SetCookieInit, "value"> = {},
-	) {
-		const id = crypto.randomUUID();
-		return new SetCookie({
-			value: this.toString(),
-			httpOnly: true, // Prevents JavaScript from accessing the cookie
-			maxAge: 60 * 5, // 5 minutes
-			path: "/", // Allow the cookie to be sent to any path
-			sameSite: "Lax", // Prevents it from being sent in cross-site requests
-			...options,
-			name: `${cookieName}:${id}`,
-		});
-	}
+  toSetCookie(
+    cookieName = "oauth2",
+    options: Omit<SetCookieInit, "value"> = {},
+  ) {
+    const id = crypto.randomUUID();
+    return new SetCookie({
+      value: this.toString(),
+      httpOnly: true, // Prevents JavaScript from accessing the cookie
+      maxAge: 60 * 5, // 5 minutes
+      path: "/", // Allow the cookie to be sent to any path
+      sameSite: "Lax", // Prevents it from being sent in cross-site requests
+      ...options,
+      name: `${cookieName}:${id}`,
+    });
+  }
 
-	/**
-	 * Create a new instance from a Request object by getting the store from a
-	 * cookie with the given name.
-	 */
-	static fromRequest(request: Request, cookieName = "oauth2") {
-		const cookie = new Cookie(request.headers.get("cookie") ?? "");
+  /**
+   * Create a new instance from a Request object by getting the store from a
+   * cookie with the given name.
+   */
+  static fromRequest(request: Request, cookieName = "oauth2") {
+    const cookie = new Cookie(request.headers.get("cookie") ?? "");
 
-		const params = new URLSearchParams();
+    const params = new URLSearchParams();
 
-		for (const name of cookie.names) {
-			if (name.startsWith(cookieName)) {
-				const cookieInstance = cookie.get(name);
-				if (!cookieInstance) continue;
-				for (const [key, value] of new URLSearchParams(cookieInstance)) {
-					params.append(key, value);
-				}
-			}
-		}
+    for (const name of cookie.names) {
+      if (name.startsWith(cookieName)) {
+        const cookieInstance = cookie.get(name);
+        if (!cookieInstance) continue;
+        for (const [key, value] of new URLSearchParams(cookieInstance)) {
+          params.append(key, value);
+        }
+      }
+    }
 
-		return new StateStore(params);
-	}
+    return new StateStore(params);
+  }
 }
