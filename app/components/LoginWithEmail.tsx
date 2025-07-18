@@ -6,9 +6,9 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import FormLabel from "@mui/material/FormLabel";
 import FormControl from "@mui/material/FormControl";
 import TextField from "@mui/material/TextField";
-import Link from '@mui/material/Link';
+import Link from "@mui/material/Link";
 
-interface LoginWithEmailProps { 
+interface LoginWithEmailProps {
   onSubmit?: (email: string, password: string) => void;
 }
 
@@ -18,7 +18,7 @@ const LoginWithEmail: React.FC<LoginWithEmailProps> = () => {
   const [passwordError, setPasswordError] = React.useState(false);
   const [passwordErrorMessage, setPasswordErrorMessage] = React.useState("");
 
-  const [/*open*/, setOpen] = React.useState(false);
+  const [, /*open*/ setOpen] = React.useState(false);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -90,6 +90,7 @@ const LoginWithEmail: React.FC<LoginWithEmailProps> = () => {
             name="email"
             placeholder="your@email.com"
             autoComplete="email"
+            //eslint-disable-next-line jsx-a11y/no-autofocus
             autoFocus
             required
             fullWidth

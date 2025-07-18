@@ -8,7 +8,7 @@ export type EnvironmentVariables = {
   STRAVA_API_BASE_URL: string;
   COOKIE_SECRET: string;
   NODE_ENV: string;
-}
+};
 
 type Environment = keyof EnvironmentVariables;
 

@@ -22,18 +22,21 @@ export class StravaStrategy extends Strategy<
 
   constructor(
     protected options: OAuth2Strategy.ConstructorOptions,
-    verify: Strategy.VerifyFunction<StravaProfile, OAuth2Strategy.VerifyOptions>
+    verify: Strategy.VerifyFunction<
+      StravaProfile,
+      OAuth2Strategy.VerifyOptions
+    >,
   ) {
     super(verify);
     if (!options.clientId || !options.clientSecret || !options.redirectURI) {
       throw new Error(
-        "StravaStrategy requires clientId, clientSecret, and redirectURI options"
+        "StravaStrategy requires clientId, clientSecret, and redirectURI options",
       );
     }
     this.client = new Strava(
       options.clientId,
       options.clientSecret,
-      options.redirectURI.toString()
+      options.redirectURI.toString(),
     );
   }
 
@@ -111,7 +114,7 @@ export class StravaStrategy extends Strategy<
 
     const url = this.client.createAuthorizationURL(
       state,
-      this.options.scopes ?? []
+      this.options.scopes ?? [],
     );
 
     return { state, codeVerifier, url };

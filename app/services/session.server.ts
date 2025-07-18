@@ -10,13 +10,14 @@ type SessionFlashData = {
   success: string; //green
 };
 
-export const { getSession, commitSession, destroySession } = createCookieSessionStorage<StravaProfile, SessionFlashData>({
-  cookie: {
-    name: "__session",
-    httpOnly: true,
-    path: "/",
-    sameSite: "lax",
-    secrets: [getEnvironment("COOKIE_SECRET")],
-    secure: getEnvironment("NODE_ENV") === "production",
-  },
-});
+export const { getSession, commitSession, destroySession } =
+  createCookieSessionStorage<StravaProfile, SessionFlashData>({
+    cookie: {
+      name: "__session",
+      httpOnly: true,
+      path: "/",
+      sameSite: "lax",
+      secrets: [getEnvironment("COOKIE_SECRET")],
+      secure: getEnvironment("NODE_ENV") === "production",
+    },
+  });
