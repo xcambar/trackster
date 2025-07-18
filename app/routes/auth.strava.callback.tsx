@@ -33,9 +33,8 @@ export const loader = async ({ request }: ActionFunctionArgs) => {
     }));
     if (error?.code === "user_already_exists") {
       // If the user already exists, we can just sign them in
-      ({ data: supabaseUser, error } = await supabase.auth.signInWithPassword(
-        supabaseCredentials
-      ));
+      ({ data: supabaseUser, error } =
+        await supabase.auth.signInWithPassword(supabaseCredentials));
       if (error) {
         session.flash("error", "Login failed");
         console.error("Error signing in with Supabase:", error);
