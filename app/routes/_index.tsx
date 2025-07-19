@@ -98,7 +98,7 @@ export default function Index() {
             ></Box>
             <Box sx={{ flexGrow: 0 }}>
               {loaderData.isLoggedIn && (
-                <IconButton href="/logout">
+                <IconButton color="inherit" href="/logout">
                   <LogoutIcon />
                 </IconButton>
               )}
