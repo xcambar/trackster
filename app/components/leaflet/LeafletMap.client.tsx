@@ -1,18 +1,31 @@
-import { MapContainer, TileLayer } from "react-leaflet";
+import React from "react";
+import { MapContainer, TileLayer, useMap } from "react-leaflet";
+import { useGeolocated } from "react-geolocated";
+
 import "leaflet/dist/leaflet.css"; // Import Leaflet CSS
 
-/**
- *
- * @TODO Styles are not imported yet, need to import Leaflet CSS
- * @TODO Maybe the map won't have a height, it must be styled with CSS
- * @returns
- */
+const MapGeolocationUpdater: React.FC<{
+  center?: GeolocationCoordinates;
+}> = ({ center }) => {
+  const map = useMap();
+  if (center) {
+    map.setView([center.latitude, center.longitude], 13); // We're closing in on the current location, when available
+  } else {
+    map.setView([0, 0], 3); // The default map has a bird's eye view on the map
+  }
+  return null;
+};
 
 export const LeafletMap: React.FC = () => {
+  const { coords /*, isGeolocationAvailable, isGeolocationEnabled*/ } =
+    useGeolocated({
+      positionOptions: {
+        enableHighAccuracy: false,
+      },
+      userDecisionTimeout: 5000,
+    });
   return (
     <MapContainer
-      center={[51.505, -0.09]}
-      zoom={13}
       scrollWheelZoom={false}
       style={{ height: "100%", width: "100%" }}
     >
@@ -20,6 +33,7 @@ export const LeafletMap: React.FC = () => {
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
+      <MapGeolocationUpdater center={coords} />
     </MapContainer>
   );
 };
