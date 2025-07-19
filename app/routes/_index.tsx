@@ -17,6 +17,8 @@ import {
   Typography,
 } from "@mui/material";
 import { FlashMessage } from "../components/FlashMessage";
+import { LeafletMap } from "~/components/leaflet/LeafletMap.client";
+import { ClientOnly } from "remix-utils/client-only";
 
 export const meta: MetaFunction = () => {
   return [
@@ -105,9 +107,13 @@ export default function Index() {
             </Box>
           </Toolbar>
         </AppBar>
-        <Container maxWidth={false} sx={{ flexGrow: 1, overflow: "auto" }}>
+        <Container
+          disableGutters
+          maxWidth={false}
+          sx={{ flexGrow: 1, overflow: "auto" }}
+        >
           {loaderData.isLoggedIn ? (
-            <p>You are already logged in.</p>
+            <ClientOnly>{() => <LeafletMap />}</ClientOnly>
           ) : (
             <Signin enableEmail={enableEmail} />
           )}
