@@ -12,6 +12,7 @@ export interface StravaProfile {
   lastname: string;
   profile_medium: string;
   created_at: string;
+  token: object;
 }
 
 export class StravaStrategy extends Strategy<
