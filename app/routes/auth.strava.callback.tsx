@@ -28,18 +28,35 @@ export const loader = async ({ request }: ActionFunctionArgs) => {
     ({ data: supabaseUser, error } = await supabase.auth.signUp({
       ...supabaseCredentials,
       options: {
-        data: { strava: user },
+        data: { strava_profile: user },
       },
     }));
     if (error?.code === "user_already_exists") {
       // If the user already exists, we can just sign them in
-      ({ data: supabaseUser, error } =
-        await supabase.auth.signInWithPassword(supabaseCredentials));
+      ({ data: supabaseUser, error } = await supabase.auth.signInWithPassword(
+        supabaseCredentials
+      ));
+    }
+    const existingToken =
+      supabaseUser?.user?.user_metadata?.strava_profile?.token;
+
+    if (
+      !existingToken ||
+      //eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (user.token as any).expires_at > existingToken.expires_at
+    ) {
+      // If the Strava token is newer, update it in Supabase
+      const { error } = await supabase.auth.updateUser({
+        data: { strava_profile: user },
+      });
       if (error) {
-        session.flash("error", "Login failed");
-        console.error("Error signing in with Supabase:", error);
-        return commitSessionAndRedirect(session);
+        console.error("Error updating user in Supabase:", error);
       }
+    }
+    if (error) {
+      session.flash("error", "Login failed");
+      console.error("Error signing in with Supabase:", error);
+      return commitSessionAndRedirect(session);
     }
 
     if (supabaseUser?.user) {

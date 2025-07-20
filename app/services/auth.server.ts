@@ -18,14 +18,17 @@ export type StravaTokens = OAuth2Tokens & { data: { athlete: StravaProfile } };
 async function getUser(
   tokens: StravaTokens /*, request: Request*/
 ): Promise<StravaProfile> {
-  return await {
-    id: tokens.data.athlete.id,
-    username: tokens.data.athlete.username,
-    firstname: tokens.data.athlete.firstname,
-    lastname: tokens.data.athlete.lastname,
-    profile_medium: tokens.data.athlete.profile_medium,
-    created_at: tokens.data.athlete.created_at,
+  const { athlete, ...token } = tokens.data;
+  const stravaProfile: StravaProfile = {
+    id: athlete.id,
+    username: athlete.username,
+    firstname: athlete.firstname,
+    lastname: athlete.lastname,
+    profile_medium: athlete.profile_medium,
+    created_at: athlete.created_at,
+    token,
   };
+  return stravaProfile;
 }
 
 // Create an instance of the authenticator, pass a generic with what
