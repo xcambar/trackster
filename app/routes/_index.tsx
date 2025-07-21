@@ -11,6 +11,7 @@ import {
   AppBar,
   Box,
   Container,
+  Drawer,
   IconButton,
   Link,
   Toolbar,
@@ -19,6 +20,7 @@ import {
 import { FlashMessage } from "../components/FlashMessage";
 import { LeafletMap } from "~/components/leaflet/LeafletMap.client";
 import { ClientOnly } from "remix-utils/client-only";
+import { ActivityList } from "~/components/ActivityList";
 
 export const meta: MetaFunction = () => {
   return [
@@ -52,6 +54,8 @@ export const loader = async ({ request }: ActionFunctionArgs) => {
     }
   );
 };
+
+const drawerWidth = 360;
 
 export default function Index() {
   const loaderData = useLoaderData<typeof loader>();
@@ -95,6 +99,7 @@ export default function Index() {
               </Typography>
             </Link>
 
+            {/* This box acts as a spacer, it pushes the following elements on the right */}
             <Box
               sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}
             ></Box>
@@ -113,7 +118,26 @@ export default function Index() {
           sx={{ flexGrow: 1, overflow: "auto" }}
         >
           {loaderData.isLoggedIn ? (
-            <ClientOnly>{() => <LeafletMap />}</ClientOnly>
+            <Box sx={{ display: "flex", height: "100%" }}>
+              <Drawer
+                variant="permanent"
+                sx={{
+                  width: drawerWidth,
+                  flexShrink: 0,
+                  [`& .MuiDrawer-paper`]: {
+                    width: drawerWidth,
+                    boxSizing: "border-box",
+                    position: "static",
+                  },
+                }}
+              >
+                {" "}
+                <Box sx={{ overflow: "auto" }}>
+                  <ActivityList />
+                </Box>
+              </Drawer>
+              <ClientOnly>{() => <LeafletMap />}</ClientOnly>
+            </Box>
           ) : (
             <Signin enableEmail={enableEmail} />
           )}
