@@ -9,6 +9,7 @@ export type EnvironmentVariables = {
   SUPABASE_ANON_KEY: string;
   SUPABASE_SECRET_KEY: string;
   SUPABASE_URL: string;
+  SUPABASE_DATABASE_URL: string;
   COOKIE_SECRET: string;
   NODE_ENV: string;
 };
