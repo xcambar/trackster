@@ -3,6 +3,13 @@
 
   "configurations": [
     {
+      "command": "npm test",
+      "name": "start test",
+      "request": "launch",
+      "type": "node-terminal",
+      "cwd": "${workspaceFolder}"
+    },
+    {
       "command": "npm run dev",
       "name": "start dev server",
       "request": "launch",
