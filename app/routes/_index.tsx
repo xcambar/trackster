@@ -1,5 +1,5 @@
 import type { ActionFunctionArgs, MetaFunction } from "@remix-run/node";
-import { getEnvironment } from "../lib/environment";
+import { getEnvironment } from "../../lib/environment";
 import Signin from "../components/Signin";
 import { data, useLoaderData } from "@remix-run/react";
 import { commitSession, getSession } from "~/services/session.server";

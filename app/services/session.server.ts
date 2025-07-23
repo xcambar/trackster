@@ -1,5 +1,5 @@
 import { createCookieSessionStorage } from "@remix-run/node";
-import { getEnvironment } from "~/lib/environment";
+import { getEnvironment } from "lib/environment";
 import { StravaProfile } from "~/lib/strava/oauth/strategy";
 
 // Create a session storage
