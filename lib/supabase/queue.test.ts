@@ -60,9 +60,10 @@ describe(SupabaseQueue.name, () => {
 
   it("sends a message to the queue via the SupabaseClient", () => {
     const sbClient = new SupabaseClient("https://...", "abcdefgh");
-    const methodMock = vi.spyOn(sbClient, "rpc");
 
     const client = new SupabaseQueue({ queue: "hello", client: sbClient });
+    const methodMock = vi.spyOn(client._schema, "rpc");
+
     client.push({});
     expect(methodMock).toHaveBeenCalledWith("send", {
       queue_name: "hello",
@@ -78,9 +79,9 @@ describe(SupabaseQueue.name, () => {
 
   it("Receives a message to the queue via the SupabaseClient", () => {
     const sbClient = new SupabaseClient("https://...", "abcdefgh");
-    const methodMock = vi.spyOn(sbClient, "rpc");
 
     const client = new SupabaseQueue({ queue: "hello", client: sbClient });
+    const methodMock = vi.spyOn(client._schema, "rpc");
     client.pull();
 
     expect(methodMock).toHaveBeenCalledWith("pop", {

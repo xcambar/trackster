@@ -9,7 +9,7 @@ type SupabaseError = {
 };
 type SupabaseResponse = {
   error: null | SupabaseError;
-  //data: null | T[];
+  data: null | [];
   count: null | number;
   status: number;
   statusText: string;
@@ -23,13 +23,17 @@ type PullPayload<T = object> = {
   message: T;
 };
 
-type SupabasePushResponse = SupabaseResponse & {
-  data: null | number[];
-};
+type SupabasePushResponse =
+  | SupabaseResponse
+  | {
+      data: null | number[];
+    };
 
-type SupabasePullResponse<T = object> = SupabaseResponse & {
-  data: null | PullPayload<T>[];
-};
+type SupabasePullResponse<T = object> =
+  | SupabaseResponse
+  | {
+      data: null | PullPayload<T>[];
+    };
 
 type SupaBaseQueueOptions = {
   queue: string;
@@ -39,11 +43,15 @@ type SupaBaseQueueOptions = {
   client?: SupabaseClient;
 };
 
-export class SupabaseQueue {
-  client: SupabaseClient;
+type RPCClient = {
+  rpc(method: string, opts: object): Promise<SupabaseResponse>;
+};
 
-  schema: string;
-  queue: string;
+export class SupabaseQueue {
+  private _client: RPCClient;
+
+  private schema: string;
+  private queue: string;
 
   constructor({
     schema = "pgmq_public",
@@ -58,18 +66,30 @@ export class SupabaseQueue {
       throw new Error("The name of the queue is mandatory");
     }
 
+    let candidateClient;
     if (client) {
-      this.client = client;
+      candidateClient = client;
     } else {
       if (supabaseUrl && supabaseAnonKey) {
-        this.client = createClient(supabaseUrl, supabaseAnonKey);
+        candidateClient = createClient(supabaseUrl, supabaseAnonKey);
       } else {
-        this.client = createClient(
+        candidateClient = createClient(
           getEnvironment("SUPABASE_URL"),
           getEnvironment("SUPABASE_ANON_KEY")
         );
       }
     }
+    this._client = candidateClient.schema(this.schema) as unknown as RPCClient;
+  }
+
+  /**
+   * This is meant to be primarily useful in tests
+   * as a way to expose the underlying structure and mock properly.
+   *
+   * It could be removed but at the cost of more complex ergonomics.
+   */
+  public get _schema() {
+    return this._client;
   }
 
   public async push(
@@ -78,7 +98,7 @@ export class SupabaseQueue {
     //eslint-disable-next-line @typescript-eslint/no-explicit-any
     options?: Record<string, any>
   ): Promise<SupabasePushResponse> {
-    return this.client.schema(this.schema).rpc("send", {
+    return this._schema.rpc("send", {
       queue_name: this.queue,
       ...options,
       message,
@@ -86,7 +106,7 @@ export class SupabaseQueue {
   }
 
   public async pull<T>(): Promise<SupabasePullResponse<T>> {
-    return this.client.schema(this.schema).rpc("pop", {
+    return this._schema.rpc("pop", {
       queue_name: this.queue,
     });
   }
