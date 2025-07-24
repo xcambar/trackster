@@ -1,5 +1,7 @@
 import React, { Suspense, useEffect, useState } from "react";
 import { Await, useFetcher } from "@remix-run/react";
+import { format } from "date-fns";
+import { convert } from "convert";
 
 import {
   List,
@@ -21,6 +23,7 @@ import { stravaTheme } from "./ConnectWithStrava";
 import BikeIcon from "@mui/icons-material/DirectionsBike";
 import RunIcon from "@mui/icons-material/DirectionsRun";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
+import QuestionMarkIcon from "@mui/icons-material/QuestionMark";
 import { Activity } from "~/lib/models/activity";
 
 const ACTIVITIES_ROUTE = "/user/activities.json";
@@ -28,6 +31,11 @@ const ACTIVITIES_ROUTE = "/user/activities.json";
 type ActivityListProps = {
   activities: Promise<Activity[]>;
 };
+
+function convertKmsToM(km: number) {
+  const converted = convert(km, "m").to("km");
+  return Math.round((converted + Number.EPSILON) * 100) / 100 + " km";
+}
 
 const ListItemSkeleton = () => {
   return (
@@ -149,7 +157,10 @@ export const ActivityList: React.FC<ActivityListProps> = ({
                     <IconButton edge="end" aria-label="comments">
                       <Avatar>
                         {activity.type === "run" && <RunIcon />}
-                        {activity.type === "bike" && <BikeIcon />}
+                        {activity.type === "ride" && <BikeIcon />}
+                        {!["run", "ride"].includes(activity.type) && (
+                          <QuestionMarkIcon />
+                        )}
                       </Avatar>
                     </IconButton>
                   }
@@ -166,7 +177,8 @@ export const ActivityList: React.FC<ActivityListProps> = ({
                     }
                     secondary={
                       <Typography variant="body2" color="text.secondary">
-                        Now
+                        {format(activity.start_date, "yyyy-MM-dd")} —
+                        {convertKmsToM(activity.distance)}
                       </Typography>
                     }
                   />
