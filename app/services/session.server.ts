@@ -1,6 +1,6 @@
-import { createCookieSessionStorage } from "@remix-run/node";
+import { createCookieSessionStorage, Session } from "@remix-run/node";
 import { getEnvironment } from "lib/environment";
-import { StravaProfile } from "~/lib/strava/oauth/strategy";
+import { supabase } from "./supabase.server";
 
 // Create a session storage
 type SessionFlashData = {
@@ -10,8 +10,14 @@ type SessionFlashData = {
   success: string; //green
 };
 
+type UserSessionData = {
+  id: string | number;
+};
+
+export type UserSession = Session<UserSessionData, SessionFlashData>;
+
 export const { getSession, commitSession, destroySession } =
-  createCookieSessionStorage<StravaProfile, SessionFlashData>({
+  createCookieSessionStorage<UserSessionData, SessionFlashData>({
     cookie: {
       name: "__session",
       httpOnly: true,
@@ -24,12 +30,33 @@ export const { getSession, commitSession, destroySession } =
 
 export const isAuthenticated = async (request: Request) => {
   const session = await getSession(request.headers.get("Cookie"));
-  return session.has("id");
+  return session.has("id") && (await supabase.auth.getSession())?.data.session;
 };
 
-export const ensureAuthenticatedSession = async (request: Request) => {
-  const session = await getSession(request.headers.get("Cookie"));
-  if (!session.has("id")) {
-    throw new Response("Not Found", { status: 404 });
+export type CompleteSession = {
+  browserSession: Awaited<ReturnType<typeof getSession>>;
+  supabaseSession: Awaited<
+    ReturnType<typeof supabase.auth.getSession>
+  >["data"]["session"];
+};
+
+export const ensureAuthenticatedSession = async (
+  request: Request
+): Promise<CompleteSession> => {
+  // Remix Session check
+  const browserSession = await getSession(request.headers.get("Cookie"));
+
+  // Supabase session check
+  const {
+    data: { session },
+    error,
+  } = await supabase.auth.getSession();
+
+  if (!browserSession.has("id") || error || !session) {
+    throw new Response("Not Found", {
+      status: 404,
+      headers: { "Set-Cookie": await destroySession(browserSession) },
+    });
   }
+  return { browserSession: browserSession, supabaseSession: session };
 };
