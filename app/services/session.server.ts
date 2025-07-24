@@ -21,3 +21,15 @@ export const { getSession, commitSession, destroySession } =
       secure: getEnvironment("NODE_ENV") === "production",
     },
   });
+
+export const isAuthenticated = async (request: Request) => {
+  const session = await getSession(request.headers.get("Cookie"));
+  return session.has("id");
+};
+
+export const ensureAuthenticatedSession = async (request: Request) => {
+  const session = await getSession(request.headers.get("Cookie"));
+  if (!session.has("id")) {
+    throw new Response("Not Found", { status: 404 });
+  }
+};
