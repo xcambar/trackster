@@ -2,10 +2,10 @@ import type { ActionFunctionArgs, MetaFunction } from "@remix-run/node";
 import { getEnvironment } from "../../lib/environment";
 import Signin from "../components/Signin";
 import { data, useLoaderData } from "@remix-run/react";
-import { getSession, isAuthenticated } from "~/services/session.server";
+import { getCompleteUserSession, getSession } from "~/services/session.server";
 import LogoutIcon from "@mui/icons-material/Logout";
 import PlaceIcon from "@mui/icons-material/Place";
-import { getActivitiesForUser } from "~/lib/models/activity";
+import { Activity, getActivitiesForUser } from "~/lib/models/activity";
 
 import {
   AlertColor,
@@ -22,6 +22,7 @@ import { FlashMessage } from "../components/FlashMessage";
 import { LeafletMap } from "~/components/leaflet/LeafletMap.client";
 import { ClientOnly } from "remix-utils/client-only";
 import { ActivityList } from "~/components/ActivityList";
+import { getUserFromSession } from "~/lib/models/user";
 
 export const meta: MetaFunction = () => {
   return [
@@ -30,28 +31,14 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-type Activity = {
-  id: number;
-  type: "run" | "bike";
-  title: string;
-};
-
 export const loader = async ({ request }: ActionFunctionArgs) => {
-  const session = await getSession(request.headers.get("Cookie"));
-  const isLoggedIn = await isAuthenticated(request);
+  const browserSession = await getSession(request.headers.get("Cookie"));
+  const userSession = await getCompleteUserSession(request);
+  const isLoggedIn = userSession !== null;
 
-  // const activities = isLoggedIn
-  //   ? getActivitiesForUser(session.get("id"))
-  //   : Promise.resolve([] as Activity[]);
-
-  /**
-   * @todo replace with the commented code above
-   */
-  const activities = new Promise<Activity[]>((resolve) => {
-    setTimeout(() => {
-      resolve([]);
-    }, 3000);
-  });
+  const activities = isLoggedIn
+    ? getActivitiesForUser(await getUserFromSession(userSession))
+    : Promise.resolve([] as Activity[]);
 
   return data({
     activities,
@@ -60,10 +47,10 @@ export const loader = async ({ request }: ActionFunctionArgs) => {
     },
     isLoggedIn,
     flash: {
-      error: session.get("error"),
-      warning: session.get("warning"),
-      info: session.get("info"),
-      success: session.get("success"),
+      error: browserSession.get("error"),
+      warning: browserSession.get("warning"),
+      info: browserSession.get("info"),
+      success: browserSession.get("success"),
     },
   });
 };

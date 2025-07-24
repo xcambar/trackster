@@ -16,7 +16,7 @@ type UserSessionData = {
 
 export type UserSession = Session<UserSessionData, SessionFlashData>;
 
-export const { getSession, commitSession, destroySession } =
+const { getSession, commitSession, destroySession } =
   createCookieSessionStorage<UserSessionData, SessionFlashData>({
     cookie: {
       name: "__session",
@@ -28,6 +28,8 @@ export const { getSession, commitSession, destroySession } =
     },
   });
 
+export { getSession, commitSession, destroySession };
+
 export const isAuthenticated = async (request: Request) => {
   const session = await getSession(request.headers.get("Cookie"));
   return session.has("id") && (await supabase.auth.getSession())?.data.session;
@@ -38,6 +40,24 @@ export type CompleteSession = {
   supabaseSession: Awaited<
     ReturnType<typeof supabase.auth.getSession>
   >["data"]["session"];
+};
+
+export const getCompleteUserSession = async (
+  request: Request
+): Promise<null | CompleteSession> => {
+  // Remix Session check
+  const browserSession = await getSession(request.headers.get("Cookie"));
+
+  // Supabase session check
+  const {
+    data: { session },
+    error,
+  } = await supabase.auth.getSession();
+
+  if (!browserSession.has("id") || error || !session) {
+    return null;
+  }
+  return { browserSession: browserSession, supabaseSession: session };
 };
 
 export const ensureAuthenticatedSession = async (
