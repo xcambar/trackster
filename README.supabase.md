@@ -20,6 +20,9 @@ Queues require to:
 - expose the schema `pgmq_public` (maybe only on development, to be confirmed)
 - Expose the Service Role key (`SUPABASE_SECRET_KEY` or similar, NOT the `SUPABASE_ANON_KEY`) to grant write authorization
 
+Queues setup:
+- `strava_api`
+
 ## Webhooks
 
 - 1 webhook triggered on INSERT on `auth.users` to dispatch to the appropriate edge function
