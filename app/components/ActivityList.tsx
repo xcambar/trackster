@@ -1,4 +1,6 @@
-import React from "react";
+import React, { Suspense, useEffect, useState } from "react";
+import { Await, useFetcher } from "@remix-run/react";
+
 import {
   List,
   ListSubheader,
@@ -6,6 +8,7 @@ import {
   ListItemText,
   Typography,
   Button,
+  Skeleton,
   ThemeProvider,
   ListItemIcon,
   Checkbox,
@@ -17,104 +20,162 @@ import { stravaTheme } from "./ConnectWithStrava";
 
 import BikeIcon from "@mui/icons-material/DirectionsBike";
 import RunIcon from "@mui/icons-material/DirectionsRun";
+import AutorenewIcon from "@mui/icons-material/Autorenew";
+import { Activity } from "~/lib/models/activity";
 
-type Activity = {
-  type: "run" | "bike";
-  title: string;
-};
-const mockActivities: Activity[] = [
-  { type: "run", title: "Morning run" },
-  { type: "run", title: "5k training" },
-  { type: "bike", title: "HIIT" },
-  { type: "run", title: "5k training" },
-  { type: "bike", title: "Long distance" },
-  { type: "run", title: "Morning run" },
-  { type: "run", title: "Slow run" },
-];
+const ACTIVITIES_ROUTE = "/user/activities.json";
 
-type ActivityListItemsProps = {
-  activity: Activity;
+type ActivityListProps = {
+  activities: Promise<Activity[]>;
 };
-const ActivityListItem: React.FC<ActivityListItemsProps> = ({ activity }) => {
+
+const ListItemSkeleton = () => {
   return (
-    <ListItem
-      dense
-      secondaryAction={
-        <IconButton edge="end" aria-label="comments">
-          <Avatar>
-            {activity.type === "run" && <RunIcon />}
-            {activity.type === "bike" && <BikeIcon />}
-          </Avatar>
-        </IconButton>
-      }
-    >
-      <ListItemIcon sx={{ minWidth: "inherit" }}>
-        <Checkbox edge="start"></Checkbox>
-      </ListItemIcon>
-      <ListItemText
-        disableTypography
-        primary={
-          <Typography variant="body1" noWrap>
-            {activity.title}
-          </Typography>
-        }
-        secondary={
-          <Typography variant="body2" color="text.secondary">
-            Now
-          </Typography>
-        }
-      />
-    </ListItem>
+    <>
+      {Array.from(new Array(4)).map((_, idx) => (
+        <ListItem
+          key={`loading-${idx}`}
+          secondaryAction={
+            <IconButton edge="end" aria-label="comments">
+              <Avatar>
+                <Skeleton variant="circular" />
+              </Avatar>
+            </IconButton>
+          }
+        >
+          <ListItemIcon sx={{ minWidth: "inherit" }}>
+            <Checkbox edge="start"></Checkbox>
+          </ListItemIcon>
+          <ListItemText
+            disableTypography
+            primary={
+              <Typography variant="body1">
+                <Skeleton variant="rectangular" width="65%" />
+              </Typography>
+            }
+            secondary={
+              <Typography variant="body2">
+                <Skeleton variant="rectangular" width="50%" />
+              </Typography>
+            }
+          />
+        </ListItem>
+      ))}
+    </>
   );
 };
 
-export const ActivityList: React.FC = () => {
-  const [loading, setLoading] = React.useState(false);
-  const [activities, setActivities] = React.useState<typeof mockActivities>([]);
+export const ActivityList: React.FC<ActivityListProps> = ({
+  activities: activitiesPromise,
+}) => {
+  const activitiesFetcher = useFetcher<Activity[]>();
+
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    activitiesPromise.then((newActivities) => {
+      setLoading(false);
+      setActivities(() => newActivities);
+    });
+    return () => undefined;
+  }, [activitiesPromise]);
+
+  useEffect(() => {
+    const { state, data } = activitiesFetcher;
+    setLoading(state === "loading");
+    if (data) {
+      setActivities(() => [...(data as Activity[])]);
+    }
+  }, [activitiesFetcher]);
+
   const handleLoadFromStravaClick = () => {
-    setLoading(true);
-    setTimeout(() => {
-      setActivities(mockActivities);
-    }, 1000);
+    activitiesFetcher.load(ACTIVITIES_ROUTE);
   };
 
   return (
     <List>
-      <ListSubheader>Your activities</ListSubheader>
-      {activities.length === 0 ? (
-        <>
-          <ListItem key="empty_list">
-            <ListItemText>
-              <Typography
-                variant="subtitle1"
-                color="grey"
-                sx={{ fontStyle: "italic" }}
-              >
-                No activity available
-              </Typography>
-            </ListItemText>
-          </ListItem>
-          <ListItem key="load_from_strava">
-            <ThemeProvider theme={stravaTheme}>
-              <Button
-                fullWidth
-                loading={loading}
-                color="strava"
-                variant="contained"
-                size="small"
-                onClick={handleLoadFromStravaClick}
-                startIcon={loading ? null : <StravaIcon variant="white" />}
-              >
-                Load from Strava
-              </Button>
-            </ThemeProvider>
-          </ListItem>
-        </>
-      ) : (
-        activities.map((activity) => (
-          <ActivityListItem key={activity} activity={activity} />
-        ))
-      )}
+      <ListSubheader>
+        Your activities
+        <IconButton
+          sx={{ float: "right" }}
+          disableRipple
+          loading={loading}
+          onClick={handleLoadFromStravaClick}
+        >
+          <AutorenewIcon />
+        </IconButton>
+      </ListSubheader>
+      <Suspense fallback={<ListItemSkeleton />}>
+        <Await resolve={activitiesPromise}>
+          {() =>
+            activities.length === 0 ? (
+              <>
+                <ListItem key="empty_list">
+                  <ListItemText>
+                    <Typography
+                      variant="subtitle1"
+                      color="grey"
+                      sx={{ fontStyle: "italic" }}
+                    >
+                      No activity available
+                    </Typography>
+                  </ListItemText>
+                </ListItem>
+                <ListItem key="load_from_strava">
+                  <ThemeProvider theme={stravaTheme}>
+                    <Button
+                      fullWidth
+                      loading={loading}
+                      color="strava"
+                      variant="contained"
+                      size="small"
+                      onClick={handleLoadFromStravaClick}
+                      startIcon={
+                        loading ? null : <StravaIcon variant="white" />
+                      }
+                    >
+                      Load from Strava
+                    </Button>
+                  </ThemeProvider>
+                </ListItem>
+              </>
+            ) : (
+              activities.map((activity) => (
+                <ListItem
+                  key={activity.id}
+                  dense
+                  secondaryAction={
+                    <IconButton edge="end" aria-label="comments">
+                      <Avatar>
+                        {activity.type === "run" && <RunIcon />}
+                        {activity.type === "bike" && <BikeIcon />}
+                      </Avatar>
+                    </IconButton>
+                  }
+                >
+                  <ListItemIcon sx={{ minWidth: "inherit" }}>
+                    <Checkbox edge="start"></Checkbox>
+                  </ListItemIcon>
+                  <ListItemText
+                    disableTypography
+                    primary={
+                      <Typography variant="body1" noWrap>
+                        {activity.title}
+                      </Typography>
+                    }
+                    secondary={
+                      <Typography variant="body2" color="text.secondary">
+                        Now
+                      </Typography>
+                    }
+                  />
+                </ListItem>
+              ))
+            )
+          }
+        </Await>
+      </Suspense>
     </List>
   );
 };

@@ -2,9 +2,10 @@ import type { ActionFunctionArgs, MetaFunction } from "@remix-run/node";
 import { getEnvironment } from "../../lib/environment";
 import Signin from "../components/Signin";
 import { data, useLoaderData } from "@remix-run/react";
-import { commitSession, getSession } from "~/services/session.server";
+import { getSession, isAuthenticated } from "~/services/session.server";
 import LogoutIcon from "@mui/icons-material/Logout";
 import PlaceIcon from "@mui/icons-material/Place";
+import { getActivitiesForUser } from "~/lib/models/activity";
 
 import {
   AlertColor,
@@ -29,36 +30,49 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-const checkAuthentication = async (request: Request) => {
-  const session = await getSession(request.headers.get("Cookie"));
-  return session.has("id");
+type Activity = {
+  id: number;
+  type: "run" | "bike";
+  title: string;
 };
 
 export const loader = async ({ request }: ActionFunctionArgs) => {
   const session = await getSession(request.headers.get("Cookie"));
-  return data(
-    {
-      features: {
-        FEATURE_EMAIL_LOGIN: getEnvironment("FEATURE_EMAIL_LOGIN"),
-      },
-      isLoggedIn: await checkAuthentication(request),
-      flash: {
-        error: session.get("error"),
-        warning: session.get("warning"),
-        info: session.get("info"),
-        success: session.get("success"),
-      },
+  const isLoggedIn = await isAuthenticated(request);
+
+  // const activities = isLoggedIn
+  //   ? getActivitiesForUser(session.get("id"))
+  //   : Promise.resolve([] as Activity[]);
+
+  /**
+   * @todo replace with the commented code above
+   */
+  const activities = new Promise<Activity[]>((resolve) => {
+    setTimeout(() => {
+      resolve([]);
+    }, 3000);
+  });
+
+  return data({
+    activities,
+    features: {
+      FEATURE_EMAIL_LOGIN: getEnvironment("FEATURE_EMAIL_LOGIN"),
     },
-    {
-      headers: { "Set-Cookie": await commitSession(session) },
-    }
-  );
+    isLoggedIn,
+    flash: {
+      error: session.get("error"),
+      warning: session.get("warning"),
+      info: session.get("info"),
+      success: session.get("success"),
+    },
+  });
 };
 
 const drawerWidth = 360;
 
 export default function Index() {
   const loaderData = useLoaderData<typeof loader>();
+  const { activities } = loaderData;
   const enableEmail = loaderData.features.FEATURE_EMAIL_LOGIN === "true";
   return (
     <Container maxWidth={false} disableGutters>
@@ -131,9 +145,8 @@ export default function Index() {
                   },
                 }}
               >
-                {" "}
                 <Box sx={{ overflow: "auto" }}>
-                  <ActivityList />
+                  <ActivityList activities={activities} />
                 </Box>
               </Drawer>
               <ClientOnly>{() => <LeafletMap />}</ClientOnly>
