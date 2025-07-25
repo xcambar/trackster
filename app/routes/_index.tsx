@@ -2,7 +2,11 @@ import type { ActionFunctionArgs, MetaFunction } from "@remix-run/node";
 import { getEnvironment } from "../../lib/environment";
 import Signin from "../components/Signin";
 import { data, useLoaderData } from "@remix-run/react";
-import { getCompleteUserSession, getSession } from "~/services/session.server";
+import {
+  commitSession,
+  getCompleteUserSession,
+  getSession,
+} from "~/services/session.server";
 import LogoutIcon from "@mui/icons-material/Logout";
 import PlaceIcon from "@mui/icons-material/Place";
 import { Activity, getActivitiesForUser } from "~/lib/models/activity";
