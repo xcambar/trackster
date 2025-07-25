@@ -44,19 +44,23 @@ export const loader = async ({ request }: ActionFunctionArgs) => {
     ? getActivitiesForUser(await getUserFromSession(userSession))
     : Promise.resolve([] as Activity[]);
 
-  return data({
-    activities,
-    features: {
-      FEATURE_EMAIL_LOGIN: getEnvironment("FEATURE_EMAIL_LOGIN"),
+  return data(
+    {
+      activities,
+      features: {
+        FEATURE_EMAIL_LOGIN: getEnvironment("FEATURE_EMAIL_LOGIN"),
+      },
+      isLoggedIn,
+      flash: {
+        error: browserSession.get("error"),
+        warning: browserSession.get("warning"),
+        info: browserSession.get("info"),
+        success: browserSession.get("success"),
+      },
     },
-    isLoggedIn,
-    flash: {
-      error: browserSession.get("error"),
-      warning: browserSession.get("warning"),
-      info: browserSession.get("info"),
-      success: browserSession.get("success"),
-    },
-  });
+    // this clears the flash messages
+    { headers: { "Set-Cookie": await commitSession(browserSession) } }
+  );
 };
 
 const drawerWidth = 360;
