@@ -16,6 +16,7 @@ import {
   Checkbox,
   IconButton,
   Avatar,
+  ListItemButton,
 } from "@mui/material";
 import { StravaIcon } from "./CustomIcons";
 import { stravaTheme } from "./ConnectWithStrava";
@@ -70,6 +71,46 @@ const ListItemSkeleton = () => {
         </ListItem>
       ))}
     </>
+  );
+};
+
+const ActivityListItem: React.FC<{ activity: Activity }> = ({ activity }) => {
+  const [selected, setSelected] = useState(false);
+  const toggleSelected = () => setSelected(!selected);
+  return (
+    <ListItem
+      dense
+      disablePadding
+      secondaryAction={
+        <IconButton edge="end">
+          <Avatar sx={{ bgcolor: selected ? "primary.main" : "primary" }}>
+            {activity.type === "run" && <RunIcon />}
+            {activity.type === "ride" && <BikeIcon />}
+            {!["run", "ride"].includes(activity.type) && <QuestionMarkIcon />}
+          </Avatar>
+        </IconButton>
+      }
+    >
+      <ListItemButton selected={selected} onClick={toggleSelected}>
+        <ListItemIcon sx={{ minWidth: "inherit" }}>
+          <Checkbox checked={selected} edge="start"></Checkbox>
+        </ListItemIcon>
+        <ListItemText
+          disableTypography
+          primary={
+            <Typography variant="body1" noWrap>
+              {activity.title}
+            </Typography>
+          }
+          secondary={
+            <Typography variant="body2" color="text.secondary">
+              {format(activity.start_date, "yyyy-MM-dd")} —
+              {convertKmsToM(activity.distance)}
+            </Typography>
+          }
+        />
+      </ListItemButton>
+    </ListItem>
   );
 };
 
@@ -150,39 +191,7 @@ export const ActivityList: React.FC<ActivityListProps> = ({
               </>
             ) : (
               activities.map((activity) => (
-                <ListItem
-                  key={activity.id}
-                  dense
-                  secondaryAction={
-                    <IconButton edge="end" aria-label="comments">
-                      <Avatar>
-                        {activity.type === "run" && <RunIcon />}
-                        {activity.type === "ride" && <BikeIcon />}
-                        {!["run", "ride"].includes(activity.type) && (
-                          <QuestionMarkIcon />
-                        )}
-                      </Avatar>
-                    </IconButton>
-                  }
-                >
-                  <ListItemIcon sx={{ minWidth: "inherit" }}>
-                    <Checkbox edge="start"></Checkbox>
-                  </ListItemIcon>
-                  <ListItemText
-                    disableTypography
-                    primary={
-                      <Typography variant="body1" noWrap>
-                        {activity.title}
-                      </Typography>
-                    }
-                    secondary={
-                      <Typography variant="body2" color="text.secondary">
-                        {format(activity.start_date, "yyyy-MM-dd")} —
-                        {convertKmsToM(activity.distance)}
-                      </Typography>
-                    }
-                  />
-                </ListItem>
+                <ActivityListItem key={activity.id} activity={activity} />
               ))
             )
           }
