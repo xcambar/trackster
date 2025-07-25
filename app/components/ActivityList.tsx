@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { convert } from "convert";
 
 import {
+  Chip,
   List,
   ListSubheader,
   ListItem,
@@ -21,6 +22,8 @@ import {
 import { StravaIcon } from "./CustomIcons";
 import { stravaTheme } from "./ConnectWithStrava";
 
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
+import CalendarIcon from "@mui/icons-material/CalendarMonth";
 import BikeIcon from "@mui/icons-material/DirectionsBike";
 import RunIcon from "@mui/icons-material/DirectionsRun";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
@@ -93,7 +96,11 @@ const ActivityListItem: React.FC<{ activity: Activity }> = ({ activity }) => {
     >
       <ListItemButton selected={selected} onClick={toggleSelected}>
         <ListItemIcon sx={{ minWidth: "inherit" }}>
-          <Checkbox checked={selected} edge="start"></Checkbox>
+          <Checkbox
+            checked={selected}
+            edge="start"
+            sx={{ paddingTop: 0, top: "-.5em" }}
+          ></Checkbox>
         </ListItemIcon>
         <ListItemText
           disableTypography
@@ -103,10 +110,19 @@ const ActivityListItem: React.FC<{ activity: Activity }> = ({ activity }) => {
             </Typography>
           }
           secondary={
-            <Typography variant="body2" color="text.secondary">
-              {format(activity.start_date, "yyyy-MM-dd")} —
-              {convertKmsToM(activity.distance)}
-            </Typography>
+            <>
+              <Chip
+                icon={<CalendarIcon />}
+                size="small"
+                label={format(activity.start_date, "yyyy-MM-dd")}
+              />
+              &nbsp;
+              <Chip
+                icon={<EmojiEventsIcon />}
+                size="small"
+                label={convertKmsToM(activity.distance)}
+              />
+            </>
           }
         />
       </ListItemButton>
