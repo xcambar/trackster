@@ -27,7 +27,7 @@ export const LeafletMap: React.FC<{ maps: ActivityMap[] }> = ({ maps }) => {
       userDecisionTimeout: 5000,
     });
   return (
-    <MapContainer scrollWheelZoom={false} style={{ flexGrow: 1 }}>
+    <MapContainer scrollWheelZoom={true} style={{ flexGrow: 1 }}>
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
