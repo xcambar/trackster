@@ -25,8 +25,13 @@ import {
 import { FlashMessage } from "../components/FlashMessage";
 import { LeafletMap } from "~/components/leaflet/LeafletMap.client";
 import { ClientOnly } from "remix-utils/client-only";
-import { ActivityList } from "~/components/ActivityList";
+import {
+  ActivityList,
+  ActivityListItemToggler,
+} from "~/components/ActivityList";
 import { getUserFromSession } from "~/lib/models/user";
+import { useState } from "react";
+import { buildStravaPolylineConfig } from "~/components/leaflet/StravaPolyline.client";
 
 export const meta: MetaFunction = () => {
   return [
@@ -65,10 +70,35 @@ export const loader = async ({ request }: ActionFunctionArgs) => {
 
 const drawerWidth = 360;
 
+export type ActivityMap = {
+  color: string;
+  polyline: string;
+  activityId: number;
+};
+
 export default function Index() {
   const loaderData = useLoaderData<typeof loader>();
   const { activities } = loaderData;
   const enableEmail = loaderData.features.FEATURE_EMAIL_LOGIN === "true";
+  const [mapsState, setMapsState] = useState<ActivityMap[]>([]);
+
+  const toggleActivity: ActivityListItemToggler = (op, activity, id) => {
+    console.log(op, activity.id, mapsState.length);
+    if (
+      op === "add" &&
+      mapsState.filter((map) => map.activityId === activity.id).length === 0
+    ) {
+      return setMapsState([
+        ...mapsState,
+        buildStravaPolylineConfig(activity, id),
+      ]);
+    }
+    if (op === "del")
+      return setMapsState(
+        mapsState.filter((map) => map.activityId !== activity.id)
+      );
+  };
+
   return (
     <Container maxWidth={false} disableGutters>
       {Object.entries(loaderData.flash).map(
@@ -141,10 +171,13 @@ export default function Index() {
                 }}
               >
                 <Box sx={{ overflow: "auto" }}>
-                  <ActivityList activities={activities} />
+                  <ActivityList
+                    activities={activities}
+                    onToggleActivity={toggleActivity}
+                  />
                 </Box>
               </Drawer>
-              <ClientOnly>{() => <LeafletMap />}</ClientOnly>
+              <ClientOnly>{() => <LeafletMap maps={mapsState} />}</ClientOnly>
             </Box>
           ) : (
             <Signin enableEmail={enableEmail} />

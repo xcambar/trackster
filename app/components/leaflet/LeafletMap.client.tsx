@@ -1,8 +1,10 @@
 import React from "react";
 import { MapContainer, TileLayer, useMap } from "react-leaflet";
+import { StravaPolyline } from "./StravaPolyline.client";
 import { useGeolocated } from "react-geolocated";
 
 import "leaflet/dist/leaflet.css"; // Import Leaflet CSS
+import { ActivityMap } from "~/routes/_index";
 
 const MapGeolocationUpdater: React.FC<{
   center?: GeolocationCoordinates;
@@ -16,7 +18,7 @@ const MapGeolocationUpdater: React.FC<{
   return null;
 };
 
-export const LeafletMap: React.FC = () => {
+export const LeafletMap: React.FC<{ maps: ActivityMap[] }> = ({ maps }) => {
   const { coords /*, isGeolocationAvailable, isGeolocationEnabled*/ } =
     useGeolocated({
       positionOptions: {
@@ -30,6 +32,9 @@ export const LeafletMap: React.FC = () => {
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
+      {maps.map(({ activityId, color, polyline }) => (
+        <StravaPolyline key={activityId} color={color} encoded={polyline} />
+      ))}
       <MapGeolocationUpdater center={coords} />
     </MapContainer>
   );
