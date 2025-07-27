@@ -29,11 +29,20 @@ import RunIcon from "@mui/icons-material/DirectionsRun";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
 import QuestionMarkIcon from "@mui/icons-material/QuestionMark";
 import { Activity } from "~/lib/models/activity";
+import { DetailedActivity } from "strava";
 
 const ACTIVITIES_ROUTE = "/user/activities.json";
 
+type ActivityListItemOp = "add" | "del";
+export type ActivityListItemToggler = (
+  op: ActivityListItemOp,
+  activity: DetailedActivity,
+  id: number
+) => void;
+
 type ActivityListProps = {
   activities: Promise<Activity[]>;
+  onToggleActivity: ActivityListItemToggler;
 };
 
 function convertKmsToM(km: number) {
@@ -77,11 +86,34 @@ const ListItemSkeleton = () => {
   );
 };
 
-const ActivityListItem: React.FC<{ activity: Activity }> = ({ activity }) => {
+const ActivityListItem: React.FC<{
+  activity: Activity;
+  onToggle(op: ActivityListItemOp, activity: DetailedActivity): void;
+}> = ({ activity, onToggle }) => {
   const [selected, setSelected] = useState(false);
-  const toggleSelected = () => setSelected(!selected);
+  const [stravaActivity, setStravaActivity] = useState<DetailedActivity>();
+  const toggleSelected = () => {
+    const newState = !selected;
+    setSelected(newState);
+    if (newState === false && stravaActivity) {
+      onToggle("del", stravaActivity);
+    }
+  };
+  const fetcher = useFetcher();
+  useEffect(() => {
+    const data: DetailedActivity = fetcher.data as DetailedActivity;
+    if (data) {
+      setStravaActivity(data);
+    }
+  }, [fetcher]);
+  useEffect(() => {
+    if (stravaActivity && selected) {
+      onToggle("add", stravaActivity);
+    }
+  }, [stravaActivity, selected, onToggle]);
   return (
     <ListItem
+      onClick={() => fetcher.load(`/user/activities.json/${activity.id}`)}
       dense
       disablePadding
       secondaryAction={
@@ -132,6 +164,7 @@ const ActivityListItem: React.FC<{ activity: Activity }> = ({ activity }) => {
 
 export const ActivityList: React.FC<ActivityListProps> = ({
   activities: activitiesPromise,
+  onToggleActivity,
 }) => {
   const activitiesFetcher = useFetcher<Activity[]>();
 
@@ -206,8 +239,14 @@ export const ActivityList: React.FC<ActivityListProps> = ({
                 </ListItem>
               </>
             ) : (
-              activities.map((activity) => (
-                <ActivityListItem key={activity.id} activity={activity} />
+              activities.map((activity, id) => (
+                <ActivityListItem
+                  key={activity.id}
+                  activity={activity}
+                  onToggle={(op, activity) =>
+                    onToggleActivity(op, activity, id)
+                  }
+                />
               ))
             )
           }
