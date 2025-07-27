@@ -31,7 +31,6 @@ import {
 } from "~/components/ActivityList";
 import { getUserFromSession } from "~/lib/models/user";
 import { useState } from "react";
-import { buildStravaPolylineConfig } from "~/components/leaflet/StravaPolyline.client";
 
 export const meta: MetaFunction = () => {
   return [
@@ -82,7 +81,11 @@ export default function Index() {
   const enableEmail = loaderData.features.FEATURE_EMAIL_LOGIN === "true";
   const [mapsState, setMapsState] = useState<ActivityMap[]>([]);
 
-  const toggleActivity: ActivityListItemToggler = (op, activity, id) => {
+  const toggleActivity: ActivityListItemToggler = (
+    op,
+    activity,
+    options?: { color?: string }
+  ) => {
     console.log(op, activity.id, mapsState.length);
     if (
       op === "add" &&
@@ -90,7 +93,11 @@ export default function Index() {
     ) {
       return setMapsState([
         ...mapsState,
-        buildStravaPolylineConfig(activity, id),
+        {
+          polyline: activity.map.polyline,
+          color: options?.color as string,
+          activityId: activity.id,
+        },
       ]);
     }
     if (op === "del")

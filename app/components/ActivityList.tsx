@@ -1,4 +1,4 @@
-import React, { Suspense, useEffect, useState } from "react";
+import React, { Suspense, useCallback, useEffect, useState } from "react";
 import { Await, useFetcher } from "@remix-run/react";
 import { format } from "date-fns";
 import { convert } from "convert";
@@ -30,6 +30,7 @@ import AutorenewIcon from "@mui/icons-material/Autorenew";
 import QuestionMarkIcon from "@mui/icons-material/QuestionMark";
 import { Activity } from "~/lib/models/activity";
 import { DetailedActivity } from "strava";
+import { pickCycleColor } from "~/lib/utils/cycle_color";
 
 const ACTIVITIES_ROUTE = "/user/activities.json";
 
@@ -37,7 +38,7 @@ type ActivityListItemOp = "add" | "del";
 export type ActivityListItemToggler = (
   op: ActivityListItemOp,
   activity: DetailedActivity,
-  id: number
+  options?: ActivityListItemOptions
 ) => void;
 
 type ActivityListProps = {
@@ -86,10 +87,15 @@ const ListItemSkeleton = () => {
   );
 };
 
+type ActivityListItemOptions = {
+  color?: string;
+};
+
 const ActivityListItem: React.FC<{
   activity: Activity;
-  onToggle(op: ActivityListItemOp, activity: DetailedActivity): void;
-}> = ({ activity, onToggle }) => {
+  onToggle: ActivityListItemToggler;
+  options: ActivityListItemOptions;
+}> = ({ activity, onToggle, options }) => {
   const [selected, setSelected] = useState(false);
   const [stravaActivity, setStravaActivity] = useState<DetailedActivity>();
   const toggleSelected = () => {
@@ -99,6 +105,7 @@ const ActivityListItem: React.FC<{
       onToggle("del", stravaActivity);
     }
   };
+
   const fetcher = useFetcher();
   useEffect(() => {
     const data: DetailedActivity = fetcher.data as DetailedActivity;
@@ -108,9 +115,9 @@ const ActivityListItem: React.FC<{
   }, [fetcher]);
   useEffect(() => {
     if (stravaActivity && selected) {
-      onToggle("add", stravaActivity);
+      onToggle("add", stravaActivity, { ...options });
     }
-  }, [stravaActivity, selected, onToggle]);
+  }, [stravaActivity, selected, onToggle, options]);
   return (
     <ListItem
       onClick={() => fetcher.load(`/user/activities.json/${activity.id}`)}
@@ -118,7 +125,11 @@ const ActivityListItem: React.FC<{
       disablePadding
       secondaryAction={
         <IconButton edge="end">
-          <Avatar sx={{ bgcolor: selected ? "primary.main" : "primary" }}>
+          <Avatar
+            sx={{
+              bgcolor: selected ? options.color || "primary.main" : "primary",
+            }}
+          >
             {activity.type === "run" && <RunIcon />}
             {activity.type === "ride" && <BikeIcon />}
             {!["run", "ride"].includes(activity.type) && <QuestionMarkIcon />}
@@ -243,9 +254,8 @@ export const ActivityList: React.FC<ActivityListProps> = ({
                 <ActivityListItem
                   key={activity.id}
                   activity={activity}
-                  onToggle={(op, activity) =>
-                    onToggleActivity(op, activity, id)
-                  }
+                  options={{ color: pickCycleColor(id) }}
+                  onToggle={onToggleActivity}
                 />
               ))
             )
