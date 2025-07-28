@@ -1,7 +1,9 @@
 import { ActivityType } from "strava";
 import { getUserFromSession } from "./user";
-import { getStravaAPIClient } from "../strava/api";
 import { User } from "@supabase/supabase-js";
+import db from "~/services/db.server";
+import { activitiesTable } from "db/schema";
+import { and, eq } from "drizzle-orm";
 
 export type Activity = {
   type: Lowercase<ActivityType>;
@@ -16,16 +18,24 @@ type UserSession = Awaited<ReturnType<typeof getUserFromSession>>;
 export const getActivitiesForUser = async (
   user: UserSession
 ): Promise<Activity[]> => {
-  const stravaToken = user.user_metadata.strava_profile.token;
-
-  const strava = getStravaAPIClient(stravaToken);
+  const activities = await db
+    .select()
+    .from(activitiesTable)
+    .where(eq(activitiesTable.athleteId, user.user_metadata.strava_profile.id));
 
   try {
-    const activities = await strava.activities.getLoggedInAthleteActivities();
-    return activities.map(({ id, type, start_date, name, distance }) => {
-      const t = type.toLowerCase() as Lowercase<ActivityType>;
-      return { id, type: t, start_date, title: name, distance };
-    });
+    return activities.map(
+      ({ id, sportType, /*start_date,*/ name, distance }) => {
+        const t = sportType?.toLowerCase() as Lowercase<ActivityType>;
+        return {
+          id,
+          type: t,
+          start_date: new Date().toISOString(),
+          title: name,
+          distance,
+        };
+      }
+    );
   } catch (error) {
     throw new Response("Internal error", {
       status: 500,
@@ -34,12 +44,18 @@ export const getActivitiesForUser = async (
 };
 
 export const getActivity = async (activityId: number, user: User) => {
-  const apiClient = getStravaAPIClient(user.user_metadata.strava_profile.token);
   try {
-    return await apiClient.activities.getActivityById({
-      id: activityId,
-      include_all_efforts: true,
-    });
+    return (
+      await db
+        .select()
+        .from(activitiesTable)
+        .where(
+          and(
+            eq(activitiesTable.id, activityId),
+            eq(activitiesTable.athleteId, user.user_metadata.strava_profile.id)
+          )
+        )
+    )[0];
   } catch (error) {
     throw new Response("Internal error", {
       status: 500,
