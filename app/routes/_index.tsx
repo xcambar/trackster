@@ -32,7 +32,6 @@ import {
 } from "~/components/ActivityList";
 import { getUserFromSession } from "~/lib/models/user";
 import { useState } from "react";
-import { DetailedActivity } from "strava";
 
 export const meta: MetaFunction = () => {
   return [
@@ -73,7 +72,7 @@ const drawerWidth = 360;
 
 export type ActivityMap = {
   color: string;
-  activity: DetailedActivity;
+  activity: Activity;
 };
 
 export default function Index() {

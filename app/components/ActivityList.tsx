@@ -29,7 +29,6 @@ import BikeIcon from "@mui/icons-material/DirectionsBike";
 import RunIcon from "@mui/icons-material/DirectionsRun";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
 import QuestionMarkIcon from "@mui/icons-material/QuestionMark";
-import { DetailedActivity } from "strava";
 import { pickCycleColor } from "~/lib/utils/cycle_color";
 
 const ACTIVITIES_ROUTE = "/user/activities.json";
@@ -37,7 +36,7 @@ const ACTIVITIES_ROUTE = "/user/activities.json";
 type ActivityListItemOp = "add" | "del";
 export type ActivityListItemToggler = (
   op: ActivityListItemOp,
-  activity: DetailedActivity,
+  activity: Activity,
   options?: ActivityListItemOptions
 ) => void;
 
@@ -97,7 +96,7 @@ const ActivityListItem: React.FC<{
   options: ActivityListItemOptions;
 }> = ({ activity, onToggle, options }) => {
   const [selected, setSelected] = useState(false);
-  const [stravaActivity, setStravaActivity] = useState<DetailedActivity>();
+  const [stravaActivity, setStravaActivity] = useState<Activity>();
   const toggleSelected = () => {
     const newState = !selected;
     setSelected(newState);
@@ -108,7 +107,7 @@ const ActivityListItem: React.FC<{
 
   const fetcher = useFetcher();
   useEffect(() => {
-    const data: DetailedActivity = fetcher.data as DetailedActivity;
+    const data: Activity = fetcher.data as Activity;
     if (data) {
       setStravaActivity(data);
     }
