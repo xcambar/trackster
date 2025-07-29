@@ -16,6 +16,7 @@ export const activityStreamsTable = pgTable(
     activityId: bigint("activity_id", { mode: "number" })
       .notNull()
       .references(() => activitiesTable.id, { onDelete: "cascade" }),
+    athleteId: bigint("athlete_id", { mode: "number" }).notNull(),
 
     // Stream metadata from BaseStream interface
     originalSize: integer("original_size").notNull(),
