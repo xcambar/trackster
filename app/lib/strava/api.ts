@@ -7,20 +7,21 @@ export function getStravaAPIClient(stravaToken: AccessToken) {
     {
       client_id: getEnvironment("STRAVA_CLIENT_ID"),
       client_secret: getEnvironment("STRAVA_CLIENT_SECRET"),
-      on_token_refresh: async (response) => {
+      on_token_refresh: async (refreshedToken) => {
         /**
          * @todo Improve on token refresh
          */
+        console.log("TOKEN SHOULD REFESH", refreshedToken);
         const {
           data: { user },
           error,
         } = await supabase.auth.getUser();
         if (!user || error) {
-          console.log("ERROR", error);
+          console.log("Could not find user. Quitting.", error);
           return;
         }
         console.log("current token", user.user_metadata.strava_profile.token);
-        user.user_metadata.strava_profile.token = response;
+        user.user_metadata.strava_profile.token = refreshedToken;
 
         const { data, error: err } = await supabase.auth.updateUser({
           data: user.user_metadata,
@@ -31,7 +32,7 @@ export function getStravaAPIClient(stravaToken: AccessToken) {
           return;
         }
         console.log("REFRESH STRAVA");
-        console.log(response);
+        console.log(refreshedToken);
       },
     },
     stravaToken
