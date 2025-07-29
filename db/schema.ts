@@ -54,7 +54,7 @@ export const activitiesTable = pgTable("activities", {
   athleteCount: integer("athlete_count"),
 
   // Map data
-  map: jsonb("map").$type<PolylineMap>(),
+  map: jsonb("map").$type<PolylineMap>().notNull(),
   // mapResourceState: integer("map_resource_state"),
 
   // Activity flags
