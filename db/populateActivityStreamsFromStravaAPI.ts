@@ -3,7 +3,7 @@ import { AccessToken, StreamSet } from "strava";
 import { isPlainObject } from "es-toolkit";
 import { camelCase } from "change-case";
 
-import { activityStreamsTable } from "./schema";
+import { activityStreamsTable, activitiesTable } from "./schema";
 import db from "../app/services/db.server";
 
 import { getTableColumns, eq } from "drizzle-orm";
@@ -35,11 +35,23 @@ function convertToCamelCase(obj: object): object {
   }, {});
 }
 
-async function extract(token: AccessToken, activityId: number): Promise<StreamSet | null> {
+async function extract(token: AccessToken, activityId: number): Promise<{ streams: StreamSet; athleteId: number } | null> {
   const client = getStravaAPIClient(token);
 
   try {
     console.log(`Fetching streams for activity ${activityId}`);
+    
+    // Get athlete ID from existing activity in database
+    const [activity] = await db
+      .select({ athleteId: activitiesTable.athleteId })
+      .from(activitiesTable)
+      .where(eq(activitiesTable.id, activityId))
+      .limit(1);
+    
+    if (!activity) {
+      throw new Error(`Activity ${activityId} not found in database`);
+    }
+    
     const streams = await client.streams.getActivityStreams({
       id: activityId,
       keys: [
@@ -56,7 +68,8 @@ async function extract(token: AccessToken, activityId: number): Promise<StreamSe
         "grade_smooth",
       ],
     });
-    return streams;
+    
+    return { streams, athleteId: activity.athleteId };
   } catch (error) {
     console.log(`No streams available for activity ${activityId}:`, error);
     return null;
@@ -65,7 +78,8 @@ async function extract(token: AccessToken, activityId: number): Promise<StreamSe
 
 function transform(
   streams: StreamSet,
-  activityId: number
+  activityId: number,
+  athleteId: number
 ): typeof activityStreamsTable.$inferInsert {
   console.log(`Transforming streams for activity ${activityId}`);
   
@@ -77,6 +91,7 @@ function transform(
 
   const dbObject = {
     activity_id: activityId,
+    athlete_id: athleteId,
     original_size: firstStream.original_size,
     resolution: firstStream.resolution,
     series_type: firstStream.series_type,
@@ -138,17 +153,18 @@ export const populateActivityStreamsFromAPI = async (
   activityId: number
 ) => {
   try {
-    const streams = await extract(token, activityId);
+    const extractResult = await extract(token, activityId);
     
-    if (!streams) {
+    if (!extractResult) {
       console.log(`No streams available for activity ${activityId}`);
       return null;
     }
 
-    const dbReadyObject = transform(streams, activityId);
+    const { streams, athleteId } = extractResult;
+    const dbReadyObject = transform(streams, activityId, athleteId);
     const row = await load(dbReadyObject);
 
-    console.log(`Activity streams for "${activityId}" saved/updated!`);
+    console.log(`Activity streams for "${activityId}" (athlete ${athleteId}) saved/updated!`);
     return row;
   } catch (e) {
     console.log(`Error populating streams for activity ${activityId}:`, e);
