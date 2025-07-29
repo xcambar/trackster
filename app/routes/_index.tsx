@@ -9,7 +9,8 @@ import {
 } from "~/services/session.server";
 import LogoutIcon from "@mui/icons-material/Logout";
 import PlaceIcon from "@mui/icons-material/Place";
-import { Activity, getActivitiesForUser } from "~/lib/models/activity";
+import { getActivitiesForUser } from "~/lib/models/activity";
+import { Activity } from "db/schema";
 
 import {
   AlertColor,
@@ -31,6 +32,7 @@ import {
 } from "~/components/ActivityList";
 import { getUserFromSession } from "~/lib/models/user";
 import { useState } from "react";
+import { DetailedActivity } from "strava";
 
 export const meta: MetaFunction = () => {
   return [
@@ -71,8 +73,7 @@ const drawerWidth = 360;
 
 export type ActivityMap = {
   color: string;
-  polyline: string;
-  activityId: number;
+  activity: DetailedActivity;
 };
 
 export default function Index() {
@@ -89,20 +90,19 @@ export default function Index() {
     console.log(op, activity.id, mapsState.length);
     if (
       op === "add" &&
-      mapsState.filter((map) => map.activityId === activity.id).length === 0
+      mapsState.filter((map) => map.activity.id === activity.id).length === 0
     ) {
       return setMapsState([
         ...mapsState,
         {
-          polyline: activity.map.polyline,
+          activity,
           color: options?.color as string,
-          activityId: activity.id,
         },
       ]);
     }
     if (op === "del")
       return setMapsState(
-        mapsState.filter((map) => map.activityId !== activity.id)
+        mapsState.filter((map) => map.activity.id !== activity.id)
       );
   };
 

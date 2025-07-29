@@ -1,9 +1,9 @@
 import { getStravaAPIClient } from "app/lib/strava/api";
 import { AccessToken, DetailedActivity, SummaryActivity } from "strava";
+import { isPlainObject } from "es-toolkit";
 import { camelCase } from "change-case";
 
 import { activitiesTable } from "./schema";
-import { isPlainObject } from "is-plain-object";
 import db from "../app/services/db.server";
 
 import { getTableColumns } from "drizzle-orm";

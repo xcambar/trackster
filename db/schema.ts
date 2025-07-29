@@ -33,7 +33,7 @@ export const activitiesTable = pgTable("activities", {
   elapsedTime: integer("elapsed_time"), // in seconds
   totalElevationGain: real("total_elevation_gain"), // in meters
 
-  sportType: text("sport_type").$type<SportType>(), // More specific sport type like "MountainBikeRide"
+  sportType: text("sport_type").$type<SportType>().notNull(), // More specific sport type like "MountainBikeRide"
 
   startDate: timestamp("start_date", { withTimezone: true }),
   startDateLocal: timestamp("start_date_local", { withTimezone: true }),
@@ -122,3 +122,5 @@ export const activitiesTable = pgTable("activities", {
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
+
+export type Activity = typeof activitiesTable.$inferSelect;

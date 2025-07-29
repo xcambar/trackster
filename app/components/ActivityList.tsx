@@ -1,7 +1,8 @@
-import React, { Suspense, useCallback, useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import { Await, useFetcher } from "@remix-run/react";
 import { format } from "date-fns";
 import { convert } from "convert";
+import { Activity } from "db/schema";
 
 import {
   Chip,
@@ -28,7 +29,6 @@ import BikeIcon from "@mui/icons-material/DirectionsBike";
 import RunIcon from "@mui/icons-material/DirectionsRun";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
 import QuestionMarkIcon from "@mui/icons-material/QuestionMark";
-import { Activity } from "~/lib/models/activity";
 import { DetailedActivity } from "strava";
 import { pickCycleColor } from "~/lib/utils/cycle_color";
 
@@ -130,9 +130,11 @@ const ActivityListItem: React.FC<{
               bgcolor: selected ? options.color || "primary.main" : "primary",
             }}
           >
-            {activity.type === "run" && <RunIcon />}
-            {activity.type === "ride" && <BikeIcon />}
-            {!["run", "ride"].includes(activity.type) && <QuestionMarkIcon />}
+            {activity.sportType === "Run" && <RunIcon />}
+            {activity.sportType === "Ride" && <BikeIcon />}
+            {!["Run", "Ride"].includes(activity.sportType) && (
+              <QuestionMarkIcon />
+            )}
           </Avatar>
         </IconButton>
       }
@@ -149,7 +151,7 @@ const ActivityListItem: React.FC<{
           disableTypography
           primary={
             <Typography variant="body1" noWrap>
-              {activity.title}
+              {activity.name}
             </Typography>
           }
           secondary={
@@ -157,7 +159,11 @@ const ActivityListItem: React.FC<{
               <Chip
                 icon={<CalendarIcon />}
                 size="small"
-                label={format(activity.start_date, "yyyy-MM-dd")}
+                label={
+                  activity.startDate
+                    ? format(activity.startDate, "yyyy-MM-dd")
+                    : "?"
+                }
               />
               &nbsp;
               <Chip
