@@ -7,9 +7,9 @@ import { activitiesTable } from "./schema";
 import db from "../app/services/db.server";
 
 import { getTableColumns } from "drizzle-orm";
-import { PgTimestamp } from "drizzle-orm/pg-core";
+import { PgTable, PgTimestamp } from "drizzle-orm/pg-core";
 
-function findDateColumns(table) {
+function findDateColumns(table: PgTable) {
   const columns = getTableColumns(table);
   return Object.entries(columns)
     .filter(([, column]) => column instanceof PgTimestamp)
