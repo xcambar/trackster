@@ -32,8 +32,12 @@ export const LeafletMap: React.FC<{ maps: ActivityMap[] }> = ({ maps }) => {
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      {maps.map(({ activityId, color, polyline }) => (
-        <StravaPolyline key={activityId} color={color} encoded={polyline} />
+      {maps.map(({ activity, color }) => (
+        <StravaPolyline
+          key={activity.id}
+          color={color}
+          encoded={activity.map.polyline}
+        />
       ))}
       <MapGeolocationUpdater center={coords} />
     </MapContainer>
