@@ -122,3 +122,4 @@ export const activitiesTable = pgTable("activities", {
 });
 
 export type Activity = typeof activitiesTable.$inferSelect;
+export type NewActivity = typeof activitiesTable.$inferInsert;
