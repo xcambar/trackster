@@ -5,12 +5,12 @@ import {
   getCompleteUserSession,
   getSession,
 } from "~/services/session.server";
-import { 
-  getLastActivityForUser, 
-  getActivityStreamsForUser, 
+import {
+  getLastActivityForUser,
+  getActivityStreamsForUser,
   getAthletePerformanceProfile,
   getPersonalBests,
-  type PersonalBest
+  type PersonalBest,
 } from "~/lib/models/activity";
 import { getUserFromSession } from "~/lib/models/user";
 import {
@@ -28,12 +28,12 @@ import {
 } from "@mui/material";
 import { FlashMessage } from "../components/FlashMessage";
 import { AppBar } from "~/components/AppBar";
-import { 
-  analyzeGradePerformance, 
-  formatPace, 
-  formatDuration, 
-  formatDistance, 
-  formatRelativeTime 
+import {
+  analyzeGradePerformance,
+  formatPace,
+  formatDuration,
+  formatDistance,
+  formatRelativeTime,
 } from "~/lib/utils/grade-analysis";
 import { Activity } from "db/schema";
 import { racePredictionEngine } from "~/lib/race-predictor/prediction-engine";
@@ -41,7 +41,10 @@ import { racePredictionEngine } from "~/lib/race-predictor/prediction-engine";
 export const meta: MetaFunction = () => {
   return [
     { title: "My Statistics - Trackster" },
-    { name: "description", content: "View your activity statistics and performance metrics" },
+    {
+      name: "description",
+      content: "View your activity statistics and performance metrics",
+    },
   ];
 };
 
@@ -151,7 +154,7 @@ export const loader = async ({ request }: ActionFunctionArgs) => {
 function LastActivityCard({ activity }: { activity: Activity | null }) {
   if (!activity) {
     return (
-      <Paper elevation={2} sx={{ p: 3, textAlign: 'center' }}>
+      <Paper elevation={2} sx={{ p: 3, textAlign: "center", height: "100%" }}>
         <Typography variant="h6" gutterBottom>
           Last Activity
         </Typography>
@@ -162,10 +165,10 @@ function LastActivityCard({ activity }: { activity: Activity | null }) {
     );
   }
 
-  const pace = activity.averageSpeed ? (1000 / activity.averageSpeed) / 60 : 0;
-  
+  const pace = activity.averageSpeed ? 1000 / activity.averageSpeed / 60 : 0;
+
   return (
-    <Paper elevation={2} sx={{ p: 3, textAlign: 'center' }}>
+    <Paper elevation={2} sx={{ p: 3, textAlign: "center" }}>
       <Typography variant="h6" gutterBottom>
         Last Activity
       </Typography>
@@ -173,7 +176,10 @@ function LastActivityCard({ activity }: { activity: Activity | null }) {
         {activity.name}
       </Typography>
       <Typography variant="body1" gutterBottom>
-        <strong>Date:</strong> {activity.startDateLocal ? new Date(activity.startDateLocal).toLocaleDateString() : 'N/A'}
+        <strong>Date:</strong>{" "}
+        {activity.startDateLocal
+          ? new Date(activity.startDateLocal).toLocaleDateString()
+          : "N/A"}
       </Typography>
       <Typography variant="body1" gutterBottom>
         <strong>Distance:</strong> {formatDistance(activity.distance)}
@@ -185,13 +191,17 @@ function LastActivityCard({ activity }: { activity: Activity | null }) {
   );
 }
 
-function TimeSinceLastActivityCard({ activity }: { activity: Activity | null }) {
-  const timeSince = activity?.startDateLocal 
+function TimeSinceLastActivityCard({
+  activity,
+}: {
+  activity: Activity | null;
+}) {
+  const timeSince = activity?.startDateLocal
     ? formatRelativeTime(new Date(activity.startDateLocal))
-    : 'N/A';
+    : "N/A";
 
   return (
-    <Paper elevation={2} sx={{ p: 3, textAlign: 'center' }}>
+    <Paper elevation={2} sx={{ p: 3, textAlign: "center", height: "100%" }}>
       <Typography variant="h6" gutterBottom>
         Time Since Last Activity
       </Typography>
@@ -209,11 +219,11 @@ function formatRaceTime(minutes: number): string {
   const hours = Math.floor(minutes / 60);
   const mins = Math.floor(minutes % 60);
   const secs = Math.round((minutes % 1) * 60);
-  
+
   if (hours > 0) {
-    return `${hours}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    return `${hours}:${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   }
-  return `${mins}:${secs.toString().padStart(2, '0')}`;
+  return `${mins}:${secs.toString().padStart(2, "0")}`;
 }
 
 interface RacePredictions {
@@ -243,16 +253,16 @@ interface RacePredictions {
   };
 }
 
-function RacePredictionsCard({ 
-  racePredictions, 
-  personalBests 
-}: { 
+function RacePredictionsCard({
+  racePredictions,
+  personalBests,
+}: {
   racePredictions: RacePredictions | null;
   personalBests: { [distance: string]: PersonalBest | null };
 }) {
   if (!racePredictions) {
     return (
-      <Paper elevation={2} sx={{ p: 3, textAlign: 'center' }}>
+      <Paper elevation={2} sx={{ p: 3, textAlign: "center" }}>
         <Typography variant="h6" gutterBottom>
           Race Predictions
         </Typography>
@@ -267,10 +277,18 @@ function RacePredictionsCard({
   }
 
   const distances = [
-    { key: 'flat5K', label: '5K Flat', pb: personalBests['5k'] },
-    { key: 'flat10K', label: '10K Flat', pb: personalBests['10k'] },
-    { key: 'flatHalfMarathon', label: 'Half Marathon Flat', pb: personalBests['halfMarathon'] },
-    { key: 'flatMarathon', label: 'Marathon Flat', pb: personalBests['marathon'] },
+    { key: "flat5K", label: "5K Flat", pb: personalBests["5k"] },
+    { key: "flat10K", label: "10K Flat", pb: personalBests["10k"] },
+    {
+      key: "flatHalfMarathon",
+      label: "Half Marathon Flat",
+      pb: personalBests["halfMarathon"],
+    },
+    {
+      key: "flatMarathon",
+      label: "Marathon Flat",
+      pb: personalBests["marathon"],
+    },
   ];
 
   return (
@@ -278,7 +296,7 @@ function RacePredictionsCard({
       <Typography variant="h6" gutterBottom>
         Race Time Predictions
       </Typography>
-      
+
       <Grid container spacing={3}>
         <Grid item xs={12} md={8}>
           <Typography variant="subtitle2" gutterBottom sx={{ mb: 2 }}>
@@ -289,7 +307,8 @@ function RacePredictionsCard({
             return (
               <Box key={key} sx={{ mb: 2 }}>
                 <Typography variant="subtitle1" color="primary" gutterBottom>
-                  <strong>{label}:</strong> {formatRaceTime(prediction.predictedTimeMinutes)}
+                  <strong>{label}:</strong>{" "}
+                  {formatRaceTime(prediction.predictedTimeMinutes)}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   Confidence: {Math.round(prediction.confidenceScore * 100)}%
@@ -298,7 +317,7 @@ function RacePredictionsCard({
             );
           })}
         </Grid>
-        
+
         <Grid item xs={12} md={4}>
           <Typography variant="subtitle2" gutterBottom sx={{ mb: 2 }}>
             Personal Bests
@@ -306,7 +325,8 @@ function RacePredictionsCard({
           {distances.map(({ key, label, pb }) => (
             <Box key={`pb-${key}`} sx={{ mb: 2 }}>
               <Typography variant="body1" gutterBottom>
-                <strong>{label.replace(' Flat', '')}:</strong> {pb ? formatRaceTime(pb.timeMinutes) : 'N/A'}
+                <strong>{label.replace(" Flat", "")}:</strong>{" "}
+                {pb ? formatRaceTime(pb.timeMinutes) : "N/A"}
               </Typography>
               {pb && (
                 <Typography variant="body2" color="text.secondary">
@@ -318,9 +338,15 @@ function RacePredictionsCard({
         </Grid>
       </Grid>
 
-      <Typography variant="body2" color="text.secondary" sx={{ mt: 2, fontStyle: 'italic' }}>
-        Based on {racePredictions.flat10K.athleteProfile.totalActivities} activities, 
-        {Math.round(racePredictions.flat10K.athleteProfile.totalDistanceKm)}km total
+      <Typography
+        variant="body2"
+        color="text.secondary"
+        sx={{ mt: 2, fontStyle: "italic" }}
+      >
+        Based on {racePredictions.flat10K.athleteProfile.totalActivities}{" "}
+        activities,
+        {Math.round(racePredictions.flat10K.athleteProfile.totalDistanceKm)}km
+        total
       </Typography>
     </Paper>
   );
@@ -328,7 +354,8 @@ function RacePredictionsCard({
 
 export default function Activities() {
   const loaderData = useLoaderData<typeof loader>();
-  const { lastActivity, gradeAnalysis, racePredictions, personalBests } = loaderData;
+  const { lastActivity, gradeAnalysis, racePredictions, personalBests } =
+    loaderData;
 
   return (
     <Container maxWidth={false} disableGutters>
@@ -344,16 +371,20 @@ export default function Activities() {
       )}
       <Box sx={{ display: "flex", flexDirection: "column", height: "100dvh" }}>
         <AppBar showLogout={true} />
-        <Container
-          maxWidth="lg"
-          sx={{ flexGrow: 1, overflow: "auto", py: 4 }}
-        >
+        <Container maxWidth="lg" sx={{ flexGrow: 1, overflow: "auto", py: 4 }}>
           <Typography variant="h3" component="h1" gutterBottom sx={{ mb: 4 }}>
             My Statistics
           </Typography>
 
           {/* Statistics Cards */}
-          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3, mb: 4 }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: { xs: "column", md: "row" },
+              gap: 3,
+              mb: 4,
+            }}
+          >
             <Box sx={{ flex: 1 }}>
               <TimeSinceLastActivityCard activity={lastActivity} />
             </Box>
@@ -364,7 +395,10 @@ export default function Activities() {
 
           {/* Race Predictions Card */}
           <Box sx={{ mb: 4 }}>
-            <RacePredictionsCard racePredictions={racePredictions} personalBests={personalBests} />
+            <RacePredictionsCard
+              racePredictions={racePredictions}
+              personalBests={personalBests}
+            />
           </Box>
 
           {/* Grade Analysis Table */}
@@ -372,15 +406,23 @@ export default function Activities() {
             <Typography variant="h5" component="h2" gutterBottom>
               Performance by Grade
             </Typography>
-            
+
             {gradeAnalysis.length > 0 ? (
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell><strong>Grade Range</strong></TableCell>
-                    <TableCell align="right"><strong>Total Time</strong></TableCell>
-                    <TableCell align="right"><strong>Average Pace</strong></TableCell>
-                    <TableCell align="right"><strong>Total Distance</strong></TableCell>
+                    <TableCell>
+                      <strong>Grade Range</strong>
+                    </TableCell>
+                    <TableCell align="right">
+                      <strong>Total Time</strong>
+                    </TableCell>
+                    <TableCell align="right">
+                      <strong>Average Pace</strong>
+                    </TableCell>
+                    <TableCell align="right">
+                      <strong>Total Distance</strong>
+                    </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -403,8 +445,13 @@ export default function Activities() {
                 </TableBody>
               </Table>
             ) : (
-              <Typography variant="body1" color="text.secondary" sx={{ textAlign: 'center', py: 4 }}>
-                No grade analysis data available. Activity stream data is required for grade analysis.
+              <Typography
+                variant="body1"
+                color="text.secondary"
+                sx={{ textAlign: "center", py: 4 }}
+              >
+                No grade analysis data available. Activity stream data is
+                required for grade analysis.
               </Typography>
             )}
           </Paper>
