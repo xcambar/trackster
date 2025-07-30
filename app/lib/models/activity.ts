@@ -1,12 +1,14 @@
 import { getUserFromSession } from "./user";
 import { User } from "@supabase/supabase-js";
 import db from "~/services/db.server";
-import { activitiesTable } from "db/schema";
+import { activitiesTable, Activity } from "db/schema";
 import { and, eq } from "drizzle-orm";
 
 type UserSession = Awaited<ReturnType<typeof getUserFromSession>>;
 
-export const getActivitiesForUser = async (user: UserSession) => {
+export const getActivitiesForUser = async (
+  user: UserSession
+): Promise<Activity[]> => {
   try {
     const activities = await db
       .select()
