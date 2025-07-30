@@ -210,7 +210,7 @@ export const ActivityList: React.FC<ActivityListProps> = ({
   return (
     <List>
       <ListSubheader>
-        Your activities
+        My activities
         <IconButton
           sx={{ float: "right" }}
           disableRipple
