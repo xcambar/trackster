@@ -43,19 +43,37 @@ export function AppBar({ showLogout = false }: AppBarProps) {
           </Link>
         </Box>
         {showLogout && (
-          <Link
-            href="/map"
-            color="inherit"
-            underline="none"
-            sx={{
-              fontWeight: 500,
-              "&:hover": {
-                textDecoration: "underline",
-              },
-            }}
-          >
-            Your maps
-          </Link>
+          <>
+            <Link
+              href="/map"
+              color="inherit"
+              underline="none"
+              sx={{
+                px: 2,
+                fontWeight: 500,
+                "&:hover": {
+                  my: 2,
+                  textDecoration: "underline",
+                },
+              }}
+            >
+              My Maps
+            </Link>
+            <Link
+              href="/activities"
+              color="inherit"
+              underline="none"
+              sx={{
+                px: 2,
+                fontWeight: 500,
+                "&:hover": {
+                  textDecoration: "underline",
+                },
+              }}
+            >
+              My activities
+            </Link>
+          </>
         )}
         {/* This box acts as a spacer, it pushes the following elements on the right */}
         <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}></Box>

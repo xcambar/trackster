@@ -5,7 +5,7 @@ import { StravaSegmentPolyline } from "./StravaSegmentPolyline.client";
 import { useGeolocated } from "react-geolocated";
 
 import "leaflet/dist/leaflet.css"; // Import Leaflet CSS
-import { ActivityMap } from "~/routes/_index";
+import { ActivityMap } from "~/lib/types/activity";
 
 const MapGeolocationUpdater: React.FC<{
   center?: GeolocationCoordinates;
@@ -39,7 +39,7 @@ export const LeafletMap: React.FC<{ maps: ActivityMap[] }> = ({ maps }) => {
             color={color}
             encoded={activity.map.polyline}
           />
-          {activity.segmentEfforts.map((segmentEffort) => (
+          {(activity.segmentEfforts || []).map((segmentEffort) => (
             <StravaSegmentPolyline
               key={`${activity.id}-segment-${segmentEffort.id}`}
               segmentEffort={segmentEffort}

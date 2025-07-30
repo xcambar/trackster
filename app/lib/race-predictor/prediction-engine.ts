@@ -177,6 +177,26 @@ class RacePredictionEngine {
   }
 
   /**
+   * Get distance-based pace if available and suitable
+   */
+  private getDistanceBasedPace(profile: any, distanceKm: number): number | null {
+    // For races close to known distances, use distance-specific paces
+    if (distanceKm >= 4.5 && distanceKm <= 5.5 && profile.avgPace5k) {
+      return profile.avgPace5k; // min/km
+    }
+    if (distanceKm >= 9 && distanceKm <= 11 && profile.avgPace10k) {
+      return profile.avgPace10k; // min/km
+    }
+    if (distanceKm >= 19 && distanceKm <= 23 && profile.avgPaceHalfMarathon) {
+      return profile.avgPaceHalfMarathon; // min/km  
+    }
+    if (distanceKm >= 40 && distanceKm <= 44 && profile.avgPaceMarathon) {
+      return profile.avgPaceMarathon; // min/km
+    }
+    return null;
+  }
+
+  /**
    * Main prediction method
    */
   async predictRaceTime(input: RacePredictionInput): Promise<RacePrediction> {
@@ -192,6 +212,38 @@ class RacePredictionEngine {
     }
 
     const profile = profileResult[0];
+    
+    // Check if we can use distance-based prediction for simpler, more accurate results
+    const distanceBasedPace = this.getDistanceBasedPace(profile, input.totalDistanceKm);
+    if (distanceBasedPace && input.totalElevationGainM < 200) {
+      // For relatively flat races with known distance paces, use simplified prediction
+      const baseTimeMinutes = input.totalDistanceKm * distanceBasedPace;
+      
+      // Apply minimal elevation adjustment (much less aggressive)
+      const elevationAdjustmentFactor = 1 + (input.totalElevationGainM / 1000) * 0.1; // 10% per 1000m gain
+      const adjustedTimeMinutes = baseTimeMinutes * elevationAdjustmentFactor;
+      
+      return {
+        predictedTimeMinutes: Math.round(adjustedTimeMinutes * 100) / 100,
+        confidenceScore: 0.9, // High confidence for distance-based predictions
+        gradeBreakdown: [{
+          gradeRange: "Distance-based prediction",
+          distanceKm: input.totalDistanceKm,
+          baseSpeedMs: 1000 / (distanceBasedPace * 60),
+          adjustedSpeedMs: 1000 / (distanceBasedPace * elevationAdjustmentFactor * 60),
+          paceMinPerKm: distanceBasedPace * elevationAdjustmentFactor,
+          segmentTimeMinutes: adjustedTimeMinutes,
+        }],
+        limitingFactors: input.totalElevationGainM >= 200 ? ["Significant elevation gain"] : [],
+        athleteProfile: {
+          totalActivities: profile.totalActivities,
+          totalDistanceKm: profile.totalDistanceKm,
+          dataConfidence: "High - Distance-based prediction",
+        },
+      };
+    }
+
+    // Fall back to grade-based prediction for complex terrain
     const gradeBreakdown: GradePrediction[] = [];
     let totalTimeMinutes = 0;
 

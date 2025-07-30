@@ -6,7 +6,7 @@ import {
   getSession,
 } from "~/services/session.server";
 import { getActivitiesForUser } from "~/lib/models/activity";
-import { Activity } from "db/schema";
+import { ActivityMap } from "~/lib/types/activity";
 import { AlertColor, Box, Container, Drawer } from "@mui/material";
 import { FlashMessage } from "../components/FlashMessage";
 import { LeafletMap } from "~/components/leaflet/LeafletMap.client";
@@ -55,12 +55,6 @@ export const loader = async ({ request }: ActionFunctionArgs) => {
 };
 
 const drawerWidth = 360;
-
-export type ActivityMap = {
-  color: string;
-  activity: Activity;
-};
-
 export default function Map() {
   const loaderData = useLoaderData<typeof loader>();
   const { activities } = loaderData;

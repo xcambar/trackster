@@ -11,7 +11,7 @@ export const meta: MetaFunction = () => {
 
 export const loader = async ({ request }: ActionFunctionArgs) => {
   const userSession = await getCompleteUserSession(request);
-  
+
   // Redirect based on authentication status
   if (userSession !== null) {
     throw redirect("/map");
