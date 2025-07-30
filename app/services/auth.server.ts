@@ -47,7 +47,7 @@ authenticator.use(
       authorizationEndpoint: getEnvironment("STRAVA_AUTHORIZATION_ENDPOINT"),
       tokenEndpoint: getEnvironment("STRAVA_TOKEN_ENDPOINT"),
 
-      scopes: ["read_all,profile:read_all,activity:read_all"],
+      scopes: ["read", "read_all", "profile:read_all", "activity:read_all"],
     },
     async ({ tokens /*, request */ }) => {
       return await getUser(tokens as StravaTokens);
