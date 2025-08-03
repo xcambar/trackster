@@ -298,7 +298,7 @@ function RacePredictionsCard({
       </Typography>
 
       <Grid container spacing={3}>
-        <Grid item xs={12} md={8}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Typography variant="subtitle2" gutterBottom sx={{ mb: 2 }}>
             Predicted Times
           </Typography>
@@ -318,7 +318,7 @@ function RacePredictionsCard({
           })}
         </Grid>
 
-        <Grid item xs={12} md={4}>
+        <Grid size={{ xs: 12, md: 4 }}>
           <Typography variant="subtitle2" gutterBottom sx={{ mb: 2 }}>
             Personal Bests
           </Typography>
