@@ -35,28 +35,29 @@ function convertToCamelCase(obj: object): object {
   }, {});
 }
 
-async function extract(token: AccessToken, activityId: number): Promise<{ streams: StreamSet; athleteId: number } | null> {
-  const client = getStravaAPIClient(token);
-
+async function extract(
+  client: ReturnType<typeof getStravaAPIClient>,
+  activityId: number
+): Promise<{ streams: StreamSet; athleteId: number } | null> {
   try {
     console.log(`Fetching streams for activity ${activityId}`);
-    
+
     // Get athlete ID from existing activity in database
     const [activity] = await db
       .select({ athleteId: activitiesTable.athleteId })
       .from(activitiesTable)
       .where(eq(activitiesTable.id, activityId))
       .limit(1);
-    
+
     if (!activity) {
       throw new Error(`Activity ${activityId} not found in database`);
     }
-    
+
     const streams = await client.streams.getActivityStreams({
       id: activityId,
       keys: [
         "time",
-        "distance", 
+        "distance",
         "latlng",
         "altitude",
         "velocity_smooth",
@@ -68,7 +69,7 @@ async function extract(token: AccessToken, activityId: number): Promise<{ stream
         "grade_smooth",
       ],
     });
-    
+
     return { streams, athleteId: activity.athleteId };
   } catch (error) {
     console.log(`No streams available for activity ${activityId}:`, error);
@@ -82,9 +83,10 @@ function transform(
   athleteId: number
 ): typeof activityStreamsTable.$inferInsert {
   console.log(`Transforming streams for activity ${activityId}`);
-  
+
   // Use the first available stream's metadata for the record
-  const firstStream = streams.time || streams.distance || streams.latlng || streams.altitude;
+  const firstStream =
+    streams.time || streams.distance || streams.latlng || streams.altitude;
   if (!firstStream) {
     throw new Error(`No valid streams found for activity ${activityId}`);
   }
@@ -95,7 +97,7 @@ function transform(
     original_size: firstStream.original_size,
     resolution: firstStream.resolution,
     series_type: firstStream.series_type,
-    
+
     // Map each stream type to its data array (or null if not present)
     time_data: streams.time?.data || null,
     distance_data: streams.distance?.data || null,
@@ -110,13 +112,17 @@ function transform(
     grade_smooth_data: streams.grade_smooth?.data || null,
   };
 
-  return convertToCamelCase(dbObject) as typeof activityStreamsTable.$inferInsert;
+  return convertToCamelCase(
+    dbObject
+  ) as typeof activityStreamsTable.$inferInsert;
 }
 
 async function load(dbReadyObject: typeof activityStreamsTable.$inferInsert) {
   try {
-    console.log(`Inserting streams for activity ${dbReadyObject.activityId} into DB`);
-    
+    console.log(
+      `Inserting streams for activity ${dbReadyObject.activityId} into DB`
+    );
+
     // Check if streams already exist for this activity
     const existing = await db
       .select()
@@ -125,7 +131,9 @@ async function load(dbReadyObject: typeof activityStreamsTable.$inferInsert) {
       .limit(1);
 
     if (existing.length > 0) {
-      console.log(`Streams already exist for activity ${dbReadyObject.activityId}, updating...`);
+      console.log(
+        `Streams already exist for activity ${dbReadyObject.activityId}, updating...`
+      );
       const [row] = await db
         .update(activityStreamsTable)
         .set({
@@ -153,8 +161,9 @@ export const populateActivityStreamsFromAPI = async (
   activityId: number
 ) => {
   try {
-    const extractResult = await extract(token, activityId);
-    
+    const client = getStravaAPIClient(token);
+    const extractResult = await extract(client, activityId);
+
     if (!extractResult) {
       console.log(`No streams available for activity ${activityId}`);
       return null;
@@ -164,7 +173,9 @@ export const populateActivityStreamsFromAPI = async (
     const dbReadyObject = transform(streams, activityId, athleteId);
     const row = await load(dbReadyObject);
 
-    console.log(`Activity streams for "${activityId}" (athlete ${athleteId}) saved/updated!`);
+    console.log(
+      `Activity streams for "${activityId}" (athlete ${athleteId}) saved/updated!`
+    );
     return row;
   } catch (e) {
     console.log(`Error populating streams for activity ${activityId}:`, e);
