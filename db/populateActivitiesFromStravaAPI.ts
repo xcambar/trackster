@@ -5,7 +5,7 @@ import { camelCase } from "change-case";
 import { activitiesTable } from "./schema";
 import db from "../app/services/db.server";
 
-import { getTableColumns } from "drizzle-orm";
+import { getTableColumns, sql } from "drizzle-orm";
 import { PgTable, PgTimestamp } from "drizzle-orm/pg-core";
 import { StravaAPIScheduler } from "~/lib/strava/api/scheduler";
 
@@ -88,8 +88,33 @@ function transform(
 async function load(dbReadyObjects: (typeof activitiesTable.$inferInsert)[]) {
   let rows;
   try {
-    console.log(`inserting ${dbReadyObjects.length} entries into DB`);
-    rows = await db.insert(activitiesTable).values(dbReadyObjects).returning();
+    console.log(`upserting ${dbReadyObjects.length} entries into DB`);
+    
+    // Build the update set dynamically from the table schema
+    const columns = getTableColumns(activitiesTable);
+    const updateSet = Object.keys(columns).reduce((acc, columnName) => {
+      // Skip primary key and timestamps that should be preserved
+      if (columnName === 'id' || columnName === 'createdAt') {
+        return acc;
+      }
+      // Update updatedAt to current time
+      if (columnName === 'updatedAt') {
+        acc[columnName] = new Date();
+        return acc;
+      }
+      // For all other columns, use the excluded (new) value
+      acc[columnName] = sql`excluded.${sql.identifier(columnName)}`;
+      return acc;
+    }, {} as Record<string, unknown>);
+
+    rows = await db
+      .insert(activitiesTable)
+      .values(dbReadyObjects)
+      .onConflictDoUpdate({
+        target: activitiesTable.id,
+        set: updateSet,
+      })
+      .returning();
   } catch (e) {
     console.log(e);
     return [];
@@ -106,6 +131,7 @@ export const populateActivitiesFromAPI = async (token: AccessToken) => {
     rows.forEach((row) => {
       console.log(`New activity "${row.name}" (${row.id}) created!`);
     });
+    return rows;
   } catch (e) {
     console.log(e);
   }
