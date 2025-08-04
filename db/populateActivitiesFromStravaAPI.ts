@@ -1,4 +1,3 @@
-import { getStravaAPIClient } from "app/lib/strava/api";
 import { AccessToken, DetailedActivity, SummaryActivity } from "strava";
 import { isPlainObject } from "es-toolkit";
 import { camelCase } from "change-case";
@@ -8,6 +7,7 @@ import db from "../app/services/db.server";
 
 import { getTableColumns } from "drizzle-orm";
 import { PgTable, PgTimestamp } from "drizzle-orm/pg-core";
+import { StravaAPIScheduler } from "~/lib/strava/api/scheduler";
 
 function findDateColumns(table: PgTable) {
   const columns = getTableColumns(table);
@@ -36,17 +36,20 @@ function convertToCamelCase(obj: object): object {
 }
 
 async function extract(token: AccessToken): Promise<DetailedActivity[]> {
-  const client = getStravaAPIClient(token);
+  const scheduler = new StravaAPIScheduler(token);
 
   let activityIDs: number[] = [];
   let page = 1;
   let hasNewActivities = true;
   while (hasNewActivities) {
-    console.log(`Fetching page ${page}`);
-    const newActivities: SummaryActivity[] =
-      await client.activities.getLoggedInAthleteActivities({
-        page: page++,
-      });
+    const newActivities: SummaryActivity[] = await scheduler.request(
+      async (client) => {
+        console.log(`Fetching page ${page}`);
+        return await client.activities.getLoggedInAthleteActivities({
+          page: page++,
+        });
+      }
+    );
 
     activityIDs = [
       ...activityIDs,
@@ -54,12 +57,17 @@ async function extract(token: AccessToken): Promise<DetailedActivity[]> {
     ];
     hasNewActivities = !!newActivities.length;
   }
-  return Promise.all(
+
+  // The requests run in parallel to save time
+  return Promise.all<DetailedActivity>(
     activityIDs.map((id) => {
-      console.log(`fetching activity ${id}`);
-      return client.activities.getActivityById({
-        id,
-        include_all_efforts: true, // Uncomment if needed
+      console.log(`Scheduling activity ${id}`);
+      return scheduler.request((client) => {
+        console.log(`Fetching activity ${id}`);
+        return client.activities.getActivityById({
+          id,
+          include_all_efforts: true, // Uncomment if needed
+        });
       });
     })
   );
