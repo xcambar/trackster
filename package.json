@@ -25,6 +25,7 @@
     "change-case": "^5.4.4",
     "convert": "^5.12.0",
     "convert-units": "^2.3.4",
+    "cron": "^4.3.3",
     "date-fns": "^4.1.0",
     "dotenv": "^17.2.0",
     "drizzle-orm": "^0.44.3",
