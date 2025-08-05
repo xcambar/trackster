@@ -1,31 +1,11 @@
-import { roundToNearestMinutes, startOfTomorrow } from "date-fns";
 import { getStravaAPIClient } from "../api";
 import { AccessToken, Strava } from "strava";
 import { CronJob } from "cron";
-
-export const findNearestQuarter = (d: Date): Date => {
-  return roundToNearestMinutes(d, { roundingMethod: "ceil", nearestTo: 15 });
-};
+import { findNextPeriod, SchedulerPeriod } from "./scheduler/timing";
 
 type StravaRequestFn = (client: Strava, name: string) => Promise<any>;
-type StravaRateLimit = [number, number];
-type SchedulerPeriod = "now" | Date;
-
+export type StravaRateLimit = [number, number];
 const MAX_ATTEMPTS = 3;
-
-function findNextPeriod(
-  [limit15Min, limitDaily]: StravaRateLimit,
-  [usage15Min, usageDaily]: StravaRateLimit
-): SchedulerPeriod {
-  if (usage15Min < limit15Min) {
-    return "now";
-  }
-  if (usageDaily > limitDaily) {
-    return startOfTomorrow();
-  }
-
-  return findNearestQuarter(new Date());
-}
 
 let requestCounter = 0;
 
@@ -88,14 +68,12 @@ export class StravaAPIScheduler {
         throw err;
       }
       this.#nextPeriod = findNextPeriod(
-        response.headers
-          .get("x-readratelimit-limit")
-          ?.split(",")
-          .map(Number) as StravaRateLimit,
-        response.headers
-          .get("x-readratelimit-usage")
-          ?.split(",")
-          .map(Number) as StravaRateLimit
+        (response.headers.get("x-readratelimit-limit")?.split(",") || []).map(
+          Number
+        ) as StravaRateLimit,
+        (response.headers.get("x-readratelimit-usage")?.split(",") || []).map(
+          Number
+        ) as StravaRateLimit
       );
       if (iter + 1 < MAX_ATTEMPTS) {
         return await this.#request(fn, iter + 1, name);
