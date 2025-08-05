@@ -1,8 +1,4 @@
-import {
-  pgTable,
-  serial,
-  real,
-} from "drizzle-orm/pg-core";
+import { pgTable, real, serial } from "drizzle-orm/pg-core";
 
 export const gapLookupTable = pgTable("gap_lookup", {
   id: serial("id").primaryKey(),
