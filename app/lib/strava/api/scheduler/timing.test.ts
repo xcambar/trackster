@@ -1,4 +1,4 @@
-import { findNearestQuarter } from "./scheduler";
+import { findNearestQuarter } from "./timing";
 
 describe("Strava API rate limiter handler", function () {
   describe("reschedule to the nearest 15 minutes", function () {
