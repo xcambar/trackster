@@ -42,13 +42,15 @@ async function extract(token: AccessToken): Promise<DetailedActivity[]> {
   let page = 1;
   let hasNewActivities = true;
   while (hasNewActivities) {
+    const _page = page++;
     const newActivities: SummaryActivity[] = await scheduler.request(
-      async (client) => {
-        console.log(`Fetching page ${page}`);
+      async (client, name) => {
+        console.log(`${name} | Fetching page ${_page}`);
         return await client.activities.getLoggedInAthleteActivities({
-          page: page++,
+          page: _page,
         });
-      }
+      },
+      `athlete-activities-page-${_page}`
     );
 
     activityIDs = [
@@ -89,23 +91,29 @@ async function load(dbReadyObjects: (typeof activitiesTable.$inferInsert)[]) {
   let rows;
   try {
     console.log(`upserting ${dbReadyObjects.length} entries into DB`);
-    
+
     // Build the update set dynamically from the table schema
     const columns = getTableColumns(activitiesTable);
-    const updateSet = Object.keys(columns).reduce((acc, columnName) => {
-      // Skip primary key and timestamps that should be preserved
-      if (columnName === 'id' || columnName === 'createdAt') {
+    const updateSet = Object.entries(columns).reduce(
+      (acc, [columnName, column]) => {
+        // Skip primary key and timestamps that should be preserved
+        if (columnName === "id" || columnName === "createdAt") {
+          return acc;
+        }
+        // Update updatedAt to current time
+        if (columnName === "updatedAt") {
+          acc[columnName] = new Date();
+          return acc;
+        }
+
+        // For all other columns, use the excluded (new) value
+        // Use the actual database column name from the column definition
+        const dbColumnName = column.name;
+        acc[columnName] = sql`excluded.${sql.identifier(dbColumnName)}`;
         return acc;
-      }
-      // Update updatedAt to current time
-      if (columnName === 'updatedAt') {
-        acc[columnName] = new Date();
-        return acc;
-      }
-      // For all other columns, use the excluded (new) value
-      acc[columnName] = sql`excluded.${sql.identifier(columnName)}`;
-      return acc;
-    }, {} as Record<string, unknown>);
+      },
+      {} as Record<string, unknown>
+    );
 
     rows = await db
       .insert(activitiesTable)
@@ -123,16 +131,12 @@ async function load(dbReadyObjects: (typeof activitiesTable.$inferInsert)[]) {
 }
 
 export const populateActivitiesFromAPI = async (token: AccessToken) => {
-  try {
-    const plainAPIObjects = await extract(token);
-    const dbReadyObjects = await transform(plainAPIObjects);
-    const rows = await load(dbReadyObjects);
+  const plainAPIObjects = await extract(token);
+  const dbReadyObjects = await transform(plainAPIObjects);
+  const rows = await load(dbReadyObjects);
 
-    rows.forEach((row) => {
-      console.log(`New activity "${row.name}" (${row.id}) created!`);
-    });
-    return rows;
-  } catch (e) {
-    console.log(e);
-  }
+  rows.forEach((row) => {
+    console.log(`New activity "${row.name}" (${row.id}) created!`);
+  });
+  return rows;
 };
