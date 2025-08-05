@@ -3,7 +3,7 @@ import { AccessToken, Strava } from "strava";
 import { CronJob } from "cron";
 import { findNextPeriod, SchedulerPeriod } from "./scheduler/timing";
 
-type StravaRequestFn = (client: Strava, name: string) => Promise<any>;
+export type StravaRequestFn = (client: Strava, name: string) => Promise<any>;
 export type StravaRateLimit = [number, number];
 const MAX_ATTEMPTS = 3;
 

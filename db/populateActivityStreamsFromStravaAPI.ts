@@ -1,5 +1,5 @@
 import { getStravaAPIClient } from "app/lib/strava/api";
-import { AccessToken, StreamSet } from "strava";
+import { AccessToken, Stream, StreamSet } from "strava";
 import { isPlainObject } from "es-toolkit";
 import { camelCase } from "change-case";
 
@@ -8,6 +8,7 @@ import db from "../app/services/db.server";
 
 import { getTableColumns, eq } from "drizzle-orm";
 import { PgTable, PgTimestamp } from "drizzle-orm/pg-core";
+import { buildStravaAPIScheduler } from "~/services/strava.server";
 
 function findDateColumns(table: PgTable) {
   const columns = getTableColumns(table);
@@ -39,42 +40,37 @@ async function extract(
   client: ReturnType<typeof getStravaAPIClient>,
   activityId: number
 ): Promise<{ streams: StreamSet; athleteId: number } | null> {
-  try {
-    console.log(`Fetching streams for activity ${activityId}`);
+  console.log(`Fetching streams for activity ${activityId}`);
 
-    // Get athlete ID from existing activity in database
-    const [activity] = await db
-      .select({ athleteId: activitiesTable.athleteId })
-      .from(activitiesTable)
-      .where(eq(activitiesTable.id, activityId))
-      .limit(1);
+  // Get athlete ID from existing activity in database
+  const [activity] = await db
+    .select({ athleteId: activitiesTable.athleteId })
+    .from(activitiesTable)
+    .where(eq(activitiesTable.id, activityId))
+    .limit(1);
 
-    if (!activity) {
-      throw new Error(`Activity ${activityId} not found in database`);
-    }
-
-    const streams = await client.streams.getActivityStreams({
-      id: activityId,
-      keys: [
-        "time",
-        "distance",
-        "latlng",
-        "altitude",
-        "velocity_smooth",
-        "heartrate",
-        "cadence",
-        "watts",
-        "temp",
-        "moving",
-        "grade_smooth",
-      ],
-    });
-
-    return { streams, athleteId: activity.athleteId };
-  } catch (error) {
-    console.log(`No streams available for activity ${activityId}:`, error);
-    return null;
+  if (!activity) {
+    throw new Error(`Activity ${activityId} not found in database`);
   }
+
+  const streams = await client.streams.getActivityStreams({
+    id: activityId,
+    keys: [
+      "time",
+      "distance",
+      "latlng",
+      "altitude",
+      "velocity_smooth",
+      "heartrate",
+      "cadence",
+      "watts",
+      "temp",
+      "moving",
+      "grade_smooth",
+    ],
+  });
+
+  return { streams, athleteId: activity.athleteId };
 }
 
 function transform(
@@ -161,8 +157,11 @@ export const populateActivityStreamsFromAPI = async (
   activityId: number
 ) => {
   try {
-    const client = getStravaAPIClient(token);
-    const extractResult = await extract(client, activityId);
+    const scheduler = buildStravaAPIScheduler(token);
+    const extractResult: Awaited<ReturnType<typeof extract>> =
+      await scheduler.request(async (client) => {
+        return await extract(client, activityId);
+      });
 
     if (!extractResult) {
       console.log(`No streams available for activity ${activityId}`);
