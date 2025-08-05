@@ -1,7 +1,7 @@
 import { Strategy } from "remix-auth/strategy";
 
-import { OAuth2Strategy, OAuth2RequestError } from "remix-auth-oauth2";
-import { generateState, generateCodeVerifier, Strava } from "arctic";
+import { generateCodeVerifier, generateState, Strava } from "arctic";
+import { OAuth2RequestError, OAuth2Strategy } from "remix-auth-oauth2";
 import { redirect } from "./lib/redirect";
 import { StateStore } from "./lib/store";
 

@@ -7,7 +7,7 @@ import db from "../app/services/db.server";
 
 import { getTableColumns, sql } from "drizzle-orm";
 import { PgTable, PgTimestamp } from "drizzle-orm/pg-core";
-import { StravaAPIScheduler } from "~/lib/strava/api/scheduler";
+import { buildStravaAPIScheduler } from "~/services/strava.server";
 
 function findDateColumns(table: PgTable) {
   const columns = getTableColumns(table);
@@ -36,7 +36,7 @@ function convertToCamelCase(obj: object): object {
 }
 
 async function extract(token: AccessToken): Promise<DetailedActivity[]> {
-  const scheduler = new StravaAPIScheduler(token);
+  const scheduler = buildStravaAPIScheduler(token);
 
   let activityIDs: number[] = [];
   let page = 1;

@@ -1,8 +1,8 @@
 import React from "react";
+import { useGeolocated } from "react-geolocated";
 import { MapContainer, TileLayer, useMap } from "react-leaflet";
 import { StravaPolyline } from "./StravaPolyline.client";
 import { StravaSegmentPolyline } from "./StravaSegmentPolyline.client";
-import { useGeolocated } from "react-geolocated";
 
 import "leaflet/dist/leaflet.css"; // Import Leaflet CSS
 import { ActivityMap } from "~/lib/types/activity";
@@ -27,6 +27,7 @@ export const LeafletMap: React.FC<{ maps: ActivityMap[] }> = ({ maps }) => {
       },
       userDecisionTimeout: 5000,
     });
+
   return (
     <MapContainer scrollWheelZoom={true} style={{ flexGrow: 1 }}>
       <TileLayer
@@ -35,10 +36,7 @@ export const LeafletMap: React.FC<{ maps: ActivityMap[] }> = ({ maps }) => {
       />
       {maps.map(({ activity, color }) => (
         <React.Fragment key={activity.id}>
-          <StravaPolyline
-            color={color}
-            encoded={activity.map.polyline}
-          />
+          <StravaPolyline color={color} encoded={activity.map.polyline} />
           {(activity.segmentEfforts || []).map((segmentEffort) => (
             <StravaSegmentPolyline
               key={`${activity.id}-segment-${segmentEffort.id}`}

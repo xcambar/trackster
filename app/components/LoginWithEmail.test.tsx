@@ -1,6 +1,6 @@
-import { render, screen, fireEvent } from "@testing-library/react";
-import LoginWithEmail from "./LoginWithEmail";
 import "@testing-library/jest-dom";
+import { fireEvent, render, screen } from "@testing-library/react";
+import LoginWithEmail from "./LoginWithEmail";
 
 describe("LoginWithEmail", () => {
   it("renders email input, password input and submit button", () => {

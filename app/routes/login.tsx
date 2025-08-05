@@ -1,19 +1,15 @@
+import { AlertColor, Box, Container } from "@mui/material";
 import type { ActionFunctionArgs, MetaFunction } from "@remix-run/node";
 import { data, redirect, useLoaderData } from "@remix-run/react";
-import { getEnvironment } from "../../lib/environment";
+import { AppBar } from "~/components/AppBar";
 import {
   commitSession,
   getCompleteUserSession,
   getSession,
 } from "~/services/session.server";
-import {
-  AlertColor,
-  Box,
-  Container,
-} from "@mui/material";
+import { getEnvironment } from "../../lib/environment";
 import { FlashMessage } from "../components/FlashMessage";
 import Signin from "../components/Signin";
-import { AppBar } from "~/components/AppBar";
 
 export const meta: MetaFunction = () => {
   return [
@@ -25,7 +21,7 @@ export const meta: MetaFunction = () => {
 export const loader = async ({ request }: ActionFunctionArgs) => {
   const browserSession = await getSession(request.headers.get("Cookie"));
   const userSession = await getCompleteUserSession(request);
-  
+
   // Redirect authenticated users to the map
   if (userSession !== null) {
     throw redirect("/map");

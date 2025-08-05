@@ -1,33 +1,33 @@
-import React, { Suspense, useEffect, useState } from "react";
 import { Await, useFetcher } from "@remix-run/react";
-import { format } from "date-fns";
 import { convert } from "convert";
+import { format } from "date-fns";
 import { Activity } from "db/schema";
+import React, { Suspense, useEffect, useState } from "react";
 
 import {
-  Chip,
-  List,
-  ListSubheader,
-  ListItem,
-  ListItemText,
-  Typography,
+  Avatar,
   Button,
+  Checkbox,
+  Chip,
+  IconButton,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  ListSubheader,
   Skeleton,
   ThemeProvider,
-  ListItemIcon,
-  Checkbox,
-  IconButton,
-  Avatar,
-  ListItemButton,
+  Typography,
 } from "@mui/material";
-import { StravaIcon } from "./CustomIcons";
 import { stravaTheme } from "./ConnectWithStrava";
+import { StravaIcon } from "./CustomIcons";
 
-import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
+import AutorenewIcon from "@mui/icons-material/Autorenew";
 import CalendarIcon from "@mui/icons-material/CalendarMonth";
 import BikeIcon from "@mui/icons-material/DirectionsBike";
 import RunIcon from "@mui/icons-material/DirectionsRun";
-import AutorenewIcon from "@mui/icons-material/Autorenew";
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import QuestionMarkIcon from "@mui/icons-material/QuestionMark";
 import { pickCycleColor } from "~/lib/utils/cycle_color";
 

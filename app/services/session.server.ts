@@ -28,7 +28,7 @@ const { getSession, commitSession, destroySession } =
     },
   });
 
-export { getSession, commitSession, destroySession };
+export { commitSession, destroySession, getSession };
 
 export const isAuthenticated = async (request: Request) => {
   const session = await getSession(request.headers.get("Cookie"));

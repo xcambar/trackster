@@ -1,6 +1,6 @@
-import { getEnvironment } from "../../../lib/environment";
 import { AccessToken, Strava } from "strava";
 import { supabase } from "~/services/supabase.server";
+import { getEnvironment } from "../../../lib/environment";
 
 export function getStravaAPIClient(stravaToken: AccessToken) {
   return new Strava(

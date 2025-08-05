@@ -1,42 +1,42 @@
+import {
+  AlertColor,
+  Box,
+  Container,
+  Grid,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Typography,
+} from "@mui/material";
 import type { ActionFunctionArgs, MetaFunction } from "@remix-run/node";
 import { data, redirect, useLoaderData } from "@remix-run/react";
+import { Activity } from "db/schema";
+import { AppBar } from "~/components/AppBar";
+import {
+  getActivityStreamsForUser,
+  getAthletePerformanceProfile,
+  getLastActivityForUser,
+  getPersonalBests,
+  type PersonalBest,
+} from "~/lib/models/activity";
+import { getUserFromSession } from "~/lib/models/user";
+import { racePredictionEngine } from "~/lib/race-predictor/prediction-engine";
+import {
+  analyzeGradePerformance,
+  formatDistance,
+  formatDuration,
+  formatPace,
+  formatRelativeTime,
+} from "~/lib/utils/grade-analysis";
 import {
   commitSession,
   getCompleteUserSession,
   getSession,
 } from "~/services/session.server";
-import {
-  getLastActivityForUser,
-  getActivityStreamsForUser,
-  getAthletePerformanceProfile,
-  getPersonalBests,
-  type PersonalBest,
-} from "~/lib/models/activity";
-import { getUserFromSession } from "~/lib/models/user";
-import {
-  AlertColor,
-  Box,
-  Container,
-  Paper,
-  Typography,
-  Table,
-  TableHead,
-  TableBody,
-  TableRow,
-  TableCell,
-  Grid,
-} from "@mui/material";
 import { FlashMessage } from "../components/FlashMessage";
-import { AppBar } from "~/components/AppBar";
-import {
-  analyzeGradePerformance,
-  formatPace,
-  formatDuration,
-  formatDistance,
-  formatRelativeTime,
-} from "~/lib/utils/grade-analysis";
-import { Activity } from "db/schema";
-import { racePredictionEngine } from "~/lib/race-predictor/prediction-engine";
 
 export const meta: MetaFunction = () => {
   return [

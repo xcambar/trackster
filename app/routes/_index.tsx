@@ -5,7 +5,10 @@ import { getCompleteUserSession } from "~/services/session.server";
 export const meta: MetaFunction = () => {
   return [
     { title: "Trackster" },
-    { name: "description", content: "Track your running and cycling activities" },
+    {
+      name: "description",
+      content: "Track your running and cycling activities",
+    },
   ];
 };
 
