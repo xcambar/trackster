@@ -1,8 +1,8 @@
+import { Box, Divider, Typography } from "@mui/material";
+import PolylineEncoded from "google-polyline";
 import React from "react";
 import { Polyline, Popup } from "react-leaflet";
-import PolylineEncoded from "google-polyline";
 import { DetailedSegmentEffort } from "strava";
-import { Typography, Paper, Box, Divider } from "@mui/material";
 
 interface SegmentPolylineProps {
   segmentEffort: DetailedSegmentEffort;
@@ -41,19 +41,31 @@ export const StravaSegmentPolyline: React.FC<SegmentPolylineProps> = ({
     >
       <Popup closeButton={false} autoClose={false} autoPan={false}>
         <Box sx={{ minWidth: 180 }}>
-          <Typography variant="body2" fontWeight="medium" color="text.primary" sx={{ mb: 1 }}>
+          <Typography
+            variant="body2"
+            fontWeight="medium"
+            color="text.primary"
+            sx={{ mb: 1 }}
+          >
             {segmentEffort.name}
           </Typography>
           <Divider sx={{ mb: 1 }} />
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
             <Typography variant="caption" color="text.secondary">
               Distance: {(segmentEffort.distance / 1000).toFixed(2)} km
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              Time: {Math.floor(segmentEffort.elapsed_time / 60)}:{(segmentEffort.elapsed_time % 60).toString().padStart(2, '0')}
+              Time: {Math.floor(segmentEffort.elapsed_time / 60)}:
+              {(segmentEffort.elapsed_time % 60).toString().padStart(2, "0")}
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              Pace: {((segmentEffort.elapsed_time / 60) / (segmentEffort.distance / 1000)).toFixed(1)} min/km
+              Pace:{" "}
+              {(
+                segmentEffort.elapsed_time /
+                60 /
+                (segmentEffort.distance / 1000)
+              ).toFixed(1)}{" "}
+              min/km
             </Typography>
           </Box>
         </Box>

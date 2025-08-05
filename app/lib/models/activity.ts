@@ -1,10 +1,16 @@
-import { getUserFromSession } from "./user";
 import { User } from "@supabase/supabase-js";
-import db from "~/services/db.server";
 import { activitiesTable, Activity } from "db/schema";
-import { activityStreamsTable, ActivityStreams } from "db/schemas/activity_streams";
-import { athletePerformanceProfilesTable, AthletePerformanceProfile } from "db/schemas/athlete_performance_profiles";
-import { and, eq, desc, gte, lte, sql } from "drizzle-orm";
+import {
+  ActivityStreams,
+  activityStreamsTable,
+} from "db/schemas/activity_streams";
+import {
+  AthletePerformanceProfile,
+  athletePerformanceProfilesTable,
+} from "db/schemas/athlete_performance_profiles";
+import { and, desc, eq, gte, lte, sql } from "drizzle-orm";
+import db from "~/services/db.server";
+import { getUserFromSession } from "./user";
 
 type UserSession = Awaited<ReturnType<typeof getUserFromSession>>;
 
@@ -75,7 +81,9 @@ export const getActivityStreamsForUser = async (
     const streams = await db
       .select()
       .from(activityStreamsTable)
-      .where(eq(activityStreamsTable.athleteId, user.user_metadata.strava_profile.id));
+      .where(
+        eq(activityStreamsTable.athleteId, user.user_metadata.strava_profile.id)
+      );
 
     return streams;
   } catch (error) {
@@ -92,7 +100,12 @@ export const getAthletePerformanceProfile = async (
     const profiles = await db
       .select()
       .from(athletePerformanceProfilesTable)
-      .where(eq(athletePerformanceProfilesTable.athleteId, user.user_metadata.strava_profile.id))
+      .where(
+        eq(
+          athletePerformanceProfilesTable.athleteId,
+          user.user_metadata.strava_profile.id
+        )
+      )
       .limit(1);
 
     return profiles[0] || null;

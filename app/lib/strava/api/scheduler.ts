@@ -1,6 +1,6 @@
-import { getStravaAPIClient } from "../api";
-import { AccessToken, Strava } from "strava";
 import { CronJob } from "cron";
+import { AccessToken, Strava } from "strava";
+import { getStravaAPIClient } from "../api";
 import { findNextPeriod, SchedulerPeriod } from "./scheduler/timing";
 
 export type StravaRequestFn = (client: Strava, name: string) => Promise<any>;

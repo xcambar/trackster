@@ -1,7 +1,7 @@
-import React from "react";
 import { Button, createTheme } from "@mui/material";
-import { StravaIcon } from "./CustomIcons";
 import { ThemeProvider } from "@mui/material/styles";
+import React from "react";
+import { StravaIcon } from "./CustomIcons";
 
 // Extend MUI's theme to include a custom color for Strava
 declare module "@mui/material/Button" {

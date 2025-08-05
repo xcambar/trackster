@@ -1,6 +1,6 @@
+import { OAuth2Tokens } from "arctic";
 import { Authenticator } from "remix-auth";
 import { StravaProfile, StravaStrategy } from "~/lib/strava/oauth/strategy";
-import { OAuth2Tokens } from "arctic";
 
 import { getEnvironment } from "lib/environment";
 

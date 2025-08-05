@@ -1,23 +1,23 @@
+import { AlertColor, Box, Container, Drawer } from "@mui/material";
 import type { ActionFunctionArgs, MetaFunction } from "@remix-run/node";
 import { data, redirect, useLoaderData } from "@remix-run/react";
-import {
-  commitSession,
-  getCompleteUserSession,
-  getSession,
-} from "~/services/session.server";
-import { getActivitiesForUser } from "~/lib/models/activity";
-import { ActivityMap } from "~/lib/types/activity";
-import { AlertColor, Box, Container, Drawer } from "@mui/material";
-import { FlashMessage } from "../components/FlashMessage";
-import { LeafletMap } from "~/components/leaflet/LeafletMap.client";
+import { useState } from "react";
 import { ClientOnly } from "remix-utils/client-only";
 import {
   ActivityList,
   ActivityListItemToggler,
 } from "~/components/ActivityList";
-import { getUserFromSession } from "~/lib/models/user";
-import { useState } from "react";
 import { AppBar } from "~/components/AppBar";
+import { LeafletMap } from "~/components/leaflet/LeafletMap.client";
+import { getActivitiesForUser } from "~/lib/models/activity";
+import { getUserFromSession } from "~/lib/models/user";
+import { ActivityMap } from "~/lib/types/activity";
+import {
+  commitSession,
+  getCompleteUserSession,
+  getSession,
+} from "~/services/session.server";
+import { FlashMessage } from "../components/FlashMessage";
 
 export const meta: MetaFunction = () => {
   return [

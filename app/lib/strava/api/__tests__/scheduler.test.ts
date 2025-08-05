@@ -1,7 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { StravaAPIScheduler } from "../scheduler";
-import { getStravaAPIClient } from "../../api";
 import { AccessToken } from "strava";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { getStravaAPIClient } from "../../api";
+import { StravaAPIScheduler } from "../scheduler";
 
 // Mock dependencies - CronJob set to not execute for tests that would timeout
 vi.mock("../../api");

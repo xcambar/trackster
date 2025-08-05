@@ -1,4 +1,4 @@
-import { AlertColor, Snackbar, Alert } from "@mui/material";
+import { Alert, AlertColor, Snackbar } from "@mui/material";
 import React from "react";
 
 export const FlashMessage = ({

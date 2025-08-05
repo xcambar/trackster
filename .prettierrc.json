@@ -18,5 +18,6 @@
   "trailingComma": "es5",
   "useTabs": false,
   "embeddedLanguageFormatting": "auto",
-  "experimentalTernaries": false
+  "experimentalTernaries": false,
+  "plugins": ["prettier-plugin-organize-imports"]
 }

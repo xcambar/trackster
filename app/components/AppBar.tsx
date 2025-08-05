@@ -1,13 +1,13 @@
+import LogoutIcon from "@mui/icons-material/Logout";
+import PlaceIcon from "@mui/icons-material/Place";
 import {
-  AppBar as MuiAppBar,
   Box,
   IconButton,
   Link,
+  AppBar as MuiAppBar,
   Toolbar,
   Typography,
 } from "@mui/material";
-import LogoutIcon from "@mui/icons-material/Logout";
-import PlaceIcon from "@mui/icons-material/Place";
 
 interface AppBarProps {
   showLogout?: boolean;

@@ -1,5 +1,5 @@
-import React from "react";
 import SvgIcon, { SvgIconProps } from "@mui/material/SvgIcon";
+import React from "react";
 
 type VariantNames = "main" | "white";
 type IconVariantProps = {

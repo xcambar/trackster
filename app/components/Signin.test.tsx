@@ -1,6 +1,6 @@
-import Signin from "./Signin";
-import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
+import { render, screen } from "@testing-library/react";
+import Signin from "./Signin";
 
 describe("it should always display the Email login form optionally", () => {
   it("does not render the form when the feature is disabled", async () => {

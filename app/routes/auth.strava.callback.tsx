@@ -1,7 +1,7 @@
 import type { ActionFunctionArgs } from "@remix-run/node";
-import { authenticator } from "~/services/auth.server";
-import { getSession, commitSession } from "~/services/session.server";
 import { redirect } from "~/lib/strava/oauth/lib/redirect";
+import { authenticator } from "~/services/auth.server";
+import { commitSession, getSession } from "~/services/session.server";
 import { supabase } from "~/services/supabase.server";
 
 async function commitSessionAndRedirect(
@@ -33,9 +33,8 @@ export const loader = async ({ request }: ActionFunctionArgs) => {
     }));
     if (error?.code === "user_already_exists") {
       // If the user already exists, we can just sign them in
-      ({ data: supabaseUser, error } = await supabase.auth.signInWithPassword(
-        supabaseCredentials
-      ));
+      ({ data: supabaseUser, error } =
+        await supabase.auth.signInWithPassword(supabaseCredentials));
     }
     const existingToken =
       supabaseUser?.user?.user_metadata?.strava_profile?.token;

@@ -1,14 +1,19 @@
-import * as React from "react";
+import { withEmotionCache } from "@emotion/react";
 import {
+  CssBaseline,
+  unstable_useEnhancedEffect as useEnhancedEffect,
+} from "@mui/material";
+import type { LinksFunction } from "@remix-run/node";
+import {
+  isRouteErrorResponse,
   Links,
   Meta,
   Outlet,
   Scripts,
   ScrollRestoration,
   useRouteError,
-  isRouteErrorResponse,
 } from "@remix-run/react";
-import type { LinksFunction } from "@remix-run/node";
+import * as React from "react";
 
 export const links: LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -22,11 +27,6 @@ export const links: LinksFunction = () => [
     href: "https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap",
   },
 ];
-import { withEmotionCache } from "@emotion/react";
-import {
-  CssBaseline,
-  unstable_useEnhancedEffect as useEnhancedEffect,
-} from "@mui/material";
 
 interface DocumentProps {
   children: React.ReactNode;

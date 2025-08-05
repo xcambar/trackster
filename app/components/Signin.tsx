@@ -1,11 +1,11 @@
-import React from "react";
 import Box from "@mui/material/Box";
+import MuiCard from "@mui/material/Card";
 import Divider from "@mui/material/Divider";
 import Link from "@mui/material/Link";
-import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
-import MuiCard from "@mui/material/Card";
 import { styled } from "@mui/material/styles";
+import Typography from "@mui/material/Typography";
+import React from "react";
 import ConnectWithStrava from "./ConnectWithStrava";
 import LoginWithEmail from "./LoginWithEmail";
 
