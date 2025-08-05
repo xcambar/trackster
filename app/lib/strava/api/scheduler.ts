@@ -7,7 +7,7 @@ export const findNearestQuarter = (d: Date): Date => {
   return roundToNearestMinutes(d, { roundingMethod: "ceil", nearestTo: 15 });
 };
 
-type StravaRequestFn = (client: Strava) => Promise<any>;
+type StravaRequestFn = (client: Strava, name: string) => Promise<any>;
 type StravaRateLimit = [number, number];
 type SchedulerPeriod = "now" | Date;
 
@@ -26,6 +26,8 @@ function findNextPeriod(
 
   return findNearestQuarter(new Date());
 }
+
+let requestCounter = 0;
 
 export class StravaAPIScheduler {
   #client: Strava;
@@ -53,17 +55,18 @@ export class StravaAPIScheduler {
     return usage15Min < limit15Min && usageDaily < limitDaily;
   }
 
-  async #schedule(fn: StravaRequestFn): Promise<any> {
+  async #schedule(fn: StravaRequestFn, name): Promise<any> {
     const when = this.#nextPeriod;
+    console.log(`${name} | Scheduling to begin ${when}`);
     if (when === "now") {
-      return await fn(this.#client);
+      return await fn(this.#client, name);
     }
     return new Promise((resolve, reject) => {
-      console.log(`Scheduling at ${when}`);
       const job = new CronJob(when, async () => {
         this.#nextPeriod = "now";
         try {
-          resolve(await fn(this.#client));
+          console.log(`${name} | Starting `);
+          resolve(await fn(this.#client, name));
         } catch (err) {
           reject(err);
         }
@@ -72,11 +75,15 @@ export class StravaAPIScheduler {
     });
   }
 
-  async #request<T>(fn: StravaRequestFn, iter = 0): Promise<T> {
+  async #request<T>(fn: StravaRequestFn, iter = 0, name: string): Promise<T> {
+    console.log(`${name} | Starting attempt #${iter}`);
     try {
-      return await this.#schedule(fn);
+      return await this.#schedule(fn, name);
     } catch (err) {
       const response = err as Response;
+      console.log(
+        `${name} | Attempt #${iter} failed with status ${response.status}`
+      );
       if (response.status !== 429) {
         throw err;
       }
@@ -91,13 +98,14 @@ export class StravaAPIScheduler {
           .map(Number) as StravaRateLimit
       );
       if (iter + 1 < MAX_ATTEMPTS) {
-        return await this.#request(fn, iter + 1);
+        return await this.#request(fn, iter + 1, name);
       }
       throw err;
     }
   }
 
-  async request<T>(fn: StravaRequestFn) {
-    return this.#request<T>(fn, 0);
+  async request<T>(fn: StravaRequestFn, name = "request") {
+    name = [name, requestCounter++].join("-");
+    return this.#request<T>(fn, 0, name);
   }
 }
