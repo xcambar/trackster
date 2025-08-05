@@ -1,10 +1,10 @@
+import { eq } from "drizzle-orm";
 import db from "../app/services/db.server";
-import { 
-  athletePerformanceProfilesTable, 
-  activityStreamsTable, 
-  activitiesTable 
+import {
+  activitiesTable,
+  activityStreamsTable,
+  athletePerformanceProfilesTable,
 } from "../db/schema";
-import { eq, and, sql } from "drizzle-orm";
 
 interface GradeSpeedData {
   grade0To5: number[];
@@ -24,7 +24,7 @@ interface DistancePaceData {
 /**
  * Grade coverage flags (bitfield):
  * Bit 0: 0-5% grade has data
- * Bit 1: 5-10% grade has data  
+ * Bit 1: 5-10% grade has data
  * Bit 2: 10-15% grade has data
  * Bit 3: 15-25% grade has data
  * Bit 4: >25% grade has data
@@ -38,7 +38,7 @@ const GRADE_COVERAGE_FLAGS = {
 };
 
 function categorizeByGrade(
-  velocityData: number[], 
+  velocityData: number[],
   gradeData: number[]
 ): GradeSpeedData {
   const data: GradeSpeedData = {
@@ -50,13 +50,19 @@ function categorizeByGrade(
   };
 
   const minLength = Math.min(velocityData.length, gradeData.length);
-  
+
   for (let i = 0; i < minLength; i++) {
     const speed = velocityData[i];
     const grade = gradeData[i];
-    
+
     // Filter valid data points (positive uphill grades only)
-    if (speed > 0 && !isNaN(speed) && !isNaN(grade) && grade >= 0 && grade <= 50) {
+    if (
+      speed > 0 &&
+      !isNaN(speed) &&
+      !isNaN(grade) &&
+      grade >= 0 &&
+      grade <= 50
+    ) {
       if (grade >= 0 && grade < 5) {
         data.grade0To5.push(speed);
       } else if (grade >= 5 && grade < 10) {
@@ -70,22 +76,25 @@ function categorizeByGrade(
       }
     }
   }
-  
+
   return data;
 }
 
-function categorizeByDistance(activities: Array<{ distance: number; averageSpeed: number }>): DistancePaceData {
+function categorizeByDistance(
+  activities: Array<{ distance: number; averageSpeed: number }>
+): DistancePaceData {
   const data: DistancePaceData = {
     pace5k: [],
     pace10k: [],
     paceHalfMarathon: [],
     paceMarathon: [],
   };
-  
+
   for (const activity of activities) {
     const distanceKm = activity.distance / 1000; // Convert meters to km
-    const paceMinPerKm = activity.averageSpeed > 0 ? 1000 / (activity.averageSpeed * 60) : 0;
-    
+    const paceMinPerKm =
+      activity.averageSpeed > 0 ? 1000 / (activity.averageSpeed * 60) : 0;
+
     // Only include reasonable paces (3-20 min/km)
     if (paceMinPerKm >= 3 && paceMinPerKm <= 20) {
       if (distanceKm >= 4 && distanceKm <= 6) {
@@ -99,7 +108,7 @@ function categorizeByDistance(activities: Array<{ distance: number; averageSpeed
       }
     }
   }
-  
+
   return data;
 }
 
@@ -110,19 +119,23 @@ function calculateAverage(values: number[]): number | null {
 
 function calculateGradeCoverageFlags(gradeData: GradeSpeedData): number {
   let flags = 0;
-  
+
   if (gradeData.grade0To5.length >= 50) flags |= GRADE_COVERAGE_FLAGS.GRADE_0_5;
-  if (gradeData.grade5To10.length >= 50) flags |= GRADE_COVERAGE_FLAGS.GRADE_5_10;
-  if (gradeData.grade10To15.length >= 30) flags |= GRADE_COVERAGE_FLAGS.GRADE_10_15;
-  if (gradeData.grade15To25.length >= 20) flags |= GRADE_COVERAGE_FLAGS.GRADE_15_25;
-  if (gradeData.gradeOver25.length >= 10) flags |= GRADE_COVERAGE_FLAGS.GRADE_OVER_25;
-  
+  if (gradeData.grade5To10.length >= 50)
+    flags |= GRADE_COVERAGE_FLAGS.GRADE_5_10;
+  if (gradeData.grade10To15.length >= 30)
+    flags |= GRADE_COVERAGE_FLAGS.GRADE_10_15;
+  if (gradeData.grade15To25.length >= 20)
+    flags |= GRADE_COVERAGE_FLAGS.GRADE_15_25;
+  if (gradeData.gradeOver25.length >= 10)
+    flags |= GRADE_COVERAGE_FLAGS.GRADE_OVER_25;
+
   return flags;
 }
 
 async function buildAthleteProfile(athleteId: number): Promise<void> {
   console.log(`Building performance profile for athlete ${athleteId}`);
-  
+
   // Get all activity streams for the athlete
   const streams = await db
     .select({
@@ -132,7 +145,7 @@ async function buildAthleteProfile(athleteId: number): Promise<void> {
     })
     .from(activityStreamsTable)
     .where(eq(activityStreamsTable.athleteId, athleteId));
-    
+
   if (streams.length === 0) {
     console.log(`No stream data found for athlete ${athleteId}`);
     return;
@@ -161,11 +174,11 @@ async function buildAthleteProfile(athleteId: number): Promise<void> {
   for (const stream of streams) {
     const velocityData = stream.velocityData as number[] | null;
     const gradeData = stream.gradeData as number[] | null;
-    
+
     if (!velocityData || !gradeData) continue;
-    
+
     const gradeSpeedData = categorizeByGrade(velocityData, gradeData);
-    
+
     // Merge into aggregate data
     allGradeData.grade0To5.push(...gradeSpeedData.grade0To5);
     allGradeData.grade5To10.push(...gradeSpeedData.grade5To10);
@@ -176,7 +189,7 @@ async function buildAthleteProfile(athleteId: number): Promise<void> {
 
   // Process distance-based pace data
   const distancePaceData = categorizeByDistance(
-    activities.filter(a => a.averageSpeed && a.distance)
+    activities.filter((a) => a.averageSpeed && a.distance)
   );
 
   // Calculate averages
@@ -196,7 +209,8 @@ async function buildAthleteProfile(athleteId: number): Promise<void> {
     // Default efficiency factor (1.0 = standard GAP)
     elevationEfficiencyFactor: 1.0,
     totalActivities: activities.length,
-    totalDistanceKm: activities.reduce((sum, a) => sum + (a.distance || 0), 0) / 1000,
+    totalDistanceKm:
+      activities.reduce((sum, a) => sum + (a.distance || 0), 0) / 1000,
     gradeCoverageFlags: calculateGradeCoverageFlags(allGradeData),
   };
 
@@ -225,47 +239,40 @@ async function buildAthleteProfile(athleteId: number): Promise<void> {
   console.log(`Profile Summary for Athlete ${athleteId}:`);
   console.log(`- Total activities: ${profile.totalActivities}`);
   console.log(`- Total distance: ${profile.totalDistanceKm.toFixed(1)} km`);
-  console.log(`- Speed on 0-5% grade: ${profile.speedGrade0To5?.toFixed(2) || 'N/A'} m/s`);
-  console.log(`- Speed on 5-10% grade: ${profile.speedGrade5To10?.toFixed(2) || 'N/A'} m/s`);
-  console.log(`- Grade coverage flags: ${profile.gradeCoverageFlags.toString(2).padStart(5, '0')} (binary)`);
+  console.log(
+    `- Speed on 0-5% grade: ${profile.speedGrade0To5?.toFixed(2) || "N/A"} m/s`
+  );
+  console.log(
+    `- Speed on 5-10% grade: ${profile.speedGrade5To10?.toFixed(2) || "N/A"} m/s`
+  );
+  console.log(
+    `- Grade coverage flags: ${profile.gradeCoverageFlags.toString(2).padStart(5, "0")} (binary)`
+  );
 }
 
 async function buildAllAthleteProfiles(): Promise<void> {
   console.log("Building performance profiles for all athletes...");
-  
+
   // Get all unique athlete IDs that have stream data
   const athletes = await db
     .selectDistinct({ athleteId: activityStreamsTable.athleteId })
     .from(activityStreamsTable);
-    
+
   console.log(`Found ${athletes.length} athletes with stream data`);
-  
+
   for (const athlete of athletes) {
     try {
       await buildAthleteProfile(athlete.athleteId);
     } catch (error) {
-      console.error(`Error building profile for athlete ${athlete.athleteId}:`, error);
+      console.error(
+        `Error building profile for athlete ${athlete.athleteId}:`,
+        error
+      );
     }
   }
-  
+
   console.log("🎉 All athlete profiles built successfully!");
 }
 
 // Export for use as module
-export { buildAthleteProfile, buildAllAthleteProfiles };
-
-// Run if called directly
-if (require.main === module) {
-  const athleteId = process.argv[2];
-  
-  if (athleteId && !isNaN(Number(athleteId))) {
-    buildAthleteProfile(Number(athleteId))
-      .then(() => console.log(`Profile built for athlete ${athleteId}`))
-      .catch(console.error)
-      .finally(() => process.exit(0));
-  } else {
-    buildAllAthleteProfiles()
-      .catch(console.error)
-      .finally(() => process.exit(0));
-  }
-}
+export { buildAllAthleteProfiles, buildAthleteProfile };

@@ -2,6 +2,7 @@ import "dotenv/config";
 
 import { populateActivitiesFromAPI } from "db/populateActivitiesFromStravaAPI";
 import { populateActivityStreamsFromAPI } from "db/populateActivityStreamsFromStravaAPI";
+import { buildAthleteProfile } from "../db/buildAthletePerformanceProfiles";
 
 const token = {
   expires_at: 1753720301,
@@ -11,17 +12,16 @@ const token = {
   refresh_token: "151e94e3e068d4876e4e4a8bd0c808f7f29d4d67",
 };
 
-// const activityIds = await db
-//   .select({ id: activitiesTable.id })
-//   .from(activitiesTable);
-
 try {
   const activities = await populateActivitiesFromAPI(token);
+  const athleteId = activities[0]?.athleteId;
   const activityIds = activities.map(({ id }) => id);
 
   for (const activity of activityIds) {
     await populateActivityStreamsFromAPI(token, activity);
   }
+
+  await buildAthleteProfile(athleteId as number);
 } catch (err) {
   const response = err as Response;
   let message;

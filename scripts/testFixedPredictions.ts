@@ -1,5 +1,6 @@
 #!/usr/bin/env tsx
 
+import "dotenv/config";
 import { racePredictionEngine } from "../app/lib/race-predictor/prediction-engine";
 
 async function testPredictions() {
@@ -86,5 +87,9 @@ function formatRaceTime(minutes: number): string {
   return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
-// Run the test
-testPredictions();
+// Run if called directly
+if (process.argv[1]?.endsWith('testFixedPredictions.ts')) {
+  testPredictions()
+    .catch(console.error)
+    .finally(() => process.exit(0));
+}
