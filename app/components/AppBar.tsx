@@ -57,10 +57,10 @@ export function AppBar({ showLogout = false }: AppBarProps) {
                 },
               }}
             >
-              My Maps
+              My Workouts
             </Link>
             <Link
-              href="/activities"
+              href="/statistics"
               color="inherit"
               underline="none"
               sx={{
@@ -71,7 +71,7 @@ export function AppBar({ showLogout = false }: AppBarProps) {
                 },
               }}
             >
-              My activities
+              My statistics
             </Link>
             <Link
               href="/new-route"
@@ -85,7 +85,7 @@ export function AppBar({ showLogout = false }: AppBarProps) {
                 },
               }}
             >
-              New route
+              Create a Route
             </Link>
           </>
         )}
