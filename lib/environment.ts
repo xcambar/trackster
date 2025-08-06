@@ -12,6 +12,8 @@ export type EnvironmentVariables = {
   SUPABASE_DATABASE_URL: string;
   COOKIE_SECRET: string;
   NODE_ENV: string;
+  GRAPHHOPPER_BASE_URL: string;
+  GRAPHHOPPER_API_KEY: string;
 };
 
 type Environment = keyof EnvironmentVariables;
