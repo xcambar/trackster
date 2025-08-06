@@ -21,6 +21,7 @@ export const getActivitiesForUser = async (
     const activities = await db
       .select()
       .from(activitiesTable)
+      .orderBy(desc(activitiesTable.createdAt))
       .where(
         eq(activitiesTable.athleteId, user.user_metadata.strava_profile.id)
       );
