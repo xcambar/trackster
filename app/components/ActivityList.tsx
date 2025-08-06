@@ -25,11 +25,9 @@ import { StravaIcon } from "./CustomIcons";
 
 import AutorenewIcon from "@mui/icons-material/Autorenew";
 import CalendarIcon from "@mui/icons-material/CalendarMonth";
-import BikeIcon from "@mui/icons-material/DirectionsBike";
-import RunIcon from "@mui/icons-material/DirectionsRun";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
-import QuestionMarkIcon from "@mui/icons-material/QuestionMark";
 import { pickCycleColor } from "~/lib/utils/cycle_color";
+import { ActivityTypeIcon } from "./ActivityTypeIcon";
 
 const ACTIVITIES_ROUTE = "/user/activities.json";
 
@@ -124,17 +122,14 @@ const ActivityListItem: React.FC<{
       disablePadding
       secondaryAction={
         <IconButton edge="end">
-          <Avatar
-            sx={{
-              bgcolor: selected ? options.color || "primary.main" : "primary",
+          <ActivityTypeIcon
+            sportType={activity.sportType}
+            avatarProps={{
+              sx: {
+                bgcolor: selected ? options.color || "primary.main" : "primary",
+              },
             }}
-          >
-            {activity.sportType === "Run" && <RunIcon />}
-            {activity.sportType === "Ride" && <BikeIcon />}
-            {!["Run", "Ride"].includes(activity.sportType) && (
-              <QuestionMarkIcon />
-            )}
-          </Avatar>
+          />
         </IconButton>
       }
     >
