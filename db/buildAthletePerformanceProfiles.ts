@@ -52,8 +52,8 @@ function categorizeByGrade(
   const minLength = Math.min(velocityData.length, gradeData.length);
 
   for (let i = 0; i < minLength; i++) {
-    const speed = velocityData[i];
-    const grade = gradeData[i];
+    const speed = velocityData[i]!;
+    const grade = gradeData[i]!;
 
     // Filter valid data points (positive uphill grades only)
     if (
