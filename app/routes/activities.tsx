@@ -14,6 +14,7 @@ import {
 import type { ActionFunctionArgs, MetaFunction } from "@remix-run/node";
 import { data, redirect, useLoaderData } from "@remix-run/react";
 import { Activity } from "db/schema";
+import { ActivityTypeIcon } from "~/components/ActivityTypeIcon";
 import { AppBar } from "~/components/AppBar";
 import {
   getActivityStreamsForUser,
@@ -156,7 +157,7 @@ function LastActivityCard({ activity }: { activity: Activity | null }) {
     return (
       <Paper elevation={2} sx={{ p: 3, textAlign: "center", height: "100%" }}>
         <Typography variant="h6" gutterBottom>
-          Last Activity
+          Latest Activity
         </Typography>
         <Typography variant="body1" color="text.secondary">
           No activities found
@@ -170,10 +171,20 @@ function LastActivityCard({ activity }: { activity: Activity | null }) {
   return (
     <Paper elevation={2} sx={{ p: 3, textAlign: "center" }}>
       <Typography variant="h6" gutterBottom>
-        Last Activity
+        Latest Activity
       </Typography>
       <Typography variant="h4" color="primary" gutterBottom>
         {activity.name}
+        <ActivityTypeIcon
+          avatarProps={{
+            sx: {
+              display: "inline-flex",
+              ml: 1,
+              bgcolor: "primary.main",
+            },
+          }}
+          sportType={activity.sportType}
+        />
       </Typography>
       <Typography variant="body1" gutterBottom>
         <strong>Date:</strong>{" "}
