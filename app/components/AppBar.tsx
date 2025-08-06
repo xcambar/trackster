@@ -73,6 +73,20 @@ export function AppBar({ showLogout = false }: AppBarProps) {
             >
               My activities
             </Link>
+            <Link
+              href="/new-route"
+              color="inherit"
+              underline="none"
+              sx={{
+                px: 2,
+                fontWeight: 500,
+                "&:hover": {
+                  textDecoration: "underline",
+                },
+              }}
+            >
+              New route
+            </Link>
           </>
         )}
         {/* This box acts as a spacer, it pushes the following elements on the right */}
