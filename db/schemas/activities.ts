@@ -1,21 +1,21 @@
 import {
-  pgTable,
   bigint,
-  text,
-  integer,
-  real,
-  timestamp,
-  jsonb,
   boolean,
+  integer,
+  jsonb,
+  pgTable,
+  real,
+  text,
+  timestamp,
 } from "drizzle-orm/pg-core";
 import {
-  SportType,
-  PolylineMap,
-  PhotoSummary,
-  SummaryGear,
-  Split,
   DetailedSegmentEffort,
   Lap,
+  PhotoSummary,
+  PolylineMap,
+  Split,
+  SportType,
+  SummaryGear,
 } from "strava";
 
 export const activitiesTable = pgTable("activities", {
@@ -66,7 +66,7 @@ export const activitiesTable = pgTable("activities", {
   hasKudoed: boolean("has_kudoed").default(false),
 
   // Performance metrics
-  averageSpeed: real("average_speed"), // in m/s
+  averageSpeed: real("average_speed").notNull().default(0), // in m/s
   maxSpeed: real("max_speed"), // in m/s
   averageCadence: real("average_cadence"),
   averageTemp: real("average_temp"), // in Celsius
