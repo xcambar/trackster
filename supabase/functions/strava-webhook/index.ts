@@ -3,14 +3,14 @@
 // Follow this setup guide to integrate the Deno language server with your editor:
 // https://deno.land/manual/getting_started/setup_your_environment
 
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 
 console.log("Strava Webhook Function started");
 
 // Database setup using Supabase client
-const supabaseUrl = Deno.env.get('SUPABASE_URL')!
-const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-const supabase = createClient(supabaseUrl, supabaseServiceKey)
+const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 Deno.serve(async (req: Request) => {
   const method = req.method;
@@ -63,7 +63,7 @@ Deno.serve(async (req: Request) => {
       // First, log the webhook event to our tracking table
       try {
         const { error } = await supabase
-          .from('webhook_events')
+          .from("webhook_events")
           .insert({
             object_type: object_type,
             object_id: object_id,
@@ -72,9 +72,9 @@ Deno.serve(async (req: Request) => {
             subscription_id: subscription_id,
             event_time: new Date(event_time * 1000).toISOString(),
             updates: updates || {},
-            processed: false
+            processed: false,
           });
-        
+
         if (error) {
           console.error("Failed to log webhook event:", error);
         }
@@ -87,41 +87,56 @@ Deno.serve(async (req: Request) => {
         switch (aspect_type) {
           case "create":
             try {
-              console.log(`🚀 Processing activity creation for ID: ${object_id}`);
-              
+              console.log(
+                `🚀 Processing activity creation for ID: ${object_id}`,
+              );
+
               // Get user's Strava access token from our database
               // For now, we'll use a placeholder token - in a real implementation:
               // 1. Look up the athlete's access token based on owner_id
               // 2. Refresh the token if needed
               const userTokenResult = await supabase
-                .from('auth.users')
-                .select('raw_user_meta_data')
-                .eq('raw_user_meta_data->>strava_id', owner_id)
+                .from("auth.users")
+                .select("raw_user_meta_data")
+                .eq("raw_user_meta_data->>strava_id", owner_id)
                 .single();
 
               if (userTokenResult.error || !userTokenResult.data) {
                 console.error(`No user found for owner_id: ${owner_id}`);
-                return new Response(`User ${owner_id} not found`, { status: 404});
+                return new Response(`User ${owner_id} not found`, {
+                  status: 404,
+                });
               }
 
-              const stravaToken = userTokenResult.data.raw_user_meta_data?.access_token;
+              const stravaToken = userTokenResult.data.raw_user_meta_data
+                ?.access_token;
               if (!stravaToken) {
-                console.error(`No Strava token found for owner_id: ${owner_id}`);
-                return new Response('Not Found', { status: 404});
+                console.error(
+                  `No Strava token found for owner_id: ${owner_id}`,
+                );
+                return new Response("Not Found", { status: 404 });
               }
 
               // Fetch the full activity data from Strava API
               console.log(`� Fetching activity  ${object_id} from Strava API`);
-              const stravaResponse = await fetch(`https://www.strava.com/api/v3/activities/${object_id}`, {
-                headers: {
-                  'Authorization': `Bearer ${stravaToken}`,
-                  'Accept': 'application/json'
-                }
-              });
+              const stravaResponse = await fetch(
+                `https://www.strava.com/api/v3/activities/${object_id}`,
+                {
+                  headers: {
+                    "Authorization": `Bearer ${stravaToken}`,
+                    "Accept": "application/json",
+                  },
+                },
+              );
 
               if (!stravaResponse.ok) {
-                console.error(`Failed to fetch activity from Strava: ${stravaResponse.status} ${stravaResponse.statusText}`);
-                return new Response(`Failed to fetch activity from Strava: ${stravaResponse.status} ${stravaResponse.statusText}`, { status: 404});
+                console.error(
+                  `Failed to fetch activity from Strava: ${stravaResponse.status} ${stravaResponse.statusText}`,
+                );
+                return new Response(
+                  `Failed to fetch activity from Strava: ${stravaResponse.status} ${stravaResponse.statusText}`,
+                  { status: 404 },
+                );
               }
 
               const activityData = await stravaResponse.json();
@@ -160,59 +175,68 @@ Deno.serve(async (req: Request) => {
                 calories: activityData.calories,
                 description: activityData.description,
                 created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
+                updated_at: new Date().toISOString(),
               };
 
               // Insert the activity into our database
               const { error: insertError } = await supabase
-                .from('activities')
+                .from("activities")
                 .insert(newActivity);
 
               if (insertError) {
-                console.error('Failed to insert activity:', insertError);
-                return new Response('Internal error', { status: 500});
+                console.error("Failed to insert activity:", insertError);
+                return new Response("Internal error", { status: 500 });
               }
 
-              console.log(`✅ Activity ${object_id} successfully synced to database`);
-              
+              console.log(
+                `✅ Activity ${object_id} successfully synced to database`,
+              );
+
               // Mark webhook as processed
               await supabase
-                .from('webhook_events')
+                .from("webhook_events")
                 .update({ processed: true })
-                .eq('object_id', object_id)
-                .eq('aspect_type', 'create');
-                
+                .eq("object_id", object_id)
+                .eq("aspect_type", "create");
             } catch (error) {
-              console.error(`❌ Failed to process activity creation for ID ${object_id}:`, error);
+              console.error(
+                `❌ Failed to process activity creation for ID ${object_id}:`,
+                error,
+              );
             }
             break;
 
           case "update":
             try {
               console.log(`✏️ Processing activity update for ID: ${object_id}`);
-              
+
               // First, check if the activity exists in our database
-              const { data: existingActivity, error: fetchError } = await supabase
-                .from('activities')
-                .select('id')
-                .eq('id', object_id)
-                .single();
+              const { data: existingActivity, error: fetchError } =
+                await supabase
+                  .from("activities")
+                  .select("id")
+                  .eq("id", object_id)
+                  .single();
 
               if (fetchError || !existingActivity) {
-                console.log(`⚠️ Activity ${object_id} not found in database, skipping update`);
+                console.log(
+                  `⚠️ Activity ${object_id} not found in database, skipping update`,
+                );
                 // Mark webhook as processed even if activity doesn't exist
                 await supabase
-                  .from('webhook_events')
+                  .from("webhook_events")
                   .update({ processed: true })
-                  .eq('object_id', object_id)
-                  .eq('aspect_type', 'update');
-                return new Response('Not Found', { status: 404});
+                  .eq("object_id", object_id)
+                  .eq("aspect_type", "update");
+                return new Response("Not Found", { status: 404 });
               }
 
               // Update the activity in our database based on the changes
-              const updateData: Record<string, unknown> = { updated_at: new Date().toISOString() };
+              const updateData: Record<string, unknown> = {
+                updated_at: new Date().toISOString(),
+              };
               let hasChanges = false;
-              
+
               if (updates) {
                 if (updates.title) {
                   updateData.name = updates.title;
@@ -221,12 +245,18 @@ Deno.serve(async (req: Request) => {
                 }
                 if (updates.type) {
                   updateData.sport_type = updates.type;
-                  console.log(`  🏃 Updating activity type to: "${updates.type}"`);
+                  console.log(
+                    `  🏃 Updating activity type to: "${updates.type}"`,
+                  );
                   hasChanges = true;
                 }
                 if (updates.private !== undefined) {
                   updateData.private = updates.private;
-                  console.log(`  🔒 Updating privacy to: ${updates.private ? "private" : "public"}`);
+                  console.log(
+                    `  🔒 Updating privacy to: ${
+                      updates.private ? "private" : "public"
+                    }`,
+                  );
                   hasChanges = true;
                 }
               }
@@ -234,13 +264,13 @@ Deno.serve(async (req: Request) => {
               // Only perform update if there are actual changes
               if (hasChanges) {
                 const { error: updateError } = await supabase
-                  .from('activities')
+                  .from("activities")
                   .update(updateData)
-                  .eq('id', object_id);
+                  .eq("id", object_id);
 
                 if (updateError) {
-                  console.error('Failed to update activity:', updateError);
-                return new Response('Internal error', { status: 500});
+                  console.error("Failed to update activity:", updateError);
+                  return new Response("Internal error", { status: 500 });
                 }
 
                 console.log(`✅ Activity ${object_id} updated successfully`);
@@ -250,61 +280,74 @@ Deno.serve(async (req: Request) => {
 
               // Mark webhook as processed
               await supabase
-                .from('webhook_events')
+                .from("webhook_events")
                 .update({ processed: true })
-                .eq('object_id', object_id)
-                .eq('aspect_type', 'update');
-
+                .eq("object_id", object_id)
+                .eq("aspect_type", "update");
             } catch (error) {
-              console.error(`❌ Failed to process activity update for ID ${object_id}:`, error);
+              console.error(
+                `❌ Failed to process activity update for ID ${object_id}:`,
+                error,
+              );
             }
             break;
 
           case "delete":
             try {
-              console.log(`🗑️ Processing activity deletion for ID: ${object_id}`);
-              
+              console.log(
+                `🗑️ Processing activity deletion for ID: ${object_id}`,
+              );
+
               // Delete the activity from our database
               const { error: deleteError } = await supabase
-                .from('activities')
+                .from("activities")
                 .delete()
-                .eq('id', object_id);
+                .eq("id", object_id);
 
               if (deleteError) {
-                console.error('Failed to delete activity:', deleteError);
+                console.error("Failed to delete activity:", deleteError);
               }
 
               // Mark webhook as processed
               await supabase
-                .from('webhook_events')
+                .from("webhook_events")
                 .update({ processed: true })
-                .eq('object_id', object_id)
-                .eq('aspect_type', 'delete');
+                .eq("object_id", object_id)
+                .eq("aspect_type", "delete");
 
-              console.log(`✅ Activity deletion webhook processed for ID: ${object_id}`);
+              console.log(
+                `✅ Activity deletion webhook processed for ID: ${object_id}`,
+              );
             } catch (error) {
-              console.error(`❌ Failed to process activity deletion for ID ${object_id}:`, error);
+              console.error(
+                `❌ Failed to process activity deletion for ID ${object_id}:`,
+                error,
+              );
             }
             break;
 
           default:
-            console.log(`❓ Unknown activity aspect_type: ${aspect_type} for ID: ${object_id}`);
+            console.log(
+              `❓ Unknown activity aspect_type: ${aspect_type} for ID: ${object_id}`,
+            );
             // Still mark as processed since we've logged it
             await supabase
-              .from('webhook_events')
+              .from("webhook_events")
               .update({ processed: true })
-              .eq('object_id', object_id)
-              .eq('aspect_type', aspect_type);
+              .eq("object_id", object_id)
+              .eq("aspect_type", aspect_type);
         }
       } else {
         // For non-activity events (athlete deauthorization, etc.)
-        console.log(`📊 Processing ${object_type?.toUpperCase()} event (${aspect_type})`);
-        
+        console.log(
+          `📊 Processing ${object_type?.toUpperCase()} event (${aspect_type})`,
+        );
+
         if (object_type === "athlete" && aspect_type === "update") {
           // Handle athlete deauthorization
           if (updates?.authorized === "false") {
             console.log(`🚫 Athlete ${owner_id} deauthorized the app`);
-            
+
             // You could:
             // 1. Mark user as deauthorized in your users table
             // 2. Delete or archive their activities
@@ -315,10 +358,10 @@ Deno.serve(async (req: Request) => {
 
         // Mark webhook as processed
         await supabase
-          .from('webhook_events')
+          .from("webhook_events")
           .update({ processed: true })
-          .eq('object_id', object_id)
-          .eq('aspect_type', aspect_type);
+          .eq("object_id", object_id)
+          .eq("aspect_type", aspect_type);
       }
 
       return new Response("EVENT_RECEIVED", {
