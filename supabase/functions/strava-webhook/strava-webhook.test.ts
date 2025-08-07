@@ -5,26 +5,29 @@ import { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 
 // Mock Supabase client for testing
 function createMockSupabaseClient(supabaseFail = false): SupabaseClient {
-  const supabaseReturn = supabaseFail ? Promise.reject : Promise.resolve;
   const supabasePayload = supabaseFail
     ? { error: new Error("error in tests") }
     : { error: null };
+
+  const returnPromise = (payload: unknown) =>
+    supabaseFail ? Promise.reject(payload) : Promise.resolve(payload);
+
   return {
     from: (_table: string) => ({
-      insert: (_data: unknown) => supabaseReturn(supabasePayload),
+      insert: (_data: unknown) => returnPromise(supabasePayload),
       update: (_data: unknown) => ({
         eq: (_column: string, _value: unknown) => ({
-          eq: () => (Promise.resolve(supabasePayload)),
+          eq: () => returnPromise(supabasePayload),
         }),
       }),
       delete: () => ({
         eq: (_column: string, _value: unknown) =>
-          supabaseReturn(supabasePayload),
+          returnPromise(supabasePayload),
       }),
       select: (_columns: string) => ({
         eq: (_column: string, _value: unknown) => ({
           single: () =>
-            supabaseReturn({
+            returnPromise({
               ...supabasePayload,
               data: {
                 raw_user_meta_data: {
