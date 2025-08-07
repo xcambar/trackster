@@ -1,6 +1,42 @@
 /// <reference lib="deno.ns" />
 import { assertEquals } from "jsr:@std/assert@1";
 import webhookHandler from "./handler.ts";
+import { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+
+// Mock Supabase client for testing
+function createMockSupabaseClient(supabaseFail = false): SupabaseClient {
+  const supabaseReturn = supabaseFail ? Promise.reject : Promise.resolve;
+  const supabasePayload = supabaseFail
+    ? { error: new Error("error in tests") }
+    : { error: null };
+  return {
+    from: (_table: string) => ({
+      insert: (_data: unknown) => supabaseReturn(supabasePayload),
+      update: (_data: unknown) => ({
+        eq: (_column: string, _value: unknown) => ({
+          eq: () => (Promise.resolve(supabasePayload)),
+        }),
+      }),
+      delete: () => ({
+        eq: (_column: string, _value: unknown) =>
+          supabaseReturn(supabasePayload),
+      }),
+      select: (_columns: string) => ({
+        eq: (_column: string, _value: unknown) => ({
+          single: () =>
+            supabaseReturn({
+              ...supabasePayload,
+              data: {
+                raw_user_meta_data: {
+                  access_token: "mock_token",
+                },
+              },
+            }),
+        }),
+      }),
+    }),
+  } as unknown as SupabaseClient;
+}
 Deno.test(
   "Strava Webhook - GET request webhook verification with valid challenge",
   async () => {
@@ -8,13 +44,13 @@ Deno.test(
       "http://localhost:54321/functions/v1/strava-webhook?hub.mode=subscribe&hub.challenge=test_challenge_123&hub.verify_token=STRAVA";
     const request = new Request(url, { method: "GET" });
 
-    const response = await webhookHandler(request);
+    const response = await webhookHandler(request, createMockSupabaseClient());
     const responseBody = await response.json();
 
     assertEquals(response.status, 200);
     assertEquals(response.headers.get("Content-Type"), "application/json");
     assertEquals(responseBody["hub.challenge"], "test_challenge_123");
-  }
+  },
 );
 
 Deno.test(
@@ -24,11 +60,11 @@ Deno.test(
       "http://localhost:54321/functions/v1/strava-webhook?hub.mode=subscribe&hub.verify_token=STRAVA";
     const request = new Request(url, { method: "GET" });
 
-    const response = await webhookHandler(request);
+    const response = await webhookHandler(request, createMockSupabaseClient());
 
     assertEquals(response.status, 400);
     assertEquals(await response.text(), "Bad Request");
-  }
+  },
 );
 
 Deno.test("Strava Webhook - GET request with invalid mode", async () => {
@@ -36,7 +72,7 @@ Deno.test("Strava Webhook - GET request with invalid mode", async () => {
     "http://localhost:54321/functions/v1/strava-webhook?hub.mode=invalid&hub.challenge=test_challenge&hub.verify_token=STRAVA";
   const request = new Request(url, { method: "GET" });
 
-  const response = await webhookHandler(request);
+  const response = await webhookHandler(request, createMockSupabaseClient());
 
   assertEquals(response.status, 400);
   assertEquals(await response.text(), "Bad Request");
@@ -60,16 +96,16 @@ Deno.test(
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
-      }
+      },
     );
 
-    const response = await webhookHandler(request);
+    const response = await webhookHandler(request, createMockSupabaseClient());
     const responseText = await response.text();
 
     assertEquals(response.status, 200);
     assertEquals(response.headers.get("Content-Type"), "text/plain");
     assertEquals(responseText, "EVENT_RECEIVED");
-  }
+  },
 );
 
 Deno.test(
@@ -94,14 +130,14 @@ Deno.test(
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
-      }
+      },
     );
 
-    const response = await webhookHandler(request);
+    const response = await webhookHandler(request, createMockSupabaseClient());
 
     assertEquals(response.status, 200);
     assertEquals(await response.text(), "EVENT_RECEIVED");
-  }
+  },
 );
 
 Deno.test(
@@ -122,14 +158,14 @@ Deno.test(
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
-      }
+      },
     );
 
-    const response = await webhookHandler(request);
+    const response = await webhookHandler(request, createMockSupabaseClient());
 
     assertEquals(response.status, 200);
     assertEquals(await response.text(), "EVENT_RECEIVED");
-  }
+  },
 );
 
 Deno.test(
@@ -153,14 +189,14 @@ Deno.test(
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
-      }
+      },
     );
 
-    const response = await webhookHandler(request);
+    const response = await webhookHandler(request, createMockSupabaseClient());
 
     assertEquals(response.status, 200);
     assertEquals(await response.text(), "EVENT_RECEIVED");
-  }
+  },
 );
 
 Deno.test(
@@ -172,14 +208,14 @@ Deno.test(
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: "invalid json{",
-      }
+      },
     );
 
-    const response = await webhookHandler(request);
+    const response = await webhookHandler(request, createMockSupabaseClient());
 
     assertEquals(response.status, 500);
     assertEquals(await response.text(), "Internal Server Error");
-  }
+  },
 );
 
 Deno.test("Strava Webhook - POST request with empty body", async () => {
@@ -189,10 +225,10 @@ Deno.test("Strava Webhook - POST request with empty body", async () => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: "",
-    }
+    },
   );
 
-  const response = await webhookHandler(request);
+  const response = await webhookHandler(request, createMockSupabaseClient());
 
   assertEquals(response.status, 500);
   assertEquals(await response.text(), "Internal Server Error");
@@ -206,14 +242,14 @@ Deno.test(
       {
         method: "PUT",
         body: JSON.stringify({ test: "data" }),
-      }
+      },
     );
 
-    const response = await webhookHandler(request);
+    const response = await webhookHandler(request, createMockSupabaseClient());
 
     assertEquals(response.status, 405);
     assertEquals(await response.text(), "Method Not Allowed");
-  }
+  },
 );
 
 Deno.test(
@@ -223,14 +259,14 @@ Deno.test(
       "http://localhost:54321/functions/v1/strava-webhook",
       {
         method: "DELETE",
-      }
+      },
     );
 
-    const response = await webhookHandler(request);
+    const response = await webhookHandler(request, createMockSupabaseClient());
 
     assertEquals(response.status, 405);
     assertEquals(await response.text(), "Method Not Allowed");
-  }
+  },
 );
 
 Deno.test(
@@ -240,12 +276,12 @@ Deno.test(
       "http://localhost:54321/functions/v1/strava-webhook",
       {
         method: "PATCH",
-      }
+      },
     );
 
-    const response = await webhookHandler(request);
+    const response = await webhookHandler(request, createMockSupabaseClient());
 
     assertEquals(response.status, 405);
     assertEquals(await response.text(), "Method Not Allowed");
-  }
+  },
 );
