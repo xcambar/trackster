@@ -51,7 +51,7 @@ Activities are stored with comprehensive Strava data including:
 
 ### Environment Configuration
 The application uses `lib/environment.ts` for centralized environment variable management. Key variables include:
-- `SUPABASE_DATABASE_URL` - Database connection
+- `SUPABASE_DB_URL` - Database connection
 - `STRAVA_CLIENT_ID` / `STRAVA_CLIENT_SECRET` - OAuth credentials
 
 ### Map Integration
