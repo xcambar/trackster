@@ -9,3 +9,6 @@ export type { AthletePerformanceProfile, NewAthletePerformanceProfile } from "./
 
 export { gapLookupTable } from "./schemas/gap_lookup";
 export type { GapLookup, NewGapLookup } from "./schemas/gap_lookup";
+
+export { webhookEventsTable } from "./schemas/webhook_events";
+export type { WebhookEvent, NewWebhookEvent } from "./schemas/webhook_events";
