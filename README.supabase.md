@@ -26,3 +26,9 @@ Queues setup:
 ## Webhooks
 
 - 1 webhook triggered on INSERT on `auth.users` to dispatch to the appropriate edge function
+
+## Edge functions
+
+### `strava-webhook`
+
+This Edge function listens to the Strava webhooks and dispatchs updates on the athletes and their activities. Hence, it is a publicly available function.
