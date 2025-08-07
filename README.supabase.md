@@ -18,7 +18,7 @@ Queues require to:
 
 - enable to expose from PostgREST
 - expose the schema `pgmq_public` (maybe only on development, to be confirmed)
-- Expose the Service Role key (`SUPABASE_SECRET_KEY` or similar, NOT the `SUPABASE_ANON_KEY`) to grant write authorization
+- Expose the Service Role key (`SUPABASE_SERVICE_ROLE_KEY` or similar, NOT the `SUPABASE_ANON_KEY`) to grant write authorization
 
 Queues setup:
 - `strava_api`
