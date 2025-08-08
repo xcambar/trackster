@@ -11,7 +11,7 @@ export type EnvironmentVariables = {
   SUPABASE_URL: string;
   SUPABASE_DB_URL: string;
   COOKIE_SECRET: string;
-  NODE_ENV: string;
+  NETLIFY: string;
   GRAPHHOPPER_BASE_URL: string;
   GRAPHHOPPER_API_KEY: string;
 };
