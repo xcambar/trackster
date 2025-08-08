@@ -1,0 +1,21 @@
+name: Trackster Database Migrations 
+
+on:
+  workflow_run:
+    workflows: [Trackster CI]
+    types:
+      - completed
+
+jobs:
+  db_migrate:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version-file: .nvmrc
+        cache: 'npm'
+    - run: npm install
+    - run: npx drizzle-kit push
