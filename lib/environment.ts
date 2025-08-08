@@ -4,7 +4,7 @@ export type EnvironmentVariables = {
   STRAVA_CLIENT_SECRET: string;
   STRAVA_AUTHORIZATION_ENDPOINT: string;
   STRAVA_TOKEN_ENDPOINT: string;
-  STRAVA_REDIRECT_URI: string;
+  STRAVA_REDIRECT_PATH: string;
   STRAVA_API_BASE_URL: string;
   SUPABASE_ANON_KEY: string;
   SUPABASE_SERVICE_ROLE_KEY: string;
@@ -14,6 +14,7 @@ export type EnvironmentVariables = {
   TRACKSTER_PRODUCTION: string;
   GRAPHHOPPER_BASE_URL: string;
   GRAPHHOPPER_API_KEY: string;
+  URL: string;
 };
 
 type Environment = keyof EnvironmentVariables;
