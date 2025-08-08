@@ -1,0 +1,28 @@
+name: Trackster CI
+
+on:
+  push:
+    branches: [ $default-branch ]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version-file: .nvmrc
+        cache: 'npm'
+    - run: npm install
+    - run: npm test
+    - name: Setup Deno
+      uses: denoland/setup-deno@v2
+      with:
+        deno-version: v2.x
+    - run: |
+        cd supabase/functions
+        deno test
+    
