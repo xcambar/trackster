@@ -24,7 +24,7 @@ const { getSession, commitSession, destroySession } =
       path: "/",
       sameSite: "lax",
       secrets: [getEnvironment("COOKIE_SECRET")],
-      secure: getEnvironment("NETLIFY") === "true",
+      secure: getEnvironment("TRACKSTER_PRODUCTION") === "true",
     },
   });
 
