@@ -45,7 +45,7 @@ authenticator.use(
       redirectURI: [
         getEnvironment("URL"),
         getEnvironment("STRAVA_REDIRECT_PATH"),
-      ].join(),
+      ].join(""),
 
       authorizationEndpoint: getEnvironment("STRAVA_AUTHORIZATION_ENDPOINT"),
       tokenEndpoint: getEnvironment("STRAVA_TOKEN_ENDPOINT"),
