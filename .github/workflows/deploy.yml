@@ -18,4 +18,6 @@ jobs:
         node-version-file: .nvmrc
         cache: 'npm'
     - run: npm install
-    - run: npx drizzle-kit push
+    - env:
+        SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      run: npx drizzle-kit push
