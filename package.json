@@ -7,7 +7,7 @@
     "build": "remix vite:build",
     "dev": "remix vite:dev",
     "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
-    "start": "remix-serve ./build/server/index.js",
+    "start": "netlify serve",
     "typecheck": "tsc",
     "test": "vitest",
     "format": "prettier --write ./app"
@@ -17,6 +17,7 @@
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/material": "^7.2.0",
+    "@netlify/functions": "^4.2.1",
     "@remix-run/node": "^2.16.8",
     "@remix-run/react": "^2.16.8",
     "@remix-run/serve": "^2.16.8",
@@ -33,6 +34,7 @@
     "google-polyline": "^1.0.3",
     "isbot": "^4.1.0",
     "leaflet": "^1.9.4",
+    "netlify-cli": "^23.1.2",
     "pg": "^8.16.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -43,6 +45,7 @@
   },
   "devDependencies": {
     "@mui/icons-material": "^7.2.0",
+    "@netlify/remix-adapter": "^2.6.1",
     "@remix-run/dev": "^2.16.8",
     "@remix-run/testing": "^2.16.8",
     "@testing-library/jest-dom": "^6.6.3",
