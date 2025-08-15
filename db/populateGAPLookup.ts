@@ -1,4 +1,3 @@
-import "dotenv/config";
 import db from "../app/services/db.server";
 import { gapLookupTable } from "./schema";
 
@@ -71,21 +70,6 @@ async function populateGAPLookup(): Promise<void> {
   }
 
   console.log("✅ GAP lookup table populated successfully!");
-
-  // Display some sample values for verification
-  console.log("\nSample GAP adjustment factors:");
-  console.log("Grade  | Factor | Pace Impact");
-  console.log("-------|--------|------------");
-
-  const sampleGrades = [-20, -10, -5, 0, 5, 10, 15, 20, 25];
-  for (const grade of sampleGrades) {
-    const factor = calculateGAPAdjustmentFactor(grade);
-    const impact = ((factor - 1) * 100).toFixed(1);
-    const sign = factor >= 1 ? "+" : "";
-    console.log(
-      `${grade.toString().padStart(5)}% | ${factor.toFixed(4)} | ${sign}${impact}%`
-    );
-  }
 }
 
 // Export for use as module

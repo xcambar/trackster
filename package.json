@@ -10,7 +10,12 @@
     "start": "netlify serve",
     "typecheck": "tsc",
     "test": "vitest",
-    "format": "prettier --write ./app"
+    "format": "prettier --write ./app",
+    "db-seed": "dotenv -- run-s db:*",
+    "db:flush": "dotenv -- bash -c 'psql ${SUPABASE_DB_URL} -f ./supabase/sql/flush.sql'",
+    "db:migrate-schema": "npx drizzle-kit push",
+    "db:hooks": "dotenv -- bash -c 'psql --set=webhook_domain=${URL} ${SUPABASE_DB_URL} -f ./supabase/sql/hooks.sql'",
+    "db:gap": "tsx ./scripts/seed_GAP_lookup_table.ts"
   },
   "dependencies": {
     "@changey/react-leaflet-markercluster": "^4.0.0-rc1",
@@ -29,6 +34,7 @@
     "cron": "^4.3.3",
     "date-fns": "^4.1.0",
     "dotenv": "^17.2.0",
+    "dotenv-cli": "^10.0.0",
     "drizzle-orm": "^0.44.3",
     "es-toolkit": "^1.39.8",
     "google-polyline": "^1.0.3",
@@ -68,6 +74,7 @@
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",
     "jsdom": "^26.1.0",
+    "npm-run-all": "^4.1.5",
     "prettier": "3.6.2",
     "prettier-plugin-organize-imports": "^4.2.0",
     "remix-auth": "^4.2.0",
