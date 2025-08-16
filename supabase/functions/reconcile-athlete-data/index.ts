@@ -27,6 +27,10 @@ Deno.serve(async (req) => {
     return new Response(null, { status: 404 });
   }
 
+  return await handle(athleteId);
+});
+
+async function handle(athleteId: string) {
   const supabase = makeSupabaseClient();
   const { data, error } = await supabase
     .from("user_athlete_mapping")
@@ -46,14 +50,13 @@ Deno.serve(async (req) => {
 
   const responseData = {
     user: userTokenResult,
-    method,
     athleteId,
   };
 
   return new Response(JSON.stringify(responseData), {
     headers: { "Content-Type": "application/json" },
   });
-});
+}
 
 /* To invoke locally:
 
