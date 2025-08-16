@@ -3,7 +3,7 @@
 import "dotenv/config";
 import { eq } from "drizzle-orm";
 import db from "../app/services/db.server";
-import { athletePerformanceProfilesTable } from "../db/schema";
+import { athletePerformanceProfilesTable } from "@trackster/db";
 import { 
   generateRoundTripWithEstimation,
   type RoundTripRequest 

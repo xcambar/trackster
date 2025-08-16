@@ -1,0 +1,33 @@
+{
+  "name": "@trackster/db",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Database schemas and utilities for Trackster",
+  "main": "./schema.ts",
+  "exports": {
+    ".": "./schema.ts",
+    "./schemas/activities": "./schemas/activities.ts",
+    "./schemas/activity_streams": "./schemas/activity_streams.ts",
+    "./schemas/athlete_performance_profiles": "./schemas/athlete_performance_profiles.ts",
+    "./schemas/gap_lookup": "./schemas/gap_lookup.ts",
+    "./schemas/user_athlete_mapping": "./schemas/user_athlete_mapping.ts",
+    "./schemas/webhook_events": "./schemas/webhook_events.ts",
+    "./buildAthletePerformanceProfiles": "./buildAthletePerformanceProfiles.ts",
+    "./populateActivitiesFromStravaAPI": "./populateActivitiesFromStravaAPI.ts",
+    "./populateActivityStreamsFromStravaAPI": "./populateActivityStreamsFromStravaAPI.ts",
+    "./populateGAPLookup": "./populateGAPLookup.ts"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.44.3",
+    "pg": "^8.16.3",
+    "dotenv": "^17.2.0"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.15.4",
+    "typescript": "^5.1.6"
+  },
+  "peerDependencies": {
+    "typescript": "^5.1.6"
+  }
+}

@@ -1,10 +1,10 @@
 import { eq } from "drizzle-orm";
-import db from "../app/services/db.server";
+import db from "../../../app/services/db.server";
 import {
   activitiesTable,
   activityStreamsTable,
   athletePerformanceProfilesTable,
-} from "../db/schema";
+} from "./schema";
 
 interface GradeSpeedData {
   grade0To5: number[];

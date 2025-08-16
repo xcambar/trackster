@@ -1,5 +1,5 @@
 import { getEnvironment } from "lib/environment";
-import { AthletePerformanceProfile } from "../../../db/schemas/athlete_performance_profiles";
+import { AthletePerformanceProfile } from "@trackster/db/schemas/athlete_performance_profiles";
 
 export interface RoundTripRequest {
   /** Starting point latitude */

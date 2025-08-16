@@ -3,6 +3,9 @@
   "private": true,
   "sideEffects": false,
   "type": "module",
+  "workspaces": [
+    "packages/@trackster/*"
+  ],
   "scripts": {
     "build": "remix vite:build",
     "dev": "remix vite:dev",
@@ -18,6 +21,7 @@
     "db:gap": "tsx ./scripts/seed_GAP_lookup_table.ts"
   },
   "dependencies": {
+    "@trackster/db": "workspace:*",
     "@changey/react-leaflet-markercluster": "^4.0.0-rc1",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",

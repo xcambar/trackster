@@ -2,7 +2,7 @@ import { and, eq, gte, lte } from "drizzle-orm";
 import {
   athletePerformanceProfilesTable,
   gapLookupTable,
-} from "../../../db/schema";
+} from "@trackster/db";
 import db from "../../services/db.server";
 
 export interface RacePredictionInput {
