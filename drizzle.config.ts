@@ -1,7 +1,7 @@
 import "dotenv/config";
 
 import { defineConfig } from "drizzle-kit";
-import { getEnvironment } from "./lib/environment";
+import { getEnvironment } from "@trackster/env";
 
 export default defineConfig({
   out: "./drizzle",

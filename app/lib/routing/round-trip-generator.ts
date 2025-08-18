@@ -1,4 +1,4 @@
-import { getEnvironment } from "lib/environment";
+import { getEnvironment } from "@trackster/env";
 import { AthletePerformanceProfile } from "@trackster/db/schemas/athlete_performance_profiles";
 
 export interface RoundTripRequest {

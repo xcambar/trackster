@@ -1,6 +1,6 @@
 import { AccessToken, Strava } from "strava";
 import { supabase } from "~/services/supabase.server";
-import { getEnvironment } from "../../../lib/environment";
+import { getEnvironment } from "@trackster/env";
 
 export function getStravaAPIClient(stravaToken: AccessToken) {
   return new Strava(
