@@ -1,0 +1,14 @@
+packages:
+  - packages/@trackster/*
+  - supabase/functions/*
+
+ignoredBuiltDependencies:
+  - '@parcel/watcher'
+  - sharp
+  - unix-dgram
+  - unrs-resolver
+
+onlyBuiltDependencies:
+  - esbuild
+  - netlify-cli
+  - supabase
