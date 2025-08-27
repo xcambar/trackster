@@ -5,11 +5,6 @@
   "dependencies": {
     "@trackster/env": "workspace:*"
   },
-  "dependenciesMeta": {
-    "@trackster/env": {
-      "injected": true
-    }
-  },
   "devDependencies": {},
   "engines": {
     "node": ">=20.0.0"
