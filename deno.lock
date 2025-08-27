@@ -11945,6 +11945,7 @@
   "workspace": {
     "packageJson": {
       "dependencies": [
+        "npm:@changesets/cli@^2.29.6",
         "npm:@changey/react-leaflet-markercluster@^4.0.0-rc1",
         "npm:@emotion/react@^11.14.0",
         "npm:@emotion/styled@^11.14.1",
