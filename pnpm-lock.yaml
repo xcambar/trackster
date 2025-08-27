@@ -47,6 +47,9 @@ importers:
       '@types/google-polyline':
         specifier: ^1.0.2
         version: 1.0.2
+      arctic:
+        specifier: ^3.7.0
+        version: 3.7.0
       change-case:
         specifier: ^5.4.4
         version: 5.4.4

@@ -37,6 +37,7 @@
     "@trackster/db": "workspace:*",
     "@trackster/env": "workspace:*",
     "@types/google-polyline": "^1.0.2",
+    "arctic": "^3.7.0",
     "change-case": "^5.4.4",
     "convert": "^5.12.0",
     "convert-units": "^2.3.4",
