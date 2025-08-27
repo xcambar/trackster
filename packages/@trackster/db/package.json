@@ -1,7 +1,6 @@
 {
   "name": "@trackster/db",
-  "version": "1.0.0",
-  "private": true,
+  "version": "0.1.0",
   "type": "module",
   "description": "Database schemas and utilities for Trackster",
   "main": "./schema.ts",
@@ -30,5 +29,13 @@
   },
   "peerDependencies": {
     "typescript": "^5.1.6"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xcambar/trackster.git",
+    "directory": "packages/@trackster/db"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
   }
 }

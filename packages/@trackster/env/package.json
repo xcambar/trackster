@@ -1,6 +1,5 @@
 {
   "name": "@trackster/env",
-  "private": true,
   "type": "module",
   "version": "0.1.0",
   "description": "Environment variable utilities for Trackster",
@@ -27,5 +26,13 @@
     "config",
     "typescript"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xcambar/trackster.git",
+    "directory": "packages/@trackster/env"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  }
 }
