@@ -27,6 +27,7 @@
     "@changey/react-leaflet-markercluster": "^4.0.0-rc1",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
+    "@mjackson/headers": "^0.11.1",
     "@mui/material": "^7.2.0",
     "@netlify/functions": "^4.2.1",
     "@react-leaflet/core": "^3.0.0",
