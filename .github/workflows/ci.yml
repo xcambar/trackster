@@ -15,9 +15,12 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version-file: .nvmrc
-        cache: 'npm'
-    - run: npm install
-    - run: npm test
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: 8
+    - run: pnpm install --frozen-lockfile
+    - run: pnpm test
     - name: Setup Deno
       uses: denoland/setup-deno@v2
       with:

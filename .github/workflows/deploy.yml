@@ -16,8 +16,11 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version-file: .nvmrc
-        cache: 'npm'
-    - run: npm install
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: 8
+    - run: pnpm install --frozen-lockfile
     - env:
         SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
-      run: npx drizzle-kit push
+      run: pnpm exec drizzle-kit push
