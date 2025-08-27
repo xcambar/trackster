@@ -1,5 +1,5 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
-import { getEnvironment } from "../environment";
+import { getEnvironment } from "@trackster/env";
 
 type SupabaseError = {
   code: string;

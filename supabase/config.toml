@@ -309,13 +309,10 @@ policy = "oneshot"
 # Port to attach the Chrome inspector for debugging edge functions.
 inspector_port = 8083
 # The Deno major version to use.
-deno_version = 1
+deno_version = 2
 
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
-[functions.strava-webhook]
-verify_jwt = false
-
 [analytics]
 enabled = true
 port = 54327
@@ -334,3 +331,21 @@ s3_region = "env(S3_REGION)"
 s3_access_key = "env(S3_ACCESS_KEY)"
 # Configures AWS_SECRET_ACCESS_KEY for S3 bucket
 s3_secret_key = "env(S3_SECRET_KEY)"
+
+[functions.strava-webhook]
+verify_jwt = false
+
+[functions.hello-world]
+import_map = "./functions/reconcile-athlete-data/deno.json"
+entrypoint = "./functions/hello-world/dist/index.js"
+
+[functions.reconcile-athlete-data]
+enabled = true
+verify_jwt = true
+import_map = "./functions/reconcile-athlete-data/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/reconcile-athlete-data/dist/index.js"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/reconcile-athlete-data/*.html" ]

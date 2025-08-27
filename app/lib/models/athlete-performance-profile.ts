@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import {
   athletePerformanceProfilesTable,
   type AthletePerformanceProfile,
-} from "../../../db/schemas/athlete_performance_profiles";
+} from "@trackster/db/schemas/athlete_performance_profiles";
 import db from "../../services/db.server";
 
 /**

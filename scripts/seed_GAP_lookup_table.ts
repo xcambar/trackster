@@ -1,6 +1,6 @@
 import "dotenv/config";
 
-import { populateGAPLookup } from "db/populateGAPLookup";
+import { populateGAPLookup } from "@trackster/db/populateGAPLookup";
 import db from "../app/services/db.server";
 
 await populateGAPLookup();

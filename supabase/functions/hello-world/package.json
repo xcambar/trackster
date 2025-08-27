@@ -1,0 +1,15 @@
+{
+  "name": "@trackster-deno/fn-hello-world",
+  "version": "0.0.0",
+  "description": "Example Supabase Function",
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "main.ts",
+  "scripts": {
+    "test": "deno test"
+  },
+  "dependencies": {
+    "@trackster/env": "workspace:*"
+  }
+}

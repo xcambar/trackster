@@ -1,4 +1,4 @@
-import { ActivityStreams } from "db/schemas/activity_streams";
+import { ActivityStreams } from "@trackster/db/schemas/activity_streams";
 
 export interface GradeRange {
   label: string;

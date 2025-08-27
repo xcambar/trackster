@@ -1,0 +1,8 @@
+{
+  "tasks": {
+    "build": "mkdir dist; rm -fr dist/*; deno bundle --check index.ts > dist/index.js"
+  },
+  "imports": {
+    "drizzle-orm/pg-core": "npm:drizzle-orm/pg-core"
+  }
+}
