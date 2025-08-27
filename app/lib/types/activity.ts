@@ -1,4 +1,4 @@
-import { Activity } from "db/schema";
+import { Activity } from "@trackster/db";
 
 export type ActivityMap = {
   color: string;

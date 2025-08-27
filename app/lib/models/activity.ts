@@ -1,13 +1,13 @@
 import { User } from "@supabase/supabase-js";
-import { activitiesTable, Activity } from "db/schema";
+import { activitiesTable, Activity } from "@trackster/db";
 import {
   ActivityStreams,
   activityStreamsTable,
-} from "db/schemas/activity_streams";
+} from "@trackster/db/schemas/activity_streams";
 import {
   AthletePerformanceProfile,
   athletePerformanceProfilesTable,
-} from "db/schemas/athlete_performance_profiles";
+} from "@trackster/db/schemas/athlete_performance_profiles";
 import { and, desc, eq, gte, lte, sql } from "drizzle-orm";
 import db from "~/services/db.server";
 import { getUserFromSession } from "./user";

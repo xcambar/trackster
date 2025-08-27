@@ -1,5 +1,5 @@
 import { createCookieSessionStorage, Session } from "@remix-run/node";
-import { getEnvironment } from "lib/environment";
+import { getEnvironment } from "@trackster/env";
 import { supabase } from "./supabase.server";
 
 // Create a session storage

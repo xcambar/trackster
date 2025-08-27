@@ -1,0 +1,12 @@
+{
+  "name": "@trackster-deno/fn-reconcile-athlete-data",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@trackster/env": "workspace:*"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

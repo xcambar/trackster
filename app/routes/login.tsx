@@ -7,7 +7,7 @@ import {
   getCompleteUserSession,
   getSession,
 } from "~/services/session.server";
-import { getEnvironment } from "../../lib/environment";
+import { getEnvironment } from "@trackster/env";
 import { FlashMessage } from "../components/FlashMessage";
 import Signin from "../components/Signin";
 

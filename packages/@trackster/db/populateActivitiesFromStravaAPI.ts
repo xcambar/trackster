@@ -3,11 +3,11 @@ import { isPlainObject } from "es-toolkit";
 import { camelCase } from "change-case";
 
 import { activitiesTable } from "./schema";
-import db from "../app/services/db.server";
+import db from "../../../app/services/db.server";
 
 import { getTableColumns, sql } from "drizzle-orm";
 import { PgTable, PgTimestamp } from "drizzle-orm/pg-core";
-import { buildStravaAPIScheduler } from "~/services/strava.server";
+import { buildStravaAPIScheduler } from "../../../app/services/strava.server";
 
 function findDateColumns(table: PgTable) {
   const columns = getTableColumns(table);

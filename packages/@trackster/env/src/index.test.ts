@@ -1,4 +1,4 @@
-import { getEnvironment } from "./environment";
+import { getEnvironment } from "./index";
 
 describe("Loading environment variables securely", () => {
   it("should throw an error if the environment variable is not set", () => {
