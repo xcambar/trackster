@@ -4,7 +4,7 @@
   "sideEffects": false,
   "type": "module",
   "workspaces": [
-    "packages/@xcambar/trackster-*"
+    "packages/@xcambar/*"
   ],
   "scripts": {
     "build": "remix vite:build",
