@@ -1,6 +1,6 @@
 {
   "name": "@xcambar/trackster-db",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "type": "module",
   "description": "Database schemas and utilities for Trackster",
   "main": "./schema.ts",
