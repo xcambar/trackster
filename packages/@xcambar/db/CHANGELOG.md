@@ -1,5 +1,11 @@
 # @trackster/db
 
+## 0.1.2
+
+### Patch Changes
+
+- 5335f22: Initial release, take 2
+
 ## 0.1.1
 
 ### Patch Changes
