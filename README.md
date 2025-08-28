@@ -25,7 +25,7 @@ This monorepo uses [Changesets](https://github.com/changesets/changesets) for au
 
 ### To publish a new version:
 
-1. Make your changes to packages in `packages/@trackster/*`
+1. Make your changes to packages in `packages/@xcambar/trackster-*`
 2. Run `npm run changeset` to create a changeset describing your changes (select affected packages and change type: patch/minor/major)
 3. Commit and push the changeset file to the main branch
 4. GitHub Actions will automatically create a "Version Packages" PR with updated versions and changelogs

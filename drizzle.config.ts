@@ -1,11 +1,11 @@
 import "dotenv/config";
 
+import { getEnvironment } from "@xcambar/trackster-env";
 import { defineConfig } from "drizzle-kit";
-import { getEnvironment } from "@trackster/env";
 
 export default defineConfig({
   out: "./drizzle",
-  schema: "./packages/@trackster/db/schema.ts",
+  schema: "./packages/@xcambar/trackster-db/schema.ts",
   dialect: "postgresql",
   casing: "snake_case",
   dbCredentials: {

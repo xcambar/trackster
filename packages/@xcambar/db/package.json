@@ -1,5 +1,5 @@
 {
-  "name": "@trackster/db",
+  "name": "@xcambar/trackster-db",
   "version": "0.1.1",
   "type": "module",
   "description": "Database schemas and utilities for Trackster",
@@ -33,7 +33,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/xcambar/trackster.git",
-    "directory": "packages/@trackster/db"
+    "directory": "packages/@xcambar/trackster-db"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"

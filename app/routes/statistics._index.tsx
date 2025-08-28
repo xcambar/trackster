@@ -1,7 +1,7 @@
 import { Box, Paper, Typography } from "@mui/material";
 import { ActionFunctionArgs } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
-import { Activity } from "@trackster/db";
+import { Activity } from "@xcambar/trackster-db";
 import { ActivityTypeIcon } from "~/components/ActivityTypeIcon";
 import { getLastActivityForUser } from "~/lib/models/activity";
 import { getUserFromSession } from "~/lib/models/user";

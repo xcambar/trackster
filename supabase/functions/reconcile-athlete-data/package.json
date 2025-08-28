@@ -1,9 +1,9 @@
 {
-  "name": "@trackster-deno/fn-reconcile-athlete-data",
+  "name": "@xcambar/trackster-fn-reconcile-athlete-data",
   "private": true,
   "type": "module",
   "dependencies": {
-    "@trackster/env": "workspace:*"
+    "@xcambar/trackster-env": "workspace:*"
   },
   "devDependencies": {},
   "engines": {

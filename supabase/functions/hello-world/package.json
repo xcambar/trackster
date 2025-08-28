@@ -1,5 +1,5 @@
 {
-  "name": "@trackster-deno/fn-hello-world",
+  "name": "@xcambar/trackster-fn-hello-world",
   "version": "0.0.0",
   "description": "Example Supabase Function",
   "license": "ISC",
@@ -10,6 +10,6 @@
     "test": "deno test"
   },
   "dependencies": {
-    "@trackster/env": "workspace:*"
+    "@xcambar/trackster-env": "workspace:*"
   }
 }

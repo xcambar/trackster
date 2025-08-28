@@ -1,6 +1,6 @@
 // tslint:disable:ordered-imports
 import "dotenv/config";
-import { buildAthleteProfile } from "@trackster/db/buildAthletePerformanceProfiles";
+import { buildAthleteProfile } from "@xcambar/trackster-db/buildAthletePerformanceProfiles";
 
 const athleteId = 147083611;
 await buildAthleteProfile(athleteId)

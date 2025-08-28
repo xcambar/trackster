@@ -1,1 +1,1 @@
-export { default } from "@trackster/db/client";
+export { default } from "@xcambar/trackster-db/client";

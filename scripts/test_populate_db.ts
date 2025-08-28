@@ -1,8 +1,8 @@
 import "dotenv/config";
 
-import { populateActivitiesFromAPI } from "@trackster/db/populateActivitiesFromStravaAPI";
-import { populateActivityStreamsFromAPI } from "@trackster/db/populateActivityStreamsFromStravaAPI";
-import { buildAthleteProfile } from "@trackster/db/buildAthletePerformanceProfiles";
+import { buildAthleteProfile } from "@xcambar/trackster-db/buildAthletePerformanceProfiles";
+import { populateActivitiesFromAPI } from "@xcambar/trackster-db/populateActivitiesFromStravaAPI";
+import { populateActivityStreamsFromAPI } from "@xcambar/trackster-db/populateActivityStreamsFromStravaAPI";
 
 const token = {
   expires_at: 1753720301,
