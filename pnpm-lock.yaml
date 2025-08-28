@@ -41,15 +41,15 @@ importers:
       '@supabase/supabase-js':
         specifier: ^2.52.0
         version: 2.55.0
-      '@trackster/db':
-        specifier: workspace:*
-        version: link:packages/@trackster/db
-      '@trackster/env':
-        specifier: workspace:*
-        version: link:packages/@trackster/env
       '@types/google-polyline':
         specifier: ^1.0.2
         version: 1.0.2
+      '@xcambar/trackster-db':
+        specifier: workspace:*
+        version: link:packages/@xcambar/db
+      '@xcambar/trackster-env':
+        specifier: workspace:*
+        version: link:packages/@xcambar/env
       arctic:
         specifier: ^3.7.0
         version: 3.7.0
@@ -223,7 +223,7 @@ importers:
         specifier: ^3.2.4
         version: 3.2.4(@types/debug@4.1.12)(@types/node@20.19.11)(@vitest/ui@3.2.4)(jiti@2.5.1)(jsdom@26.1.0)(tsx@4.20.4)(yaml@2.8.1)
 
-  packages/@trackster/db:
+  packages/@xcambar/db:
     dependencies:
       dotenv:
         specifier: ^17.2.0
@@ -242,7 +242,7 @@ importers:
         specifier: ^5.1.6
         version: 5.9.2
 
-  packages/@trackster/env:
+  packages/@xcambar/env:
     devDependencies:
       '@types/node':
         specifier: ^20.0.0
@@ -256,15 +256,15 @@ importers:
 
   supabase/functions/hello-world:
     dependencies:
-      '@trackster/env':
+      '@xcambar/trackster-env':
         specifier: workspace:*
-        version: link:../../../packages/@trackster/env
+        version: link:../../../packages/@xcambar/env
 
   supabase/functions/reconcile-athlete-data:
     dependencies:
-      '@trackster/env':
+      '@xcambar/trackster-env':
         specifier: workspace:*
-        version: link:../../../packages/@trackster/env
+        version: link:../../../packages/@xcambar/env
 
 packages:
 

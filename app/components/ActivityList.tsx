@@ -1,7 +1,7 @@
 import { Await, useFetcher } from "@remix-run/react";
+import { Activity } from "@xcambar/trackster-db";
 import { convert } from "convert";
 import { format } from "date-fns";
-import { Activity } from "@trackster/db";
 import React, { Suspense, useEffect, useState } from "react";
 
 import {

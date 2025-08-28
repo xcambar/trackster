@@ -1,4 +1,4 @@
-import { getEnvironment } from "npm:@trackster/env";
+import { getEnvironment } from "npm:@xcambar/trackster-env";
 
 export default (_req: Request) => {
   return new Response(`hello ${getEnvironment("SUPABASE_DB_URL")}`, {

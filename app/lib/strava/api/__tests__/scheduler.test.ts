@@ -10,7 +10,7 @@ vi.mock("cron", () => ({
     start: vi.fn(),
   })),
 }));
-vi.mock("@trackster/env", () => ({
+vi.mock("@xcambar/trackster-env", () => ({
   getEnvironment: vi.fn().mockImplementation((key: string) => {
     const mockValues: Record<string, string> = {
       SUPABASE_URL: "https://mock.supabase.co",

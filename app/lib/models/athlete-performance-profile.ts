@@ -1,8 +1,8 @@
-import { eq } from "drizzle-orm";
 import {
   athletePerformanceProfilesTable,
   type AthletePerformanceProfile,
-} from "@trackster/db/schemas/athlete_performance_profiles";
+} from "@xcambar/trackster-db/schemas/athlete_performance_profiles";
+import { eq } from "drizzle-orm";
 import db from "../../services/db.server";
 
 /**

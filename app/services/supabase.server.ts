@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import { getEnvironment } from "@trackster/env";
+import { getEnvironment } from "@xcambar/trackster-env";
 
 export const supabase = createClient(
   getEnvironment("SUPABASE_URL"),
