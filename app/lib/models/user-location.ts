@@ -1,6 +1,6 @@
 import type { User } from "@supabase/supabase-js";
+import { activitiesTable } from "@xcambar/trackster-db/schemas/activities";
 import { and, eq, isNotNull } from "drizzle-orm";
-import { activitiesTable } from "@trackster/db/schemas/activities";
 import db from "../../services/db.server";
 
 export interface UserLocation {

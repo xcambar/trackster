@@ -1,8 +1,8 @@
-import { and, eq, gte, lte } from "drizzle-orm";
 import {
   athletePerformanceProfilesTable,
   gapLookupTable,
-} from "@trackster/db";
+} from "@xcambar/trackster-db";
+import { and, eq, gte, lte } from "drizzle-orm";
 import db from "../../services/db.server";
 
 export interface RacePredictionInput {

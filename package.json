@@ -4,7 +4,7 @@
   "sideEffects": false,
   "type": "module",
   "workspaces": [
-    "packages/@trackster/*"
+    "packages/@xcambar/trackster-*"
   ],
   "scripts": {
     "build": "remix vite:build",
@@ -35,8 +35,8 @@
     "@remix-run/react": "^2.16.8",
     "@remix-run/serve": "^2.16.8",
     "@supabase/supabase-js": "^2.52.0",
-    "@trackster/db": "workspace:*",
-    "@trackster/env": "workspace:*",
+    "@xcambar/trackster-db": "workspace:*",
+    "@xcambar/trackster-env": "workspace:*",
     "@types/google-polyline": "^1.0.2",
     "arctic": "^3.7.0",
     "change-case": "^5.4.4",

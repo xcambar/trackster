@@ -1,13 +1,13 @@
 import { AlertColor, Box, Container } from "@mui/material";
 import type { ActionFunctionArgs, MetaFunction } from "@remix-run/node";
 import { data, redirect, useLoaderData } from "@remix-run/react";
+import { getEnvironment } from "@xcambar/trackster-env";
 import { AppBar } from "~/components/AppBar";
 import {
   commitSession,
   getCompleteUserSession,
   getSession,
 } from "~/services/session.server";
-import { getEnvironment } from "@trackster/env";
 import { FlashMessage } from "../components/FlashMessage";
 import Signin from "../components/Signin";
 

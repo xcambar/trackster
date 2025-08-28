@@ -1,4 +1,4 @@
-import { Activity } from "@trackster/db";
+import { Activity } from "@xcambar/trackster-db";
 
 export type ActivityMap = {
   color: string;

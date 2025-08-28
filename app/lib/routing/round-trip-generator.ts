@@ -1,5 +1,5 @@
-import { getEnvironment } from "@trackster/env";
-import { AthletePerformanceProfile } from "@trackster/db/schemas/athlete_performance_profiles";
+import { AthletePerformanceProfile } from "@xcambar/trackster-db/schemas/athlete_performance_profiles";
+import { getEnvironment } from "@xcambar/trackster-env";
 
 export interface RoundTripRequest {
   /** Starting point latitude */

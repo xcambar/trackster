@@ -1,4 +1,4 @@
-import { getEnvironment } from "@trackster/env";
+import { getEnvironment } from "@xcambar/trackster-env";
 import { drizzle } from "drizzle-orm/node-postgres";
 
 export default drizzle({

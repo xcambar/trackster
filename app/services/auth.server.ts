@@ -2,7 +2,7 @@ import { OAuth2Tokens } from "arctic";
 import { Authenticator } from "remix-auth";
 import { StravaProfile, StravaStrategy } from "~/lib/strava/oauth/strategy";
 
-import { getEnvironment } from "@trackster/env";
+import { getEnvironment } from "@xcambar/trackster-env";
 
 export type StravaTokens = OAuth2Tokens & { data: { athlete: StravaProfile } };
 
