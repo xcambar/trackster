@@ -95,6 +95,35 @@ export const ElevationGraph: React.FC<ElevationGraphProps> = ({
       return R * c;
     };
 
+    // Distance-based grade calculation for chart alignment
+    const calculateGradeAtDistance = (
+      targetDistanceKm: number,
+      points: typeof gpxAnalysis.points,
+      distanceFunc: typeof calculateDistance
+    ): number => {
+      const targetDistanceM = targetDistanceKm * 1000;
+      
+      // Find the GPS point closest to our target distance
+      let cumulativeDistance = 0;
+      let targetIndex = 0;
+      
+      for (let i = 1; i < points.length; i++) {
+        const p1 = points[i - 1];
+        const p2 = points[i];
+        if (p1 && p2) {
+          const segmentDistance = distanceFunc(p1.lat, p1.lng, p2.lat, p2.lng);
+          cumulativeDistance += segmentDistance;
+          
+          if (cumulativeDistance >= targetDistanceM) {
+            targetIndex = i;
+            break;
+          }
+        }
+      }
+      
+      return calculateMultiPassGrade(targetIndex, points, distanceFunc);
+    };
+
     // Multi-pass grade smoothing algorithm to eliminate terrain discontinuities
     const calculateMultiPassGrade = (
       currentIndex: number,
@@ -230,8 +259,8 @@ export const ElevationGraph: React.FC<ElevationGraphProps> = ({
         const lastDataPoint = data[data.length - 1];
 
         if (!lastDataPoint || distanceKm - lastDataPoint.distance >= 0.1) {
-          // Calculate grade using multi-pass smoothing algorithm
-          const grade = calculateMultiPassGrade(i, gpxAnalysis.points, calculateDistance);
+          // Calculate grade at the exact chart distance for proper alignment
+          const grade = calculateGradeAtDistance(distanceKm, gpxAnalysis.points, calculateDistance);
           
           // Calculate current effort rate based on grade and accumulated fatigue
           const effortRate = calculateEffortRate(grade, distanceKm, totalEffort);
@@ -244,7 +273,7 @@ export const ElevationGraph: React.FC<ElevationGraphProps> = ({
           // Debug output every 10 points to avoid spam
           if (i % 50 === 0) {
             console.log(
-              `Point ${i}: distance=${distanceKm.toFixed(2)}km, elevation=${currentPoint.elevation}m, grade=${grade.toFixed(1)}%, effort=${totalEffort.toFixed(1)}, rate=${effortRate.toFixed(2)}`
+              `Chart point at ${distanceKm.toFixed(2)}km: elevation=${currentPoint.elevation}m, grade=${grade.toFixed(1)}% (GPS index for grade calculation), effort=${totalEffort.toFixed(1)}, rate=${effortRate.toFixed(2)}`
             );
           }
 
@@ -344,8 +373,9 @@ export const ElevationGraph: React.FC<ElevationGraphProps> = ({
       else if (grade <= DARK_BLUE_THRESHOLD) gradeType = 'darkBlue';
       
       // Debug specific high grade points around problem areas
-      if (Math.abs(point.distance - 7.4) < 0.3 || Math.abs(point.distance - 5.25) < 0.15) {
+      if (Math.abs(point.distance - 7.4) < 0.3 || Math.abs(point.distance - 5.25) < 0.15 || Math.abs(point.distance - 5.6) < 0.1) {
         console.log(`🔍 Point ${i} at ${point.distance}km: grade=${grade.toFixed(1)}% -> type=${gradeType || 'none'}, currentRange=${currentRange.type}`);
+        console.log(`    Chart data: distance=${point.distance}km, elevation=${point.elevation}m`);
       }
 
       if (gradeType !== currentRange.type) {
@@ -365,10 +395,13 @@ export const ElevationGraph: React.FC<ElevationGraphProps> = ({
             console.log(`❌ Skipping tiny ${currentRange.type} range: ${currentRange.start.toFixed(2)}km - ${point.distance.toFixed(2)}km (length: ${rangeLength.toFixed(3)}km < ${MIN_RANGE_LENGTH}km)`);
           }
         }
-        // Start new range
-        currentRange = { type: gradeType, start: point.distance };
+        
+        // Start new range - but back-date it to the previous interval
+        // The grade at this point actually applies to the PREVIOUS interval
+        const prevDistance = i > 0 && elevationData[i - 1] ? elevationData[i - 1].distance : point.distance;
+        currentRange = { type: gradeType, start: prevDistance };
         if (gradeType) {
-          console.log(`🟡 Starting ${gradeType} range at ${point.distance.toFixed(2)}km`);
+          console.log(`🟡 Starting ${gradeType} range at ${prevDistance.toFixed(2)}km (grade calculated at ${point.distance.toFixed(2)}km)`);
         }
       }
     }
