@@ -278,46 +278,74 @@ export const ElevationGraph: React.FC<ElevationGraphProps> = ({
   // Create grade ranges using multi-pass calculated grades
   const gradeRanges = React.useMemo(() => {
     const ranges = {
+      // Uphill colors (warm tones)
       yellow: [] as Array<{ start: number; end: number }>,
       orange: [] as Array<{ start: number; end: number }>,
       red: [] as Array<{ start: number; end: number }>,
+      // Downhill colors (cool tones)
+      lightBlue: [] as Array<{ start: number; end: number }>,
+      mediumBlue: [] as Array<{ start: number; end: number }>,
+      darkBlue: [] as Array<{ start: number; end: number }>,
     };
 
-    // Use more sensitive grade thresholds to capture climbing sections
-    const YELLOW_THRESHOLD = 3; // 3-6% moderate climb
-    const ORANGE_THRESHOLD = 6; // 6-10% steep climb  
-    const RED_THRESHOLD = 10;   // 10%+ very steep climb
-    const MIN_RANGE_LENGTH = 0.05; // Minimum 50m range to be visible
-
-    console.log(`Grade thresholds: Yellow>${YELLOW_THRESHOLD}%, Orange>${ORANGE_THRESHOLD}%, Red>${RED_THRESHOLD}%`);
+    // Running-appropriate grade thresholds based on physiological impact
+    const FLAT_THRESHOLD = 2;    // 0-2% flat/easy terrain - no coloring
+    const YELLOW_THRESHOLD = 5;  // 2-5% moderate climb - noticeable effort increase
+    const ORANGE_THRESHOLD = 8;  // 5-8% steep climb - significant pace reduction
+    const RED_THRESHOLD = 8;     // 8%+ very steep climb - walking/power hiking required
     
-    // Debug: Check actual grade distribution
-    const grades = elevationData.map(p => Math.abs(p.grade)).filter(g => g > 0);
-    const maxGrade = Math.max(...grades);
-    const avgGrade = grades.reduce((sum, g) => sum + g, 0) / grades.length;
-    const gradeCount = {
-      yellow: grades.filter(g => g >= YELLOW_THRESHOLD && g < ORANGE_THRESHOLD).length,
-      orange: grades.filter(g => g >= ORANGE_THRESHOLD && g < RED_THRESHOLD).length,
-      red: grades.filter(g => g >= RED_THRESHOLD).length,
-    };
-    console.log(`Grade stats: max=${maxGrade.toFixed(1)}%, avg=${avgGrade.toFixed(1)}%, counts:`, gradeCount);
+    // Downhill thresholds (negative grades)
+    const LIGHT_BLUE_THRESHOLD = -2;   // 0 to -2% gentle downhill
+    const MEDIUM_BLUE_THRESHOLD = -5;  // -2 to -5% moderate downhill - quad impact
+    const DARK_BLUE_THRESHOLD = -8;    // -5 to -8% steep downhill - significant braking
+    // -8%+ very steep downhill - requires careful control
+    const MIN_RANGE_LENGTH = 0.095; // Minimum ~95m range to be visible (avoids floating point issues)
 
-    let currentRange: { type: 'yellow' | 'orange' | 'red' | null; start: number } = { type: null, start: 0 };
+    console.log(`Uphill thresholds: Flat±${FLAT_THRESHOLD}%, Yellow=${FLAT_THRESHOLD}-${YELLOW_THRESHOLD}%, Orange=${YELLOW_THRESHOLD}-${ORANGE_THRESHOLD}%, Red>${RED_THRESHOLD}%`);
+    console.log(`Downhill thresholds: LightBlue=${LIGHT_BLUE_THRESHOLD} to 0%, MediumBlue=${MEDIUM_BLUE_THRESHOLD} to ${LIGHT_BLUE_THRESHOLD}%, DarkBlue<${DARK_BLUE_THRESHOLD}%`);
+    
+    // Debug: Check actual grade distribution including negatives
+    const allGrades = elevationData.map(p => p.grade);
+    const maxGrade = Math.max(...allGrades);
+    const minGrade = Math.min(...allGrades);
+    const avgGrade = allGrades.reduce((sum, g) => sum + g, 0) / allGrades.length;
+    const gradeCount = {
+      flat: allGrades.filter(g => Math.abs(g) < FLAT_THRESHOLD).length,
+      yellow: allGrades.filter(g => g >= FLAT_THRESHOLD && g < YELLOW_THRESHOLD).length,
+      orange: allGrades.filter(g => g >= YELLOW_THRESHOLD && g < ORANGE_THRESHOLD).length,
+      red: allGrades.filter(g => g >= RED_THRESHOLD).length,
+      lightBlue: allGrades.filter(g => g <= LIGHT_BLUE_THRESHOLD && g > MEDIUM_BLUE_THRESHOLD).length,
+      mediumBlue: allGrades.filter(g => g <= MEDIUM_BLUE_THRESHOLD && g > DARK_BLUE_THRESHOLD).length,
+      darkBlue: allGrades.filter(g => g <= DARK_BLUE_THRESHOLD).length,
+    };
+    console.log(`Grade stats: max=${maxGrade.toFixed(1)}%, min=${minGrade.toFixed(1)}%, avg=${avgGrade.toFixed(1)}%, counts:`, gradeCount);
+
+    let currentRange: { type: 'yellow' | 'orange' | 'red' | 'lightBlue' | 'mediumBlue' | 'darkBlue' | null; start: number } = { type: null, start: 0 };
 
     for (let i = 0; i < elevationData.length; i++) {
       const point = elevationData[i];
       if (!point) continue;
       
-      const absGrade = Math.abs(point.grade);
+      const grade = point.grade; // Use signed grade (not absolute)
       
-      let gradeType: 'yellow' | 'orange' | 'red' | null = null;
-      if (absGrade >= YELLOW_THRESHOLD && absGrade < ORANGE_THRESHOLD) gradeType = 'yellow';
-      else if (absGrade >= ORANGE_THRESHOLD && absGrade < RED_THRESHOLD) gradeType = 'orange';
-      else if (absGrade >= RED_THRESHOLD) gradeType = 'red';
+      let gradeType: 'yellow' | 'orange' | 'red' | 'lightBlue' | 'mediumBlue' | 'darkBlue' | null = null;
       
-      // Debug specific high grade points around 7.4km
-      if (Math.abs(point.distance - 7.4) < 0.3) {
-        console.log(`🔍 Point ${i} at ${point.distance}km: grade=${absGrade.toFixed(1)}% -> type=${gradeType || 'none'}, currentRange=${currentRange.type}`);
+      // Flat terrain (no coloring)
+      if (Math.abs(grade) < FLAT_THRESHOLD) {
+        gradeType = null;
+      }
+      // Uphill grades (positive)
+      else if (grade >= FLAT_THRESHOLD && grade < YELLOW_THRESHOLD) gradeType = 'yellow';
+      else if (grade >= YELLOW_THRESHOLD && grade < ORANGE_THRESHOLD) gradeType = 'orange';
+      else if (grade >= RED_THRESHOLD) gradeType = 'red';
+      // Downhill grades (negative)
+      else if (grade <= LIGHT_BLUE_THRESHOLD && grade > MEDIUM_BLUE_THRESHOLD) gradeType = 'lightBlue';
+      else if (grade <= MEDIUM_BLUE_THRESHOLD && grade > DARK_BLUE_THRESHOLD) gradeType = 'mediumBlue';
+      else if (grade <= DARK_BLUE_THRESHOLD) gradeType = 'darkBlue';
+      
+      // Debug specific high grade points around problem areas
+      if (Math.abs(point.distance - 7.4) < 0.3 || Math.abs(point.distance - 5.25) < 0.15) {
+        console.log(`🔍 Point ${i} at ${point.distance}km: grade=${grade.toFixed(1)}% -> type=${gradeType || 'none'}, currentRange=${currentRange.type}`);
       }
 
       if (gradeType !== currentRange.type) {
@@ -368,7 +396,11 @@ export const ElevationGraph: React.FC<ElevationGraphProps> = ({
     const totalYellow = ranges.yellow.reduce((sum, r) => sum + (r.end - r.start), 0);
     const totalOrange = ranges.orange.reduce((sum, r) => sum + (r.end - r.start), 0);
     const totalRed = ranges.red.reduce((sum, r) => sum + (r.end - r.start), 0);
-    console.log(`Range lengths: Yellow=${totalYellow.toFixed(2)}km, Orange=${totalOrange.toFixed(2)}km, Red=${totalRed.toFixed(2)}km`);
+    const totalLightBlue = ranges.lightBlue.reduce((sum, r) => sum + (r.end - r.start), 0);
+    const totalMediumBlue = ranges.mediumBlue.reduce((sum, r) => sum + (r.end - r.start), 0);
+    const totalDarkBlue = ranges.darkBlue.reduce((sum, r) => sum + (r.end - r.start), 0);
+    console.log(`Uphill lengths: Yellow=${totalYellow.toFixed(2)}km, Orange=${totalOrange.toFixed(2)}km, Red=${totalRed.toFixed(2)}km`);
+    console.log(`Downhill lengths: LightBlue=${totalLightBlue.toFixed(2)}km, MediumBlue=${totalMediumBlue.toFixed(2)}km, DarkBlue=${totalDarkBlue.toFixed(2)}km`);
     
     return ranges;
   }, [elevationData]);
@@ -472,6 +504,7 @@ export const ElevationGraph: React.FC<ElevationGraphProps> = ({
           <Tooltip content={<CustomTooltip />} />
 
           {/* Grade range backgrounds */}
+          {/* Uphill colors (warm tones) */}
           {gradeRanges.yellow.map((range, index) => {
             console.log(`🟨 Rendering YELLOW ReferenceArea ${index}: ${range.start}km to ${range.end}km`);
             return (
@@ -479,8 +512,8 @@ export const ElevationGraph: React.FC<ElevationGraphProps> = ({
                 key={`yellow-${index}`}
                 x1={range.start}
                 x2={range.end}
-                fill="#FFFF00"
-                fillOpacity={0.3}
+                fill="#FFD700"
+                fillOpacity={0.35}
               />
             );
           })}
@@ -491,8 +524,8 @@ export const ElevationGraph: React.FC<ElevationGraphProps> = ({
                 key={`orange-${index}`}
                 x1={range.start}
                 x2={range.end}
-                fill="#FFA500"
-                fillOpacity={0.4}
+                fill="#FF8C00"
+                fillOpacity={0.45}
               />
             );
           })}
@@ -503,8 +536,46 @@ export const ElevationGraph: React.FC<ElevationGraphProps> = ({
                 key={`red-${index}`}
                 x1={range.start}
                 x2={range.end}
-                fill="#FF0000"
-                fillOpacity={0.5}
+                fill="#DC143C"
+                fillOpacity={0.55}
+              />
+            );
+          })}
+
+          {/* Downhill colors (cool tones) */}
+          {gradeRanges.lightBlue.map((range, index) => {
+            console.log(`🟦 Rendering LIGHT BLUE ReferenceArea ${index}: ${range.start}km to ${range.end}km`);
+            return (
+              <ReferenceArea
+                key={`lightBlue-${index}`}
+                x1={range.start}
+                x2={range.end}
+                fill="#87CEEB"
+                fillOpacity={0.35}
+              />
+            );
+          })}
+          {gradeRanges.mediumBlue.map((range, index) => {
+            console.log(`🔵 Rendering MEDIUM BLUE ReferenceArea ${index}: ${range.start}km to ${range.end}km`);
+            return (
+              <ReferenceArea
+                key={`mediumBlue-${index}`}
+                x1={range.start}
+                x2={range.end}
+                fill="#4682B4"
+                fillOpacity={0.45}
+              />
+            );
+          })}
+          {gradeRanges.darkBlue.map((range, index) => {
+            console.log(`🔷 Rendering DARK BLUE ReferenceArea ${index}: ${range.start}km to ${range.end}km`);
+            return (
+              <ReferenceArea
+                key={`darkBlue-${index}`}
+                x1={range.start}
+                x2={range.end}
+                fill="#191970"
+                fillOpacity={0.55}
               />
             );
           })}
