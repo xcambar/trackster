@@ -4,11 +4,11 @@ import {
   Area,
   AreaChart,
   CartesianGrid,
+  ReferenceArea,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
-  ReferenceArea,
 } from "recharts";
 import type { GPXAnalysis } from "~/lib/gpx/parser";
 
@@ -102,25 +102,25 @@ export const ElevationGraph: React.FC<ElevationGraphProps> = ({
       distanceFunc: typeof calculateDistance
     ): number => {
       const targetDistanceM = targetDistanceKm * 1000;
-      
+
       // Find the GPS point closest to our target distance
       let cumulativeDistance = 0;
       let targetIndex = 0;
-      
+
       for (let i = 1; i < points.length; i++) {
         const p1 = points[i - 1];
         const p2 = points[i];
         if (p1 && p2) {
           const segmentDistance = distanceFunc(p1.lat, p1.lng, p2.lat, p2.lng);
           cumulativeDistance += segmentDistance;
-          
+
           if (cumulativeDistance >= targetDistanceM) {
             targetIndex = i;
             break;
           }
         }
       }
-      
+
       return calculateMultiPassGrade(targetIndex, points, distanceFunc);
     };
 
@@ -130,7 +130,11 @@ export const ElevationGraph: React.FC<ElevationGraphProps> = ({
       points: typeof gpxAnalysis.points,
       distanceFunc: typeof calculateDistance
     ): number => {
-      if (currentIndex < 1 || !points[currentIndex] || points[currentIndex]?.elevation === undefined) {
+      if (
+        currentIndex < 1 ||
+        !points[currentIndex] ||
+        points[currentIndex]?.elevation === undefined
+      ) {
         return 0;
       }
 
@@ -138,7 +142,7 @@ export const ElevationGraph: React.FC<ElevationGraphProps> = ({
       const windowSizes = [50, 100, 200, 500, 1000]; // meters
       const weights = [0.2, 0.3, 0.3, 0.15, 0.05]; // More balanced smoothing (less local emphasis)
       const MIN_ELEVATION_CHANGE = 1.5; // Ignore elevation changes < 1.5m (GPS noise)
-      
+
       const currentPoint = points[currentIndex];
       let weightedGradeSum = 0;
       let totalWeight = 0;
@@ -147,7 +151,7 @@ export const ElevationGraph: React.FC<ElevationGraphProps> = ({
       for (let pass = 0; pass < windowSizes.length; pass++) {
         const windowSize = windowSizes[pass];
         const weight = weights[pass];
-        
+
         let totalDistance = 0;
         let startIndex = currentIndex;
 
@@ -155,12 +159,12 @@ export const ElevationGraph: React.FC<ElevationGraphProps> = ({
         for (let i = currentIndex - 1; i >= 0; i--) {
           const p1 = points[i];
           const p2 = points[i + 1];
-          
+
           if (!p1 || !p2) continue;
-          
+
           const segmentDistance = distanceFunc(p1.lat, p1.lng, p2.lat, p2.lng);
           totalDistance += segmentDistance;
-          
+
           if (totalDistance >= windowSize) {
             startIndex = i;
             break;
@@ -168,14 +172,21 @@ export const ElevationGraph: React.FC<ElevationGraphProps> = ({
         }
 
         const startPoint = points[startIndex];
-        if (!startPoint || startPoint.elevation === undefined || currentPoint?.elevation === undefined) {
+        if (
+          !startPoint ||
+          startPoint.elevation === undefined ||
+          currentPoint?.elevation === undefined
+        ) {
           continue;
         }
 
         const elevationDiff = currentPoint.elevation - startPoint.elevation;
-        
+
         // Skip this pass if elevation change is too small for this window size
-        const elevationThreshold = Math.max(MIN_ELEVATION_CHANGE, windowSize / 500); // Adaptive threshold
+        const elevationThreshold = Math.max(
+          MIN_ELEVATION_CHANGE,
+          windowSize / 500
+        ); // Adaptive threshold
         if (Math.abs(elevationDiff) < elevationThreshold) {
           continue;
         }
@@ -190,12 +201,14 @@ export const ElevationGraph: React.FC<ElevationGraphProps> = ({
 
       // Return weighted average of all valid passes
       const finalGrade = totalWeight > 0 ? weightedGradeSum / totalWeight : 0;
-      
+
       // Debug output for key points to show multi-pass working
       if (currentIndex % 100 === 0 && totalWeight > 0) {
-        console.log(`Multi-pass grade at index ${currentIndex}: ${finalGrade.toFixed(2)}% (from ${Math.round(totalWeight * 100)}% of passes)`);
+        console.log(
+          `Multi-pass grade at index ${currentIndex}: ${finalGrade.toFixed(2)}% (from ${Math.round(totalWeight * 100)}% of passes)`
+        );
       }
-      
+
       return finalGrade;
     };
 
@@ -208,19 +221,19 @@ export const ElevationGraph: React.FC<ElevationGraphProps> = ({
       // Base effort from grade (using power law similar to running physiology)
       const absGrade = Math.abs(grade);
       const baseEffort = 1 + Math.pow(absGrade / 100, 1.5) * 8; // 1 = flat, exponential increase with grade
-      
+
       // Fatigue multiplier based on accumulated effort
       const fatigueMultiplier = 1 + (accumulatedEffort / 100) * 0.2; // 20% harder per 100 effort units
-      
+
       // Distance fatigue (later in route = harder)
       const distanceFatigue = 1 + (distance / 10) * 0.1; // 10% harder per 10km
-      
+
       return baseEffort * fatigueMultiplier * distanceFatigue;
     };
 
     // Initialize accumulated effort tracking
     let totalEffort = 0;
-    
+
     // Add first point
     const firstPoint = gpxAnalysis.points[0];
     if (firstPoint && firstPoint.elevation !== undefined) {
@@ -260,13 +273,23 @@ export const ElevationGraph: React.FC<ElevationGraphProps> = ({
 
         if (!lastDataPoint || distanceKm - lastDataPoint.distance >= 0.1) {
           // Calculate grade at the exact chart distance for proper alignment
-          const grade = calculateGradeAtDistance(distanceKm, gpxAnalysis.points, calculateDistance);
-          
+          const grade = calculateGradeAtDistance(
+            distanceKm,
+            gpxAnalysis.points,
+            calculateDistance
+          );
+
           // Calculate current effort rate based on grade and accumulated fatigue
-          const effortRate = calculateEffortRate(grade, distanceKm, totalEffort);
-          
+          const effortRate = calculateEffortRate(
+            grade,
+            distanceKm,
+            totalEffort
+          );
+
           // Accumulate effort over the segment distance
-          const segmentDistance = lastDataPoint ? distanceKm - lastDataPoint.distance : 0;
+          const segmentDistance = lastDataPoint
+            ? distanceKm - lastDataPoint.distance
+            : 0;
           const segmentEffort = effortRate * segmentDistance; // Effort = rate × distance
           totalEffort += segmentEffort;
 
@@ -308,74 +331,150 @@ export const ElevationGraph: React.FC<ElevationGraphProps> = ({
   const gradeRanges = React.useMemo(() => {
     const ranges = {
       // Uphill colors (warm tones)
-      yellow: [] as Array<{ start: number; end: number }>,
-      orange: [] as Array<{ start: number; end: number }>,
-      red: [] as Array<{ start: number; end: number }>,
+      yellow: [] as Array<{
+        start: number;
+        end: number;
+        startElevation: number;
+        endElevation: number;
+      }>,
+      orange: [] as Array<{
+        start: number;
+        end: number;
+        startElevation: number;
+        endElevation: number;
+      }>,
+      red: [] as Array<{
+        start: number;
+        end: number;
+        startElevation: number;
+        endElevation: number;
+      }>,
       // Downhill colors (cool tones)
-      lightBlue: [] as Array<{ start: number; end: number }>,
-      mediumBlue: [] as Array<{ start: number; end: number }>,
-      darkBlue: [] as Array<{ start: number; end: number }>,
+      lightBlue: [] as Array<{
+        start: number;
+        end: number;
+        startElevation: number;
+        endElevation: number;
+      }>,
+      mediumBlue: [] as Array<{
+        start: number;
+        end: number;
+        startElevation: number;
+        endElevation: number;
+      }>,
+      darkBlue: [] as Array<{
+        start: number;
+        end: number;
+        startElevation: number;
+        endElevation: number;
+      }>,
     };
 
     // Running-appropriate grade thresholds based on physiological impact
-    const FLAT_THRESHOLD = 2;    // 0-2% flat/easy terrain - no coloring
-    const YELLOW_THRESHOLD = 5;  // 2-5% moderate climb - noticeable effort increase
-    const ORANGE_THRESHOLD = 8;  // 5-8% steep climb - significant pace reduction
-    const RED_THRESHOLD = 8;     // 8%+ very steep climb - walking/power hiking required
-    
+    const FLAT_THRESHOLD = 2; // 0-2% flat/easy terrain - no coloring
+    const YELLOW_THRESHOLD = 5; // 2-5% moderate climb - noticeable effort increase
+    const ORANGE_THRESHOLD = 8; // 5-8% steep climb - significant pace reduction
+    const RED_THRESHOLD = 8; // 8%+ very steep climb - walking/power hiking required
+
     // Downhill thresholds (negative grades)
-    const LIGHT_BLUE_THRESHOLD = -2;   // 0 to -2% gentle downhill
-    const MEDIUM_BLUE_THRESHOLD = -5;  // -2 to -5% moderate downhill - quad impact
-    const DARK_BLUE_THRESHOLD = -8;    // -5 to -8% steep downhill - significant braking
+    const LIGHT_BLUE_THRESHOLD = -2; // 0 to -2% gentle downhill
+    const MEDIUM_BLUE_THRESHOLD = -5; // -2 to -5% moderate downhill - quad impact
+    const DARK_BLUE_THRESHOLD = -8; // -5 to -8% steep downhill - significant braking
     // -8%+ very steep downhill - requires careful control
     const MIN_RANGE_LENGTH = 0.095; // Minimum ~95m range to be visible (avoids floating point issues)
 
-    console.log(`Uphill thresholds: Flat±${FLAT_THRESHOLD}%, Yellow=${FLAT_THRESHOLD}-${YELLOW_THRESHOLD}%, Orange=${YELLOW_THRESHOLD}-${ORANGE_THRESHOLD}%, Red>${RED_THRESHOLD}%`);
-    console.log(`Downhill thresholds: LightBlue=${LIGHT_BLUE_THRESHOLD} to 0%, MediumBlue=${MEDIUM_BLUE_THRESHOLD} to ${LIGHT_BLUE_THRESHOLD}%, DarkBlue<${DARK_BLUE_THRESHOLD}%`);
-    
+    console.log(
+      `Uphill thresholds: Flat±${FLAT_THRESHOLD}%, Yellow=${FLAT_THRESHOLD}-${YELLOW_THRESHOLD}%, Orange=${YELLOW_THRESHOLD}-${ORANGE_THRESHOLD}%, Red>${RED_THRESHOLD}%`
+    );
+    console.log(
+      `Downhill thresholds: LightBlue=${LIGHT_BLUE_THRESHOLD} to 0%, MediumBlue=${MEDIUM_BLUE_THRESHOLD} to ${LIGHT_BLUE_THRESHOLD}%, DarkBlue<${DARK_BLUE_THRESHOLD}%`
+    );
+
     // Debug: Check actual grade distribution including negatives
-    const allGrades = elevationData.map(p => p.grade);
+    const allGrades = elevationData.map((p) => p.grade);
     const maxGrade = Math.max(...allGrades);
     const minGrade = Math.min(...allGrades);
-    const avgGrade = allGrades.reduce((sum, g) => sum + g, 0) / allGrades.length;
+    const avgGrade =
+      allGrades.reduce((sum, g) => sum + g, 0) / allGrades.length;
     const gradeCount = {
-      flat: allGrades.filter(g => Math.abs(g) < FLAT_THRESHOLD).length,
-      yellow: allGrades.filter(g => g >= FLAT_THRESHOLD && g < YELLOW_THRESHOLD).length,
-      orange: allGrades.filter(g => g >= YELLOW_THRESHOLD && g < ORANGE_THRESHOLD).length,
-      red: allGrades.filter(g => g >= RED_THRESHOLD).length,
-      lightBlue: allGrades.filter(g => g <= LIGHT_BLUE_THRESHOLD && g > MEDIUM_BLUE_THRESHOLD).length,
-      mediumBlue: allGrades.filter(g => g <= MEDIUM_BLUE_THRESHOLD && g > DARK_BLUE_THRESHOLD).length,
-      darkBlue: allGrades.filter(g => g <= DARK_BLUE_THRESHOLD).length,
+      flat: allGrades.filter((g) => Math.abs(g) < FLAT_THRESHOLD).length,
+      yellow: allGrades.filter(
+        (g) => g >= FLAT_THRESHOLD && g < YELLOW_THRESHOLD
+      ).length,
+      orange: allGrades.filter(
+        (g) => g >= YELLOW_THRESHOLD && g < ORANGE_THRESHOLD
+      ).length,
+      red: allGrades.filter((g) => g >= RED_THRESHOLD).length,
+      lightBlue: allGrades.filter(
+        (g) => g <= LIGHT_BLUE_THRESHOLD && g > MEDIUM_BLUE_THRESHOLD
+      ).length,
+      mediumBlue: allGrades.filter(
+        (g) => g <= MEDIUM_BLUE_THRESHOLD && g > DARK_BLUE_THRESHOLD
+      ).length,
+      darkBlue: allGrades.filter((g) => g <= DARK_BLUE_THRESHOLD).length,
     };
-    console.log(`Grade stats: max=${maxGrade.toFixed(1)}%, min=${minGrade.toFixed(1)}%, avg=${avgGrade.toFixed(1)}%, counts:`, gradeCount);
+    console.log(
+      `Grade stats: max=${maxGrade.toFixed(1)}%, min=${minGrade.toFixed(1)}%, avg=${avgGrade.toFixed(1)}%, counts:`,
+      gradeCount
+    );
 
-    let currentRange: { type: 'yellow' | 'orange' | 'red' | 'lightBlue' | 'mediumBlue' | 'darkBlue' | null; start: number } = { type: null, start: 0 };
+    let currentRange: {
+      type:
+        | "yellow"
+        | "orange"
+        | "red"
+        | "lightBlue"
+        | "mediumBlue"
+        | "darkBlue"
+        | null;
+      start: number;
+      startElevation: number;
+    } = { type: null, start: 0, startElevation: 0 };
 
     for (let i = 0; i < elevationData.length; i++) {
       const point = elevationData[i];
       if (!point) continue;
-      
+
       const grade = point.grade; // Use signed grade (not absolute)
-      
-      let gradeType: 'yellow' | 'orange' | 'red' | 'lightBlue' | 'mediumBlue' | 'darkBlue' | null = null;
-      
+
+      let gradeType:
+        | "yellow"
+        | "orange"
+        | "red"
+        | "lightBlue"
+        | "mediumBlue"
+        | "darkBlue"
+        | null = null;
+
       // Flat terrain (no coloring)
       if (Math.abs(grade) < FLAT_THRESHOLD) {
         gradeType = null;
       }
       // Uphill grades (positive)
-      else if (grade >= FLAT_THRESHOLD && grade < YELLOW_THRESHOLD) gradeType = 'yellow';
-      else if (grade >= YELLOW_THRESHOLD && grade < ORANGE_THRESHOLD) gradeType = 'orange';
-      else if (grade >= RED_THRESHOLD) gradeType = 'red';
+      else if (grade >= FLAT_THRESHOLD && grade < YELLOW_THRESHOLD)
+        gradeType = "yellow";
+      else if (grade >= YELLOW_THRESHOLD && grade < ORANGE_THRESHOLD)
+        gradeType = "orange";
+      else if (grade >= RED_THRESHOLD) gradeType = "red";
       // Downhill grades (negative)
-      else if (grade <= LIGHT_BLUE_THRESHOLD && grade > MEDIUM_BLUE_THRESHOLD) gradeType = 'lightBlue';
-      else if (grade <= MEDIUM_BLUE_THRESHOLD && grade > DARK_BLUE_THRESHOLD) gradeType = 'mediumBlue';
-      else if (grade <= DARK_BLUE_THRESHOLD) gradeType = 'darkBlue';
-      
+      else if (grade <= LIGHT_BLUE_THRESHOLD && grade > MEDIUM_BLUE_THRESHOLD)
+        gradeType = "lightBlue";
+      else if (grade <= MEDIUM_BLUE_THRESHOLD && grade > DARK_BLUE_THRESHOLD)
+        gradeType = "mediumBlue";
+      else if (grade <= DARK_BLUE_THRESHOLD) gradeType = "darkBlue";
+
       // Debug specific high grade points around problem areas
-      if (Math.abs(point.distance - 7.4) < 0.3 || Math.abs(point.distance - 5.25) < 0.15 || Math.abs(point.distance - 5.6) < 0.1) {
-        console.log(`🔍 Point ${i} at ${point.distance}km: grade=${grade.toFixed(1)}% -> type=${gradeType || 'none'}, currentRange=${currentRange.type}`);
-        console.log(`    Chart data: distance=${point.distance}km, elevation=${point.elevation}m`);
+      if (
+        Math.abs(point.distance - 7.4) < 0.3 ||
+        Math.abs(point.distance - 5.25) < 0.15 ||
+        Math.abs(point.distance - 5.6) < 0.1
+      ) {
+        console.log(
+          `🔍 Point ${i} at ${point.distance}km: grade=${grade.toFixed(1)}% -> type=${gradeType || "none"}, currentRange=${currentRange.type}`
+        );
+        console.log(
+          `    Chart data: distance=${point.distance}km, elevation=${point.elevation}m`
+        );
       }
 
       if (gradeType !== currentRange.type) {
@@ -383,25 +482,41 @@ export const ElevationGraph: React.FC<ElevationGraphProps> = ({
         if (currentRange.type) {
           // Use current point's distance as the end of the previous range
           const rangeLength = point.distance - currentRange.start;
-          
+
           // Only add ranges that are long enough to be visible
           if (rangeLength >= MIN_RANGE_LENGTH) {
             ranges[currentRange.type].push({
               start: currentRange.start,
               end: point.distance,
+              startElevation: currentRange.startElevation,
+              endElevation: point.elevation,
             });
-            console.log(`📏 Adding ${currentRange.type} range: ${currentRange.start.toFixed(2)}km - ${point.distance.toFixed(2)}km (length: ${rangeLength.toFixed(3)}km)`);
+            console.log(
+              `📏 Adding ${currentRange.type} range: ${currentRange.start.toFixed(2)}km - ${point.distance.toFixed(2)}km (length: ${rangeLength.toFixed(3)}km)`
+            );
           } else {
-            console.log(`❌ Skipping tiny ${currentRange.type} range: ${currentRange.start.toFixed(2)}km - ${point.distance.toFixed(2)}km (length: ${rangeLength.toFixed(3)}km < ${MIN_RANGE_LENGTH}km)`);
+            console.log(
+              `❌ Skipping tiny ${currentRange.type} range: ${currentRange.start.toFixed(2)}km - ${point.distance.toFixed(2)}km (length: ${rangeLength.toFixed(3)}km < ${MIN_RANGE_LENGTH}km)`
+            );
           }
         }
-        
+
         // Start new range - but back-date it to the previous interval
         // The grade at this point actually applies to the PREVIOUS interval
-        const prevDistance = i > 0 && elevationData[i - 1] ? elevationData[i - 1].distance : point.distance;
-        currentRange = { type: gradeType, start: prevDistance };
+        const prevPoint =
+          i > 0 && elevationData[i - 1] ? elevationData[i - 1] : point;
+        const prevDistance = prevPoint.distance;
+        const prevElevation = prevPoint.elevation;
+
+        currentRange = {
+          type: gradeType,
+          start: prevDistance,
+          startElevation: prevElevation,
+        };
         if (gradeType) {
-          console.log(`🟡 Starting ${gradeType} range at ${prevDistance.toFixed(2)}km (grade calculated at ${point.distance.toFixed(2)}km)`);
+          console.log(
+            `🟡 Starting ${gradeType} range at ${prevDistance.toFixed(2)}km (grade calculated at ${point.distance.toFixed(2)}km)`
+          );
         }
       }
     }
@@ -415,26 +530,51 @@ export const ElevationGraph: React.FC<ElevationGraphProps> = ({
           ranges[currentRange.type].push({
             start: currentRange.start,
             end: lastPoint.distance,
+            startElevation: currentRange.startElevation,
+            endElevation: lastPoint.elevation,
           });
-          console.log(`📏 Closing final ${currentRange.type} range: ${currentRange.start.toFixed(2)}km - ${lastPoint.distance.toFixed(2)}km (length: ${rangeLength.toFixed(3)}km)`);
+          console.log(
+            `📏 Closing final ${currentRange.type} range: ${currentRange.start.toFixed(2)}km - ${lastPoint.distance.toFixed(2)}km (length: ${rangeLength.toFixed(3)}km)`
+          );
         } else {
-          console.log(`❌ Skipping tiny final ${currentRange.type} range: ${currentRange.start.toFixed(2)}km - ${lastPoint.distance.toFixed(2)}km (length: ${rangeLength.toFixed(3)}km < ${MIN_RANGE_LENGTH}km)`);
+          console.log(
+            `❌ Skipping tiny final ${currentRange.type} range: ${currentRange.start.toFixed(2)}km - ${lastPoint.distance.toFixed(2)}km (length: ${rangeLength.toFixed(3)}km < ${MIN_RANGE_LENGTH}km)`
+          );
         }
       }
     }
 
     console.log("Grade ranges:", ranges);
-    
+
     // Debug: Show total length of colored ranges
-    const totalYellow = ranges.yellow.reduce((sum, r) => sum + (r.end - r.start), 0);
-    const totalOrange = ranges.orange.reduce((sum, r) => sum + (r.end - r.start), 0);
+    const totalYellow = ranges.yellow.reduce(
+      (sum, r) => sum + (r.end - r.start),
+      0
+    );
+    const totalOrange = ranges.orange.reduce(
+      (sum, r) => sum + (r.end - r.start),
+      0
+    );
     const totalRed = ranges.red.reduce((sum, r) => sum + (r.end - r.start), 0);
-    const totalLightBlue = ranges.lightBlue.reduce((sum, r) => sum + (r.end - r.start), 0);
-    const totalMediumBlue = ranges.mediumBlue.reduce((sum, r) => sum + (r.end - r.start), 0);
-    const totalDarkBlue = ranges.darkBlue.reduce((sum, r) => sum + (r.end - r.start), 0);
-    console.log(`Uphill lengths: Yellow=${totalYellow.toFixed(2)}km, Orange=${totalOrange.toFixed(2)}km, Red=${totalRed.toFixed(2)}km`);
-    console.log(`Downhill lengths: LightBlue=${totalLightBlue.toFixed(2)}km, MediumBlue=${totalMediumBlue.toFixed(2)}km, DarkBlue=${totalDarkBlue.toFixed(2)}km`);
-    
+    const totalLightBlue = ranges.lightBlue.reduce(
+      (sum, r) => sum + (r.end - r.start),
+      0
+    );
+    const totalMediumBlue = ranges.mediumBlue.reduce(
+      (sum, r) => sum + (r.end - r.start),
+      0
+    );
+    const totalDarkBlue = ranges.darkBlue.reduce(
+      (sum, r) => sum + (r.end - r.start),
+      0
+    );
+    console.log(
+      `Uphill lengths: Yellow=${totalYellow.toFixed(2)}km, Orange=${totalOrange.toFixed(2)}km, Red=${totalRed.toFixed(2)}km`
+    );
+    console.log(
+      `Downhill lengths: LightBlue=${totalLightBlue.toFixed(2)}km, MediumBlue=${totalMediumBlue.toFixed(2)}km, DarkBlue=${totalDarkBlue.toFixed(2)}km`
+    );
+
     return ranges;
   }, [elevationData]);
 
@@ -497,11 +637,12 @@ export const ElevationGraph: React.FC<ElevationGraphProps> = ({
             bottom: 20,
           }}
           onMouseMove={(state: any) => {
+            console.log("Chart enter", state);
             if (
               state &&
               state.activeTooltipIndex !== undefined &&
               state.activeTooltipIndex !== null &&
-              typeof state.activeTooltipIndex === 'number'
+              typeof state.activeTooltipIndex === "number"
             ) {
               setActiveIndex(state.activeTooltipIndex);
             }
@@ -539,36 +680,48 @@ export const ElevationGraph: React.FC<ElevationGraphProps> = ({
           {/* Grade range backgrounds */}
           {/* Uphill colors (warm tones) */}
           {gradeRanges.yellow.map((range, index) => {
-            console.log(`🟨 Rendering YELLOW ReferenceArea ${index}: ${range.start}km to ${range.end}km`);
+            console.log(
+              `🟨 Rendering YELLOW ReferenceArea ${index}: ${range.start}km to ${range.end}km (elevation: ${range.startElevation}m to ${range.endElevation}m)`
+            );
             return (
               <ReferenceArea
                 key={`yellow-${index}`}
                 x1={range.start}
                 x2={range.end}
+                y1={range.startElevation}
+                y2={range.endElevation}
                 fill="#FFD700"
                 fillOpacity={0.35}
               />
             );
           })}
           {gradeRanges.orange.map((range, index) => {
-            console.log(`🟧 Rendering ORANGE ReferenceArea ${index}: ${range.start}km to ${range.end}km`);
+            console.log(
+              `🟧 Rendering ORANGE ReferenceArea ${index}: ${range.start}km to ${range.end}km (elevation: ${range.startElevation}m to ${range.endElevation}m)`
+            );
             return (
               <ReferenceArea
                 key={`orange-${index}`}
                 x1={range.start}
                 x2={range.end}
+                y1={range.startElevation}
+                y2={range.endElevation}
                 fill="#FF8C00"
                 fillOpacity={0.45}
               />
             );
           })}
           {gradeRanges.red.map((range, index) => {
-            console.log(`🟥 Rendering RED ReferenceArea ${index}: ${range.start}km to ${range.end}km`);
+            console.log(
+              `🟥 Rendering RED ReferenceArea ${index}: ${range.start}km to ${range.end}km (elevation: ${range.startElevation}m to ${range.endElevation}m)`
+            );
             return (
               <ReferenceArea
                 key={`red-${index}`}
                 x1={range.start}
                 x2={range.end}
+                y1={range.startElevation}
+                y2={range.endElevation}
                 fill="#DC143C"
                 fillOpacity={0.55}
               />
@@ -577,36 +730,48 @@ export const ElevationGraph: React.FC<ElevationGraphProps> = ({
 
           {/* Downhill colors (cool tones) */}
           {gradeRanges.lightBlue.map((range, index) => {
-            console.log(`🟦 Rendering LIGHT BLUE ReferenceArea ${index}: ${range.start}km to ${range.end}km`);
+            console.log(
+              `🟦 Rendering LIGHT BLUE ReferenceArea ${index}: ${range.start}km to ${range.end}km (elevation: ${range.startElevation}m to ${range.endElevation}m)`
+            );
             return (
               <ReferenceArea
                 key={`lightBlue-${index}`}
                 x1={range.start}
                 x2={range.end}
+                y1={range.startElevation}
+                y2={range.endElevation}
                 fill="#87CEEB"
                 fillOpacity={0.35}
               />
             );
           })}
           {gradeRanges.mediumBlue.map((range, index) => {
-            console.log(`🔵 Rendering MEDIUM BLUE ReferenceArea ${index}: ${range.start}km to ${range.end}km`);
+            console.log(
+              `🔵 Rendering MEDIUM BLUE ReferenceArea ${index}: ${range.start}km to ${range.end}km (elevation: ${range.startElevation}m to ${range.endElevation}m)`
+            );
             return (
               <ReferenceArea
                 key={`mediumBlue-${index}`}
                 x1={range.start}
                 x2={range.end}
+                y1={range.startElevation}
+                y2={range.endElevation}
                 fill="#4682B4"
                 fillOpacity={0.45}
               />
             );
           })}
           {gradeRanges.darkBlue.map((range, index) => {
-            console.log(`🔷 Rendering DARK BLUE ReferenceArea ${index}: ${range.start}km to ${range.end}km`);
+            console.log(
+              `🔷 Rendering DARK BLUE ReferenceArea ${index}: ${range.start}km to ${range.end}km (elevation: ${range.startElevation}m to ${range.endElevation}m)`
+            );
             return (
               <ReferenceArea
                 key={`darkBlue-${index}`}
                 x1={range.start}
                 x2={range.end}
+                y1={range.startElevation}
+                y2={range.endElevation}
                 fill="#191970"
                 fillOpacity={0.55}
               />
