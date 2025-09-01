@@ -33,20 +33,22 @@ interface GPXRouteMapProps {
   highlightDistance?: number | null;
 }
 
-const MapCenterUpdater: React.FC<{
-  center: [number, number];
-  zoom: number;
-}> = ({ center, zoom }) => {
+const MapBoundsUpdater: React.FC<{
+  bounds: [[number, number], [number, number]];
+}> = ({ bounds }) => {
   const map = useMap();
   const [hasInitialized, setHasInitialized] = React.useState(false);
 
   React.useEffect(() => {
-    // Only set the initial view, don't update when user has interacted with the map
+    // Only fit bounds on initial load, don't update when user has interacted with the map
     if (!hasInitialized) {
-      map.setView(center, zoom);
+      map.fitBounds(bounds, {
+        padding: [20, 20], // Add 20px padding on all sides for clarity
+        maxZoom: 16, // Prevent zooming in too much for very short routes
+      });
       setHasInitialized(true);
     }
-  }, [map, center, zoom, hasInitialized]);
+  }, [map, bounds, hasInitialized]);
 
   return null;
 };
@@ -59,7 +61,7 @@ export const GPXRouteMap: React.FC<GPXRouteMapProps> = ({
   // Decode polyline to get coordinates
   const coordinates = decode(gpxAnalysis.polyline);
 
-  // Calculate map bounds, center, and zoom (moved before early returns)
+  // Calculate map bounds for fitBounds (moved before early returns)
   const mapConfig = React.useMemo(() => {
     if (coordinates.length === 0) {
       return null;
@@ -69,6 +71,7 @@ export const GPXRouteMap: React.FC<GPXRouteMapProps> = ({
     if (!firstCoord || firstCoord.length < 2) {
       return null;
     }
+    
     const bounds = coordinates.reduce(
       (acc, coord) => ({
         minLat: Math.min(acc.minLat, coord[0]),
@@ -89,19 +92,13 @@ export const GPXRouteMap: React.FC<GPXRouteMapProps> = ({
       (bounds.minLng + bounds.maxLng) / 2,
     ];
 
-    // Calculate appropriate zoom level based on bounds
-    const latDiff = bounds.maxLat - bounds.minLat;
-    const lngDiff = bounds.maxLng - bounds.minLng;
-    const maxDiff = Math.max(latDiff, lngDiff);
+    // Create bounds array for Leaflet's fitBounds
+    const leafletBounds: [[number, number], [number, number]] = [
+      [bounds.minLat, bounds.minLng],
+      [bounds.maxLat, bounds.maxLng],
+    ];
 
-    let zoom = 10;
-    if (maxDiff < 0.01) zoom = 15;
-    else if (maxDiff < 0.05) zoom = 13;
-    else if (maxDiff < 0.1) zoom = 12;
-    else if (maxDiff < 0.5) zoom = 10;
-    else zoom = 8;
-
-    return { bounds, center, zoom };
+    return { bounds: leafletBounds, center };
   }, [coordinates]);
 
   // Calculate highlighted position based on distance
@@ -192,7 +189,7 @@ export const GPXRouteMap: React.FC<GPXRouteMapProps> = ({
   return (
     <MapContainer
       center={mapConfig.center}
-      zoom={mapConfig.zoom}
+      zoom={10} // Initial zoom, will be overridden by fitBounds
       style={{ height: `${height}px`, width: "100%" }}
       scrollWheelZoom={true}
     >
@@ -239,7 +236,7 @@ export const GPXRouteMap: React.FC<GPXRouteMapProps> = ({
         <Marker position={highlightedPosition} icon={highlightIcon} />
       )}
 
-      <MapCenterUpdater center={mapConfig.center} zoom={mapConfig.zoom} />
+      <MapBoundsUpdater bounds={mapConfig.bounds} />
     </MapContainer>
   );
 };
