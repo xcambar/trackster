@@ -46,7 +46,6 @@ export const GPXVisualization: React.FC<GPXVisualizationProps> = ({
             gpxAnalysis={gpxAnalysis}
             height={300}
             onHover={handleChartHover}
-            highlightDistance={highlightDistance}
           />
         </CardContent>
       </Card>
