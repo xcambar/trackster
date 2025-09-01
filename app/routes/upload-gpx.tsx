@@ -30,7 +30,7 @@ import {
 } from "@remix-run/react";
 import { ClientOnly } from "remix-utils/client-only";
 import { AppBar } from "~/components/AppBar";
-import { GPXRouteMap } from "~/components/GPXRouteMap.client";
+import { GPXVisualization } from "~/components/GPXVisualization.client";
 import {
   analyzeGPXRoute,
   parseGPXContent,
@@ -417,21 +417,15 @@ export default function UploadGPX() {
         )}
 
         {actionData?.success && actionData.gpxAnalysis && (
-          <Card sx={{ mt: 3 }}>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                Route Map
-              </Typography>
-              <ClientOnly>
-                {() => (
-                  <GPXRouteMap
-                    gpxAnalysis={actionData.gpxAnalysis!}
-                    height={400}
-                  />
-                )}
-              </ClientOnly>
-            </CardContent>
-          </Card>
+          <Box sx={{ mt: 3 }}>
+            <ClientOnly>
+              {() => (
+                <GPXVisualization
+                  gpxAnalysis={actionData.gpxAnalysis!}
+                />
+              )}
+            </ClientOnly>
+          </Box>
         )}
       </Container>
     </>
