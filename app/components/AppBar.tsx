@@ -87,6 +87,20 @@ export function AppBar({ showLogout = false }: AppBarProps) {
             >
               Create a Route
             </Link>
+            <Link
+              href="/upload-gpx"
+              color="inherit"
+              underline="none"
+              sx={{
+                px: 2,
+                fontWeight: 500,
+                "&:hover": {
+                  textDecoration: "underline",
+                },
+              }}
+            >
+              Upload GPX
+            </Link>
           </>
         )}
         {/* This box acts as a spacer, it pushes the following elements on the right */}
