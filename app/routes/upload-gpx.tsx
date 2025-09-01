@@ -9,6 +9,12 @@ import {
   FormControl,
   FormLabel,
   Input,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   Typography,
 } from "@mui/material";
 import {
@@ -299,68 +305,6 @@ export default function UploadGPX() {
                   </Typography>
                 </Box>
               </Box>
-
-              {/* Grade Distribution */}
-              <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
-                Grade Distribution
-              </Typography>
-              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
-                <Box>
-                  <Typography variant="body2" color="text.secondary">
-                    0-5% Grade
-                  </Typography>
-                  <Typography variant="body1">
-                    {actionData.gpxAnalysis.gradeDistribution.grade0To5Km.toFixed(
-                      1
-                    )}{" "}
-                    km
-                  </Typography>
-                </Box>
-                <Box>
-                  <Typography variant="body2" color="text.secondary">
-                    5-10% Grade
-                  </Typography>
-                  <Typography variant="body1">
-                    {actionData.gpxAnalysis.gradeDistribution.grade5To10Km.toFixed(
-                      1
-                    )}{" "}
-                    km
-                  </Typography>
-                </Box>
-                <Box>
-                  <Typography variant="body2" color="text.secondary">
-                    10-15% Grade
-                  </Typography>
-                  <Typography variant="body1">
-                    {actionData.gpxAnalysis.gradeDistribution.grade10To15Km.toFixed(
-                      1
-                    )}{" "}
-                    km
-                  </Typography>
-                </Box>
-                <Box>
-                  <Typography variant="body2" color="text.secondary">
-                    15-25% Grade
-                  </Typography>
-                  <Typography variant="body1">
-                    {actionData.gpxAnalysis.gradeDistribution.grade15To25Km.toFixed(
-                      1
-                    )}{" "}
-                    km
-                  </Typography>
-                </Box>
-                <Box>
-                  <Typography variant="body2" color="text.secondary">
-                    {">25% Grade"}
-                  </Typography>
-                  <Typography variant="body1">
-                    {actionData.gpxAnalysis.gradeDistribution.gradeOver25Km.toFixed(
-                      1
-                    )}{" "}
-                    km
-                  </Typography>
-                </Box>
-              </Box>
             </CardContent>
           </Card>
         )}
@@ -420,33 +364,44 @@ export default function UploadGPX() {
               <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
                 Performance Breakdown
               </Typography>
-              {actionData.prediction.gradeBreakdown.map((segment, index) => (
-                <Box
-                  key={index}
-                  sx={{
-                    mb: 2,
-                    p: 2,
-                    border: 1,
-                    borderColor: "grey.300",
-                    borderRadius: 1,
-                  }}
-                >
-                  <Typography variant="body1" fontWeight="bold">
-                    {segment.gradeRange}
-                  </Typography>
-                  <Box sx={{ display: "flex", gap: 2, mt: 1 }}>
-                    <Typography variant="body2">
-                      Distance: {segment.distanceKm.toFixed(1)} km
-                    </Typography>
-                    <Typography variant="body2">
-                      Pace: {segment.paceMinPerKm.toFixed(2)} min/km
-                    </Typography>
-                    <Typography variant="body2">
-                      Time: {formatTime(segment.segmentTimeMinutes)}
-                    </Typography>
-                  </Box>
-                </Box>
-              ))}
+              <TableContainer>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>
+                        <strong>Grade Range</strong>
+                      </TableCell>
+                      <TableCell align="right">
+                        <strong>Distance (km)</strong>
+                      </TableCell>
+                      <TableCell align="right">
+                        <strong>Pace (min/km)</strong>
+                      </TableCell>
+                      <TableCell align="right">
+                        <strong>Time</strong>
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {actionData.prediction.gradeBreakdown.map(
+                      (segment, index) => (
+                        <TableRow key={index}>
+                          <TableCell>{segment.gradeRange}</TableCell>
+                          <TableCell align="right">
+                            {segment.distanceKm.toFixed(1)}
+                          </TableCell>
+                          <TableCell align="right">
+                            {segment.paceMinPerKm.toFixed(2)}
+                          </TableCell>
+                          <TableCell align="right">
+                            {formatTime(segment.segmentTimeMinutes)}
+                          </TableCell>
+                        </TableRow>
+                      )
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
 
               <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
                 Prediction based on{" "}
