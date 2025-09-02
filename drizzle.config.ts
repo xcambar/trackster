@@ -5,7 +5,7 @@ import { defineConfig } from "drizzle-kit";
 
 export default defineConfig({
   out: "./drizzle",
-  schema: "./packages/@xcambar/trackster-db/schema.ts",
+  schema: "./packages/@xcambar/db/schema.ts",
   dialect: "postgresql",
   casing: "snake_case",
   dbCredentials: {
