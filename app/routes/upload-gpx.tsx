@@ -280,10 +280,19 @@ export default function UploadGPX() {
 
                 <Box>
                   <Typography variant="body2" color="text.secondary">
-                    Elevation Gain
+                    Total Ascent
                   </Typography>
                   <Typography variant="body1" fontWeight="bold">
-                    {formatElevation(actionData.gpxAnalysis.totalElevationGain)}
+                    {formatElevation(actionData.gpxAnalysis.totalAscent)}
+                  </Typography>
+                </Box>
+
+                <Box>
+                  <Typography variant="body2" color="text.secondary">
+                    Total Descent
+                  </Typography>
+                  <Typography variant="body1" fontWeight="bold">
+                    {formatElevation(actionData.gpxAnalysis.totalDescent)}
                   </Typography>
                 </Box>
 
@@ -302,6 +311,33 @@ export default function UploadGPX() {
                   </Typography>
                   <Typography variant="body1" fontWeight="bold">
                     {actionData.gpxAnalysis.maxGrade.toFixed(1)}%
+                  </Typography>
+                </Box>
+
+                <Box>
+                  <Typography variant="body2" color="text.secondary">
+                    Min Elevation
+                  </Typography>
+                  <Typography variant="body1" fontWeight="bold">
+                    {formatElevation(actionData.gpxAnalysis.minElevation)}
+                  </Typography>
+                </Box>
+
+                <Box>
+                  <Typography variant="body2" color="text.secondary">
+                    Max Elevation
+                  </Typography>
+                  <Typography variant="body1" fontWeight="bold">
+                    {formatElevation(actionData.gpxAnalysis.maxElevation)}
+                  </Typography>
+                </Box>
+
+                <Box>
+                  <Typography variant="body2" color="text.secondary">
+                    Elevation Range
+                  </Typography>
+                  <Typography variant="body1" fontWeight="bold">
+                    {formatElevation(actionData.gpxAnalysis.elevationRange)}
                   </Typography>
                 </Box>
               </Box>
