@@ -7,11 +7,19 @@ import {
 } from "./schema";
 
 interface GradeSpeedData {
+  // Uphill grades (positive)
   grade0To5: number[];
   grade5To10: number[];
   grade10To15: number[];
   grade15To25: number[];
   gradeOver25: number[];
+  
+  // Downhill grades (negative)
+  gradeNeg5To0: number[];
+  gradeNeg10ToNeg5: number[];
+  gradeNeg15ToNeg10: number[];
+  gradeNeg25ToNeg15: number[];
+  gradeNegOver25: number[];
 }
 
 interface DistancePaceData {
@@ -23,18 +31,33 @@ interface DistancePaceData {
 
 /**
  * Grade coverage flags (bitfield):
+ * Uphill grades:
  * Bit 0: 0-5% grade has data
  * Bit 1: 5-10% grade has data
  * Bit 2: 10-15% grade has data
  * Bit 3: 15-25% grade has data
  * Bit 4: >25% grade has data
+ * Downhill grades:
+ * Bit 5: -5% to 0% grade has data
+ * Bit 6: -10% to -5% grade has data
+ * Bit 7: -15% to -10% grade has data
+ * Bit 8: -25% to -15% grade has data
+ * Bit 9: <-25% grade has data
  */
 const GRADE_COVERAGE_FLAGS = {
+  // Uphill grades
   GRADE_0_5: 1 << 0,
   GRADE_5_10: 1 << 1,
   GRADE_10_15: 1 << 2,
   GRADE_15_25: 1 << 3,
   GRADE_OVER_25: 1 << 4,
+  
+  // Downhill grades
+  GRADE_NEG_5_TO_0: 1 << 5,
+  GRADE_NEG_10_TO_NEG_5: 1 << 6,
+  GRADE_NEG_15_TO_NEG_10: 1 << 7,
+  GRADE_NEG_25_TO_NEG_15: 1 << 8,
+  GRADE_NEG_OVER_25: 1 << 9,
 };
 
 function categorizeByGrade(
@@ -42,11 +65,19 @@ function categorizeByGrade(
   gradeData: number[]
 ): GradeSpeedData {
   const data: GradeSpeedData = {
+    // Uphill grades
     grade0To5: [],
     grade5To10: [],
     grade10To15: [],
     grade15To25: [],
     gradeOver25: [],
+    
+    // Downhill grades
+    gradeNeg5To0: [],
+    gradeNeg10ToNeg5: [],
+    gradeNeg15ToNeg10: [],
+    gradeNeg25ToNeg15: [],
+    gradeNegOver25: [],
   };
 
   const minLength = Math.min(velocityData.length, gradeData.length);
@@ -55,14 +86,15 @@ function categorizeByGrade(
     const speed = velocityData[i]!;
     const grade = gradeData[i]!;
 
-    // Filter valid data points (positive uphill grades only)
+    // Filter valid data points (all grades from -50% to +50%)
     if (
       speed > 0 &&
       !isNaN(speed) &&
       !isNaN(grade) &&
-      grade >= 0 &&
+      grade >= -50 &&
       grade <= 50
     ) {
+      // Uphill grades (positive)
       if (grade >= 0 && grade < 5) {
         data.grade0To5.push(speed);
       } else if (grade >= 5 && grade < 10) {
@@ -73,6 +105,18 @@ function categorizeByGrade(
         data.grade15To25.push(speed);
       } else if (grade >= 25) {
         data.gradeOver25.push(speed);
+      }
+      // Downhill grades (negative)
+      else if (grade < 0 && grade >= -5) {
+        data.gradeNeg5To0.push(speed);
+      } else if (grade < -5 && grade >= -10) {
+        data.gradeNeg10ToNeg5.push(speed);
+      } else if (grade < -10 && grade >= -15) {
+        data.gradeNeg15ToNeg10.push(speed);
+      } else if (grade < -15 && grade >= -25) {
+        data.gradeNeg25ToNeg15.push(speed);
+      } else if (grade < -25) {
+        data.gradeNegOver25.push(speed);
       }
     }
   }
@@ -120,6 +164,7 @@ function calculateAverage(values: number[]): number | null {
 function calculateGradeCoverageFlags(gradeData: GradeSpeedData): number {
   let flags = 0;
 
+  // Uphill grade coverage flags
   if (gradeData.grade0To5.length >= 50) flags |= GRADE_COVERAGE_FLAGS.GRADE_0_5;
   if (gradeData.grade5To10.length >= 50)
     flags |= GRADE_COVERAGE_FLAGS.GRADE_5_10;
@@ -129,6 +174,18 @@ function calculateGradeCoverageFlags(gradeData: GradeSpeedData): number {
     flags |= GRADE_COVERAGE_FLAGS.GRADE_15_25;
   if (gradeData.gradeOver25.length >= 10)
     flags |= GRADE_COVERAGE_FLAGS.GRADE_OVER_25;
+
+  // Downhill grade coverage flags
+  if (gradeData.gradeNeg5To0.length >= 50) 
+    flags |= GRADE_COVERAGE_FLAGS.GRADE_NEG_5_TO_0;
+  if (gradeData.gradeNeg10ToNeg5.length >= 50)
+    flags |= GRADE_COVERAGE_FLAGS.GRADE_NEG_10_TO_NEG_5;
+  if (gradeData.gradeNeg15ToNeg10.length >= 30)
+    flags |= GRADE_COVERAGE_FLAGS.GRADE_NEG_15_TO_NEG_10;
+  if (gradeData.gradeNeg25ToNeg15.length >= 20)
+    flags |= GRADE_COVERAGE_FLAGS.GRADE_NEG_25_TO_NEG_15;
+  if (gradeData.gradeNegOver25.length >= 10)
+    flags |= GRADE_COVERAGE_FLAGS.GRADE_NEG_OVER_25;
 
   return flags;
 }
@@ -164,11 +221,19 @@ async function buildAthleteProfile(athleteId: number): Promise<void> {
 
   // Aggregate all grade-speed data
   const allGradeData: GradeSpeedData = {
+    // Uphill grades
     grade0To5: [],
     grade5To10: [],
     grade10To15: [],
     grade15To25: [],
     gradeOver25: [],
+    
+    // Downhill grades
+    gradeNeg5To0: [],
+    gradeNeg10ToNeg5: [],
+    gradeNeg15ToNeg10: [],
+    gradeNeg25ToNeg15: [],
+    gradeNegOver25: [],
   };
 
   for (const stream of streams) {
@@ -195,11 +260,19 @@ async function buildAthleteProfile(athleteId: number): Promise<void> {
   // Calculate averages
   const profile = {
     athleteId,
+    // Uphill grade speeds
     speedGrade0To5: calculateAverage(allGradeData.grade0To5),
     speedGrade5To10: calculateAverage(allGradeData.grade5To10),
     speedGrade10To15: calculateAverage(allGradeData.grade10To15),
     speedGrade15To25: calculateAverage(allGradeData.grade15To25),
     speedGradeOver25: calculateAverage(allGradeData.gradeOver25),
+    
+    // Downhill grade speeds
+    speedGradeNeg5To0: calculateAverage(allGradeData.gradeNeg5To0),
+    speedGradeNeg10ToNeg5: calculateAverage(allGradeData.gradeNeg10ToNeg5),
+    speedGradeNeg15ToNeg10: calculateAverage(allGradeData.gradeNeg15ToNeg10),
+    speedGradeNeg25ToNeg15: calculateAverage(allGradeData.gradeNeg25ToNeg15),
+    speedGradeNegOver25: calculateAverage(allGradeData.gradeNegOver25),
     avgPace5k: calculateAverage(distancePaceData.pace5k),
     avgPace10k: calculateAverage(distancePaceData.pace10k),
     avgPaceHalfMarathon: calculateAverage(distancePaceData.paceHalfMarathon),

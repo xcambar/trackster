@@ -14,6 +14,11 @@ export interface GradeAnalysis {
 }
 
 export const GRADE_RANGES: GradeRange[] = [
+  { label: ">-25%", min: -Infinity, max: -25 },
+  { label: "-25 to -15%", min: -25, max: -15 },
+  { label: "-15 to -10%", min: -15, max: -10 },
+  { label: "-10 to -5%", min: -10, max: -5 },
+  { label: "-5 to 0%", min: -5, max: 0 },
   { label: "0-5%", min: 0, max: 5 },
   { label: "5-10%", min: 5, max: 10 },
   { label: "10-15%", min: 10, max: 15 },
@@ -22,15 +27,17 @@ export const GRADE_RANGES: GradeRange[] = [
 ];
 
 export function categorizeGrade(gradePercent: number): string {
-  const absGrade = Math.abs(gradePercent);
-
   for (const range of GRADE_RANGES) {
-    if (absGrade >= range.min && absGrade < range.max) {
+    if (gradePercent >= range.min && gradePercent < range.max) {
       return range.label;
     }
   }
 
-  return ">25%";
+  // Fallback for extreme values
+  if (gradePercent >= 25) return ">25%";
+  if (gradePercent <= -25) return ">-25%";
+  
+  return "0-5%"; // Default fallback
 }
 
 export function calculatePaceMinPerKm(velocityMs: number): number {

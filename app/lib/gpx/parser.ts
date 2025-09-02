@@ -1,7 +1,6 @@
-import { DOMParser } from "@xmldom/xmldom";
 import * as tj from "@tmcw/togeojson";
+import { DOMParser } from "@xmldom/xmldom";
 import { encode } from "google-polyline";
-import { categorizeGrade, GRADE_RANGES } from "~/lib/utils/grade-analysis";
 
 export interface GPXPoint {
   lat: number;
@@ -25,11 +24,19 @@ export interface GPXRoute {
 }
 
 export interface GPXGradeDistribution {
+  // Uphill grades (positive)
   grade0To5Km: number;
   grade5To10Km: number;
   grade10To15Km: number;
   grade15To25Km: number;
   gradeOver25Km: number;
+  
+  // Downhill grades (negative)
+  gradeNeg5To0Km: number;
+  gradeNeg10ToNeg5Km: number;
+  gradeNeg15ToNeg10Km: number;
+  gradeNeg25ToNeg15Km: number;
+  gradeNegOver25Km: number;
 }
 
 export interface GPXAnalysis extends GPXRoute {
@@ -59,7 +66,11 @@ function calculateDistance(point1: GPXPoint, point2: GPXPoint): number {
 /**
  * Calculate grade between two points
  */
-function calculateGrade(point1: GPXPoint, point2: GPXPoint, distance: number): number {
+function calculateGrade(
+  point1: GPXPoint,
+  point2: GPXPoint,
+  distance: number
+): number {
   if (!point1.elevation || !point2.elevation || distance === 0) {
     return 0;
   }
@@ -73,60 +84,68 @@ function calculateGrade(point1: GPXPoint, point2: GPXPoint, distance: number): n
 export function parseGPXContent(gpxContent: string): GPXRoute {
   const parser = new DOMParser();
   const gpxDoc = parser.parseFromString(gpxContent, "text/xml");
-  
+
   // Convert to GeoJSON first using togeojson
   const geoJSON = tj.gpx(gpxDoc);
-  
+
   // Extract route name and description
   let name = "Uploaded Route";
   let description = "";
-  
+
   // Try to get name from GPX metadata
   const nameElement = gpxDoc.getElementsByTagName("name")[0];
   if (nameElement?.textContent) {
     name = nameElement.textContent;
   }
-  
+
   const descElement = gpxDoc.getElementsByTagName("desc")[0];
   if (descElement?.textContent) {
     description = descElement.textContent;
   }
-  
+
   // Extract coordinates from GeoJSON
   const points: GPXPoint[] = [];
-  
+
   for (const feature of geoJSON.features) {
     if (feature.geometry.type === "LineString") {
       for (const coord of feature.geometry.coordinates) {
-        if (coord && coord.length >= 2 && typeof coord[0] === 'number' && typeof coord[1] === 'number') {
+        if (
+          coord &&
+          coord.length >= 2 &&
+          typeof coord[0] === "number" &&
+          typeof coord[1] === "number"
+        ) {
           points.push({
             lat: coord[1],
             lng: coord[0],
-            elevation: coord.length > 2 && typeof coord[2] === 'number' ? coord[2] : undefined,
+            elevation:
+              coord.length > 2 && typeof coord[2] === "number"
+                ? coord[2]
+                : undefined,
           });
         }
       }
     }
   }
-  
+
   if (points.length === 0) {
     throw new Error("No valid route data found in GPX file");
   }
-  
+
   // Calculate total distance and elevation changes
   let totalDistance = 0;
   let totalElevationGain = 0;
   let totalAscent = 0;
   let totalDescent = 0;
-  
+
   for (let i = 1; i < points.length; i++) {
     const prevPoint = points[i - 1];
     const currPoint = points[i];
-    
+
     if (prevPoint && currPoint) {
       const distance = calculateDistance(prevPoint, currPoint);
       totalDistance += distance;
-      
+
       // Calculate elevation changes
       if (currPoint.elevation && prevPoint.elevation) {
         const elevationDiff = currPoint.elevation - prevPoint.elevation;
@@ -139,20 +158,20 @@ export function parseGPXContent(gpxContent: string): GPXRoute {
       }
     }
   }
-  
+
   // Calculate elevation statistics
   const elevations = points
-    .map(p => p.elevation)
+    .map((p) => p.elevation)
     .filter((elevation): elevation is number => elevation !== undefined);
-  
+
   const minElevation = elevations.length > 0 ? Math.min(...elevations) : 0;
   const maxElevation = elevations.length > 0 ? Math.max(...elevations) : 0;
   const elevationRange = maxElevation - minElevation;
-  
+
   // Create Google polyline
-  const polylinePoints: [number, number][] = points.map(p => [p.lat, p.lng]);
+  const polylinePoints: [number, number][] = points.map((p) => [p.lat, p.lng]);
   const polyline = encode(polylinePoints);
-  
+
   return {
     name,
     description,
@@ -173,55 +192,78 @@ export function parseGPXContent(gpxContent: string): GPXRoute {
  */
 export function analyzeGPXRoute(route: GPXRoute): GPXAnalysis {
   const gradeDistribution: GPXGradeDistribution = {
+    // Uphill grades
     grade0To5Km: 0,
     grade5To10Km: 0,
     grade10To15Km: 0,
     grade15To25Km: 0,
     gradeOver25Km: 0,
+    
+    // Downhill grades
+    gradeNeg5To0Km: 0,
+    gradeNeg10ToNeg5Km: 0,
+    gradeNeg15ToNeg10Km: 0,
+    gradeNeg25ToNeg15Km: 0,
+    gradeNegOver25Km: 0,
   };
-  
+
   let totalGradeSum = 0;
   let gradeCount = 0;
   let maxGrade = -Infinity;
   let minGrade = Infinity;
-  
+
   // Analyze each segment between consecutive points
   for (let i = 1; i < route.points.length; i++) {
     const point1 = route.points[i - 1];
     const point2 = route.points[i];
-    
+
     if (point1 && point2) {
       const distance = calculateDistance(point1, point2);
       const grade = calculateGrade(point1, point2, distance);
-      
+
       if (distance > 0) {
-        // Update grade statistics
-        totalGradeSum += Math.abs(grade);
+        // Update grade statistics (preserve sign for min/max)
+        totalGradeSum += Math.abs(grade); // Keep abs for average calculation
         gradeCount++;
         maxGrade = Math.max(maxGrade, grade);
         minGrade = Math.min(minGrade, grade);
-        
-        // Categorize grade and add distance to appropriate bucket
-        const absGrade = Math.abs(grade);
+
+        // Categorize grade using real values (positive and negative)
         const distanceKm = distance / 1000;
-        
-        if (absGrade < 5) {
-          gradeDistribution.grade0To5Km += distanceKm;
-        } else if (absGrade < 10) {
-          gradeDistribution.grade5To10Km += distanceKm;
-        } else if (absGrade < 15) {
-          gradeDistribution.grade10To15Km += distanceKm;
-        } else if (absGrade < 25) {
-          gradeDistribution.grade15To25Km += distanceKm;
+
+        if (grade >= 0) {
+          // Uphill grades (positive)
+          if (grade < 5) {
+            gradeDistribution.grade0To5Km += distanceKm;
+          } else if (grade < 10) {
+            gradeDistribution.grade5To10Km += distanceKm;
+          } else if (grade < 15) {
+            gradeDistribution.grade10To15Km += distanceKm;
+          } else if (grade < 25) {
+            gradeDistribution.grade15To25Km += distanceKm;
+          } else {
+            gradeDistribution.gradeOver25Km += distanceKm;
+          }
         } else {
-          gradeDistribution.gradeOver25Km += distanceKm;
+          // Downhill grades (negative)
+          if (grade >= -5) {
+            gradeDistribution.gradeNeg5To0Km += distanceKm;
+          } else if (grade >= -10) {
+            gradeDistribution.gradeNeg10ToNeg5Km += distanceKm;
+          } else if (grade >= -15) {
+            gradeDistribution.gradeNeg15ToNeg10Km += distanceKm;
+          } else if (grade >= -25) {
+            gradeDistribution.gradeNeg25ToNeg15Km += distanceKm;
+          } else {
+            gradeDistribution.gradeNegOver25Km += distanceKm;
+          }
         }
       }
     }
   }
-  
+
   const averageGrade = gradeCount > 0 ? totalGradeSum / gradeCount : 0;
-  
+
   return {
     ...route,
     gradeDistribution,
@@ -234,31 +276,34 @@ export function analyzeGPXRoute(route: GPXRoute): GPXAnalysis {
 /**
  * Validate GPX file content
  */
-export function validateGPXContent(content: string): { valid: boolean; error?: string } {
+export function validateGPXContent(content: string): {
+  valid: boolean;
+  error?: string;
+} {
   try {
     const parser = new DOMParser();
     const doc = parser.parseFromString(content, "text/xml");
-    
+
     // Check for parsing errors
     const parserError = doc.getElementsByTagName("parsererror")[0];
     if (parserError) {
       return { valid: false, error: "Invalid XML format" };
     }
-    
+
     // Check if it's a GPX file
     const gpxElement = doc.getElementsByTagName("gpx")[0];
     if (!gpxElement) {
       return { valid: false, error: "Not a valid GPX file" };
     }
-    
+
     // Check for track or route data
     const tracks = doc.getElementsByTagName("trk");
     const routes = doc.getElementsByTagName("rte");
-    
+
     if (tracks.length === 0 && routes.length === 0) {
       return { valid: false, error: "No track or route data found" };
     }
-    
+
     return { valid: true };
   } catch (error) {
     return { valid: false, error: "Failed to parse GPX file" };

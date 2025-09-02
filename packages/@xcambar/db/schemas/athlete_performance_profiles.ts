@@ -11,11 +11,19 @@ export const athletePerformanceProfilesTable = pgTable("athlete_performance_prof
   athleteId: bigint("athlete_id", { mode: "number" }).notNull().unique(),
 
   // Speed by standardized grade buckets (m/s)
+  // Uphill grades (positive)
   speedGrade0To5: real("speed_grade_0_5"), // 0-5% grade average speed
   speedGrade5To10: real("speed_grade_5_10"), // 5-10% grade average speed  
   speedGrade10To15: real("speed_grade_10_15"), // 10-15% grade average speed
   speedGrade15To25: real("speed_grade_15_25"), // 15-25% grade average speed
   speedGradeOver25: real("speed_grade_over_25"), // >25% grade average speed
+  
+  // Downhill grades (negative)
+  speedGradeNeg5To0: real("speed_grade_neg_5_to_0"), // -5% to 0% grade average speed
+  speedGradeNeg10ToNeg5: real("speed_grade_neg_10_to_neg_5"), // -10% to -5% grade average speed
+  speedGradeNeg15ToNeg10: real("speed_grade_neg_15_to_neg_10"), // -15% to -10% grade average speed
+  speedGradeNeg25ToNeg15: real("speed_grade_neg_25_to_neg_15"), // -25% to -15% grade average speed
+  speedGradeNegOver25: real("speed_grade_neg_over_25"), // <-25% grade average speed
 
   // Distance-based pace profiles (min/km)
   avgPace5k: real("avg_pace_5k"),
