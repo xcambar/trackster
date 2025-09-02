@@ -11,11 +11,19 @@ export interface RacePredictionInput {
   totalDistanceKm: number;
   totalElevationGainM: number;
   gradeDistribution: {
+    // Uphill grades (positive)
     grade0To5Km: number; // km in 0-5% grade range
     grade5To10Km: number; // km in 5-10% grade range
     grade10To15Km: number; // km in 10-15% grade range
     grade15To25Km: number; // km in 15-25% grade range
     gradeOver25Km: number; // km in >25% grade range
+    
+    // Downhill grades (negative)
+    gradeNeg5To0Km: number; // km in -5% to 0% grade range
+    gradeNeg10ToNeg5Km: number; // km in -10% to -5% grade range
+    gradeNeg15ToNeg10Km: number; // km in -15% to -10% grade range
+    gradeNeg25ToNeg15Km: number; // km in -25% to -15% grade range
+    gradeNegOver25Km: number; // km in <-25% grade range
   };
 }
 
@@ -44,11 +52,19 @@ export interface RacePrediction {
  * Grade coverage flags interpretation
  */
 const GRADE_COVERAGE_FLAGS = {
+  // Uphill grades
   GRADE_0_5: 1 << 0,
   GRADE_5_10: 1 << 1,
   GRADE_10_15: 1 << 2,
   GRADE_15_25: 1 << 3,
   GRADE_OVER_25: 1 << 4,
+  
+  // Downhill grades
+  GRADE_NEG_5_TO_0: 1 << 5,
+  GRADE_NEG_10_TO_NEG_5: 1 << 6,
+  GRADE_NEG_15_TO_NEG_10: 1 << 7,
+  GRADE_NEG_25_TO_NEG_15: 1 << 8,
+  GRADE_NEG_OVER_25: 1 << 9,
 };
 
 class RacePredictionEngine {
@@ -302,8 +318,9 @@ class RacePredictionEngine {
     const gradeBreakdown: GradePrediction[] = [];
     let totalTimeMinutes = 0;
 
-    // Process each grade range
+    // Process each grade range (uphill and downhill)
     const gradeSegments = [
+      // Uphill grades
       {
         range: "0-5%",
         distanceKm: input.gradeDistribution.grade0To5Km,
@@ -333,6 +350,38 @@ class RacePredictionEngine {
         distanceKm: input.gradeDistribution.gradeOver25Km,
         baseSpeed: profile.speedGradeOver25,
         avgGrade: 30.0,
+      },
+      
+      // Downhill grades
+      {
+        range: "-5 to 0%",
+        distanceKm: input.gradeDistribution.gradeNeg5To0Km,
+        baseSpeed: profile.speedGradeNeg5To0,
+        avgGrade: -2.5,
+      },
+      {
+        range: "-10 to -5%",
+        distanceKm: input.gradeDistribution.gradeNeg10ToNeg5Km,
+        baseSpeed: profile.speedGradeNeg10ToNeg5,
+        avgGrade: -7.5,
+      },
+      {
+        range: "-15 to -10%",
+        distanceKm: input.gradeDistribution.gradeNeg15ToNeg10Km,
+        baseSpeed: profile.speedGradeNeg15ToNeg10,
+        avgGrade: -12.5,
+      },
+      {
+        range: "-25 to -15%",
+        distanceKm: input.gradeDistribution.gradeNeg25ToNeg15Km,
+        baseSpeed: profile.speedGradeNeg25ToNeg15,
+        avgGrade: -20.0,
+      },
+      {
+        range: ">-25%",
+        distanceKm: input.gradeDistribution.gradeNegOver25Km,
+        baseSpeed: profile.speedGradeNegOver25,
+        avgGrade: -30.0,
       },
     ];
 
