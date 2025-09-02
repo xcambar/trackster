@@ -3,19 +3,30 @@ import { useGeolocated } from "react-geolocated";
 import { MapContainer, TileLayer, useMap } from "react-leaflet";
 import { StravaPolyline } from "./StravaPolyline.client";
 import { StravaSegmentPolyline } from "./StravaSegmentPolyline.client";
+import { MapActivityBoundsUpdater } from "./MapActivityBoundsUpdater.client";
 
 import "leaflet/dist/leaflet.css"; // Import Leaflet CSS
 import { ActivityMap } from "~/lib/types/activity";
 
 const MapGeolocationUpdater: React.FC<{
   center?: GeolocationCoordinates;
-}> = ({ center }) => {
+  hasActivities: boolean;
+}> = ({ center, hasActivities }) => {
   const map = useMap();
-  if (center) {
-    map.setView([center.latitude, center.longitude], 13); // We're closing in on the current location, when available
-  } else {
-    map.setView([0, 0], 3); // The default map has a bird's eye view on the map
-  }
+  
+  React.useEffect(() => {
+    // Only use geolocation if no activities are selected
+    if (hasActivities) {
+      return;
+    }
+    
+    if (center) {
+      map.setView([center.latitude, center.longitude], 13); // We're closing in on the current location, when available
+    } else {
+      map.setView([0, 0], 3); // The default map has a bird's eye view on the map
+    }
+  }, [center, hasActivities, map]);
+  
   return null;
 };
 
@@ -47,7 +58,8 @@ export const LeafletMap: React.FC<{ maps: ActivityMap[] }> = ({ maps }) => {
           ))}
         </React.Fragment>
       ))}
-      <MapGeolocationUpdater center={coords} />
+      <MapActivityBoundsUpdater activities={maps} />
+      <MapGeolocationUpdater center={coords} hasActivities={maps.length > 0} />
     </MapContainer>
   );
 };
