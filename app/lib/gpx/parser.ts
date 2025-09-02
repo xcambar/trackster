@@ -16,6 +16,11 @@ export interface GPXRoute {
   points: GPXPoint[];
   totalDistance: number; // meters
   totalElevationGain: number; // meters
+  totalAscent: number; // meters (total upward elevation)
+  totalDescent: number; // meters (total downward elevation)
+  minElevation: number; // meters
+  maxElevation: number; // meters
+  elevationRange: number; // meters
   polyline: string; // Google polyline encoded
 }
 
@@ -108,9 +113,11 @@ export function parseGPXContent(gpxContent: string): GPXRoute {
     throw new Error("No valid route data found in GPX file");
   }
   
-  // Calculate total distance and elevation gain
+  // Calculate total distance and elevation changes
   let totalDistance = 0;
   let totalElevationGain = 0;
+  let totalAscent = 0;
+  let totalDescent = 0;
   
   for (let i = 1; i < points.length; i++) {
     const prevPoint = points[i - 1];
@@ -120,15 +127,27 @@ export function parseGPXContent(gpxContent: string): GPXRoute {
       const distance = calculateDistance(prevPoint, currPoint);
       totalDistance += distance;
       
-      // Calculate elevation gain (only positive changes)
+      // Calculate elevation changes
       if (currPoint.elevation && prevPoint.elevation) {
         const elevationDiff = currPoint.elevation - prevPoint.elevation;
         if (elevationDiff > 0) {
           totalElevationGain += elevationDiff;
+          totalAscent += elevationDiff;
+        } else if (elevationDiff < 0) {
+          totalDescent += Math.abs(elevationDiff);
         }
       }
     }
   }
+  
+  // Calculate elevation statistics
+  const elevations = points
+    .map(p => p.elevation)
+    .filter((elevation): elevation is number => elevation !== undefined);
+  
+  const minElevation = elevations.length > 0 ? Math.min(...elevations) : 0;
+  const maxElevation = elevations.length > 0 ? Math.max(...elevations) : 0;
+  const elevationRange = maxElevation - minElevation;
   
   // Create Google polyline
   const polylinePoints: [number, number][] = points.map(p => [p.lat, p.lng]);
@@ -140,6 +159,11 @@ export function parseGPXContent(gpxContent: string): GPXRoute {
     points,
     totalDistance,
     totalElevationGain,
+    totalAscent,
+    totalDescent,
+    minElevation,
+    maxElevation,
+    elevationRange,
     polyline,
   };
 }
