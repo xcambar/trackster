@@ -59,13 +59,12 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   return null;
 };
 
-export const ElevationGraph: React.FC<ElevationGraphProps> = ({
+export const ElevationGraph: React.FC<ElevationGraphProps> = React.memo(({
   gpxAnalysis,
   height = 300,
   onHover,
 }) => {
-  const [activeIndex, setActiveIndex] = React.useState<number | null>(null);
-
+  const chartContainerRef = React.useRef<HTMLDivElement>(null);
   // Process GPX points to create elevation profile
   const elevationData: ElevationDataPoint[] = React.useMemo(() => {
     if (!gpxAnalysis.points || gpxAnalysis.points.length === 0) {
@@ -151,6 +150,7 @@ export const ElevationGraph: React.FC<ElevationGraphProps> = ({
       for (let pass = 0; pass < windowSizes.length; pass++) {
         const windowSize = windowSizes[pass];
         const weight = weights[pass];
+        if (!windowSize || !weight) continue;
 
         let totalDistance = 0;
         let startIndex = currentIndex;
@@ -315,17 +315,6 @@ export const ElevationGraph: React.FC<ElevationGraphProps> = ({
     return data;
   }, [gpxAnalysis]);
 
-  // Effect to call onHover only when activeIndex changes
-  React.useEffect(() => {
-    if (activeIndex !== null && elevationData[activeIndex]) {
-      const dataPoint = elevationData[activeIndex];
-      console.log("Effect triggering hover with distance:", dataPoint.distance); // Debug
-      onHover?.(dataPoint.distance);
-    } else {
-      console.log("Effect clearing hover"); // Debug
-      onHover?.(null);
-    }
-  }, [activeIndex, elevationData, onHover]);
 
   // Create grade ranges using multi-pass calculated grades
   const gradeRanges = React.useMemo(() => {
@@ -505,8 +494,8 @@ export const ElevationGraph: React.FC<ElevationGraphProps> = ({
         // The grade at this point actually applies to the PREVIOUS interval
         const prevPoint =
           i > 0 && elevationData[i - 1] ? elevationData[i - 1] : point;
-        const prevDistance = prevPoint.distance;
-        const prevElevation = prevPoint.elevation;
+        const prevDistance = prevPoint?.distance || point.distance;
+        const prevElevation = prevPoint?.elevation || point.elevation;
 
         currentRange = {
           type: gradeType,
@@ -627,7 +616,35 @@ export const ElevationGraph: React.FC<ElevationGraphProps> = ({
         </Box>
       </Box>
 
-      <ResponsiveContainer width="100%" height={height}>
+      <div
+        ref={chartContainerRef}
+        style={{ width: '100%', height: `${height}px` }}
+        onMouseMove={(e) => {
+          if (!onHover || !chartContainerRef.current || elevationData.length === 0) return;
+          
+          const rect = chartContainerRef.current.getBoundingClientRect();
+          const mouseX = e.clientX - rect.left;
+          const chartWidth = rect.width;
+          
+          // Account for chart margins (left: 20, right: 30)
+          const leftMargin = 20;
+          const rightMargin = 30;
+          const plotWidth = chartWidth - leftMargin - rightMargin;
+          
+          // Calculate relative position within plot area
+          const relativeX = (mouseX - leftMargin) / plotWidth;
+          
+          if (relativeX >= 0 && relativeX <= 1) {
+            const maxDistance = elevationData[elevationData.length - 1]?.distance || 0;
+            const distance = relativeX * maxDistance;
+            onHover(distance);
+          }
+        }}
+        onMouseLeave={() => {
+          if (onHover) onHover(null);
+        }}
+      >
+        <ResponsiveContainer width="100%" height={height}>
         <AreaChart
           data={elevationData}
           margin={{
@@ -635,21 +652,6 @@ export const ElevationGraph: React.FC<ElevationGraphProps> = ({
             right: 30,
             left: 20,
             bottom: 20,
-          }}
-          onMouseMove={(state: any) => {
-            console.log("Chart enter", state);
-            if (
-              state &&
-              state.activeTooltipIndex !== undefined &&
-              state.activeTooltipIndex !== null &&
-              typeof state.activeTooltipIndex === "number"
-            ) {
-              setActiveIndex(state.activeTooltipIndex);
-            }
-          }}
-          onMouseLeave={() => {
-            console.log("Chart leave"); // Debug log
-            setActiveIndex(null);
           }}
         >
           <defs>
@@ -778,6 +780,7 @@ export const ElevationGraph: React.FC<ElevationGraphProps> = ({
             );
           })}
 
+
           {/* Base elevation area */}
           <Area
             type="monotone"
@@ -795,7 +798,7 @@ export const ElevationGraph: React.FC<ElevationGraphProps> = ({
             dataKey="elevation"
             stroke="#FF5500"
             strokeWidth={2}
-            fill="transparent"
+            fill="rgba(255, 85, 0, 0.1)"
             dot={false}
             activeDot={{
               r: 6,
@@ -805,7 +808,10 @@ export const ElevationGraph: React.FC<ElevationGraphProps> = ({
             }}
           />
         </AreaChart>
-      </ResponsiveContainer>
+        </ResponsiveContainer>
+      </div>
     </Box>
   );
-};
+});
+
+ElevationGraph.displayName = 'ElevationGraph';
