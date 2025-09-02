@@ -583,9 +583,24 @@ export const ElevationGraph: React.FC<ElevationGraphProps> = React.memo(({
   const maxElevation = Math.max(...elevations);
   const elevationRange = maxElevation - minElevation;
 
-  // Add some padding to the Y-axis
-  const yAxisMin = Math.max(0, minElevation - elevationRange * 0.1);
-  const yAxisMax = maxElevation + elevationRange * 0.1;
+  // Calculate axis ranges with proper rounding
+  const maxDistance = elevationData.length > 0 ? elevationData[elevationData.length - 1]?.distance || 0 : 0;
+  
+  // Round distance to nearest 500m (0.5km)
+  const xAxisMax = Math.ceil(maxDistance / 0.5) * 0.5;
+  const xTicks = [];
+  for (let i = 0; i <= xAxisMax; i += 0.5) {
+    xTicks.push(i);
+  }
+  
+  // Round elevation to nearest 50m with some padding
+  const elevationPadding = elevationRange * 0.1;
+  const yAxisMin = Math.floor((minElevation - elevationPadding) / 50) * 50;
+  const yAxisMax = Math.ceil((maxElevation + elevationPadding) / 50) * 50;
+  const yTicks = [];
+  for (let i = yAxisMin; i <= yAxisMax; i += 50) {
+    yTicks.push(i);
+  }
 
   return (
     <div
@@ -638,13 +653,15 @@ export const ElevationGraph: React.FC<ElevationGraphProps> = React.memo(({
             dataKey="distance"
             type="number"
             scale="linear"
-            domain={["dataMin", "dataMax"]}
+            domain={[0, xAxisMax]}
+            ticks={xTicks}
             tickFormatter={(value) => `${value}km`}
             stroke="#666"
             fontSize={12}
           />
           <YAxis
             domain={[yAxisMin, yAxisMax]}
+            ticks={yTicks}
             tickFormatter={(value) => `${value}m`}
             stroke="#666"
             fontSize={12}
