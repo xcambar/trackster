@@ -588,35 +588,7 @@ export const ElevationGraph: React.FC<ElevationGraphProps> = React.memo(({
   const yAxisMax = maxElevation + elevationRange * 0.1;
 
   return (
-    <Box>
-      <Box sx={{ mb: 2, display: "flex", gap: 3 }}>
-        <Box>
-          <Typography variant="body2" color="text.secondary">
-            Min Elevation
-          </Typography>
-          <Typography variant="body1" fontWeight="bold">
-            {minElevation}m
-          </Typography>
-        </Box>
-        <Box>
-          <Typography variant="body2" color="text.secondary">
-            Max Elevation
-          </Typography>
-          <Typography variant="body1" fontWeight="bold">
-            {maxElevation}m
-          </Typography>
-        </Box>
-        <Box>
-          <Typography variant="body2" color="text.secondary">
-            Elevation Range
-          </Typography>
-          <Typography variant="body1" fontWeight="bold">
-            {elevationRange}m
-          </Typography>
-        </Box>
-      </Box>
-
-      <div
+    <div
         ref={chartContainerRef}
         style={{ width: '100%', height: `${height}px` }}
         onMouseMove={(e) => {
@@ -809,8 +781,7 @@ export const ElevationGraph: React.FC<ElevationGraphProps> = React.memo(({
           />
         </AreaChart>
         </ResponsiveContainer>
-      </div>
-    </Box>
+    </div>
   );
 });
 
