@@ -1,13 +1,8 @@
-import { bigint, pgSchema, pgTable, uuid } from "drizzle-orm/pg-core";
-
-const mySchema = pgSchema("auth");
-
-const authSchemaUsers = mySchema.table("users", {
-  id: uuid("id").primaryKey(),
-});
+import { bigint, pgTable, uuid } from "drizzle-orm/pg-core";
+import { authSchemaUsersTable } from "../supabase_schema";
 
 export const userAthleteMappingTable = pgTable("user_athlete_mapping", {
-  userId: uuid("user_id").references(() => authSchemaUsers.id),
+  userId: uuid("user_id").references(() => authSchemaUsersTable.id),
   athleteId: bigint({ mode: "number" }),
 });
 

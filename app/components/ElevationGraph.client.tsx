@@ -11,12 +11,20 @@ import {
   YAxis,
 } from "recharts";
 import type { GPXAnalysis } from "~/lib/gpx/parser";
+import type { RouteAnalysis } from "~/lib/analysis/route-analysis";
 
 interface ElevationGraphProps {
-  gpxAnalysis: GPXAnalysis;
+  analysis: GPXAnalysis | RouteAnalysis;
   height?: number;
   onHover?: (distance: number | null) => void;
 }
+
+// Combined props type for backward compatibility
+type ElevationGraphPropsUnion = ElevationGraphProps | {
+  gpxAnalysis: GPXAnalysis;
+  height?: number;
+  onHover?: (distance: number | null) => void;
+};
 
 interface ElevationDataPoint {
   distance: number; // km
@@ -59,12 +67,16 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   return null;
 };
 
-export const ElevationGraph: React.FC<ElevationGraphProps> = React.memo(
-  ({ gpxAnalysis, height = 300, onHover }) => {
+export const ElevationGraph: React.FC<ElevationGraphPropsUnion> = React.memo(
+  (props) => {
+    // Support both prop formats for backward compatibility
+    const analysis = 'analysis' in props ? props.analysis : props.gpxAnalysis;
+    const height = props.height || 300;
+    const onHover = props.onHover;
     const chartContainerRef = React.useRef<HTMLDivElement>(null);
     // Process GPX points to create elevation profile
     const elevationData: ElevationDataPoint[] = React.useMemo(() => {
-      if (!gpxAnalysis.points || gpxAnalysis.points.length === 0) {
+      if (!analysis.points || analysis.points.length === 0) {
         return [];
       }
 
@@ -94,7 +106,7 @@ export const ElevationGraph: React.FC<ElevationGraphProps> = React.memo(
       // Distance-based grade calculation for chart alignment
       const calculateGradeAtDistance = (
         targetDistanceKm: number,
-        points: typeof gpxAnalysis.points,
+        points: typeof analysis.points,
         distanceFunc: typeof calculateDistance
       ): number => {
         const targetDistanceM = targetDistanceKm * 1000;
@@ -128,7 +140,7 @@ export const ElevationGraph: React.FC<ElevationGraphProps> = React.memo(
       // Multi-pass grade smoothing algorithm to eliminate terrain discontinuities
       const calculateMultiPassGrade = (
         currentIndex: number,
-        points: typeof gpxAnalysis.points,
+        points: typeof analysis.points,
         distanceFunc: typeof calculateDistance
       ): number => {
         if (
@@ -249,7 +261,7 @@ export const ElevationGraph: React.FC<ElevationGraphProps> = React.memo(
       let totalEffort = 0;
 
       // Add first point
-      const firstPoint = gpxAnalysis.points[0];
+      const firstPoint = analysis.points[0];
       if (firstPoint && firstPoint.elevation !== undefined) {
         data.push({
           distance: 0,
@@ -262,9 +274,9 @@ export const ElevationGraph: React.FC<ElevationGraphProps> = React.memo(
       }
 
       // Process remaining points
-      for (let i = 1; i < gpxAnalysis.points.length; i++) {
-        const prevPoint = gpxAnalysis.points[i - 1];
-        const currentPoint = gpxAnalysis.points[i];
+      for (let i = 1; i < analysis.points.length; i++) {
+        const prevPoint = analysis.points[i - 1];
+        const currentPoint = analysis.points[i];
 
         if (
           prevPoint &&
@@ -289,7 +301,7 @@ export const ElevationGraph: React.FC<ElevationGraphProps> = React.memo(
             // Calculate grade at the exact chart distance for proper alignment
             const grade = calculateGradeAtDistance(
               distanceKm,
-              gpxAnalysis.points,
+              analysis.points,
               calculateDistance
             );
 
@@ -327,7 +339,7 @@ export const ElevationGraph: React.FC<ElevationGraphProps> = React.memo(
       }
 
       return data;
-    }, [gpxAnalysis]);
+    }, [analysis]);
 
     // Create grade ranges using multi-pass calculated grades
     const gradeRanges = React.useMemo(() => {

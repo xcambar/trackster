@@ -1,4 +1,4 @@
-import { Await, useFetcher } from "@remix-run/react";
+import { Await, useFetcher, Link } from "@remix-run/react";
 import { Activity } from "@xcambar/trackster-db";
 import { convert } from "convert";
 import { format } from "date-fns";
@@ -6,6 +6,7 @@ import React, { Suspense, useEffect, useState } from "react";
 
 import {
   Avatar,
+  Box,
   Button,
   Checkbox,
   Chip,
@@ -26,6 +27,7 @@ import { StravaIcon } from "./CustomIcons";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
 import CalendarIcon from "@mui/icons-material/CalendarMonth";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import { pickCycleColor } from "~/lib/utils/cycle_color";
 import { ActivityTypeIcon } from "./ActivityTypeIcon";
 
@@ -121,16 +123,26 @@ const ActivityListItem: React.FC<{
       dense
       disablePadding
       secondaryAction={
-        <IconButton edge="end">
-          <ActivityTypeIcon
-            sportType={activity.sportType}
-            avatarProps={{
-              sx: {
-                bgcolor: selected ? options.color || "primary.main" : "primary",
-              },
-            }}
-          />
-        </IconButton>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          <IconButton 
+            component={Link} 
+            to={`/activities/${activity.id}`}
+            size="small"
+            title="View detailed analysis"
+          >
+            <VisibilityIcon fontSize="small" />
+          </IconButton>
+          <IconButton edge="end">
+            <ActivityTypeIcon
+              sportType={activity.sportType}
+              avatarProps={{
+                sx: {
+                  bgcolor: selected ? options.color || "primary.main" : "primary",
+                },
+              }}
+            />
+          </IconButton>
+        </Box>
       }
     >
       <ListItemButton selected={selected} onClick={toggleSelected}>
