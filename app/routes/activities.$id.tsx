@@ -215,31 +215,37 @@ export default function ActivityDetail() {
                 alignItems="flex-start"
                 mb={2}
               >
-                <Box>
-                  <Typography
-                    variant="h3"
-                    component="h1"
-                    gutterBottom
-                    sx={{ fontWeight: "bold" }}
+                <Box sx={{ flex: 1 }}>
+                  <Stack
+                    direction="row"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    mb={1}
                   >
-                    {analysis.name}
-                  </Typography>
-                  <Stack direction="row" spacing={2} alignItems="center">
-                    <Chip
-                      label={analysis.sportType}
-                      sx={{
-                        backgroundColor: "rgba(255,255,255,0.2)",
-                        color: "white",
-                      }}
-                    />
-                    {analysis.achievementCount ? (
-                      <Badge
-                        badgeContent={analysis.achievementCount}
-                        color="warning"
-                      >
-                        <EmojiEvents sx={{ color: "gold" }} />
-                      </Badge>
-                    ) : null}
+                    <Typography
+                      variant="h3"
+                      component="h1"
+                      sx={{ fontWeight: "bold" }}
+                    >
+                      {analysis.name}
+                    </Typography>
+                    <Stack direction="row" spacing={2} alignItems="center">
+                      <Chip
+                        label={analysis.sportType}
+                        sx={{
+                          backgroundColor: "rgba(255,255,255,0.2)",
+                          color: "white",
+                        }}
+                      />
+                      {analysis.achievementCount ? (
+                        <Badge
+                          badgeContent={analysis.achievementCount}
+                          color="warning"
+                        >
+                          <EmojiEvents sx={{ color: "gold" }} />
+                        </Badge>
+                      ) : null}
+                    </Stack>
                   </Stack>
                 </Box>
 
