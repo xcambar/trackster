@@ -350,196 +350,366 @@ export default function ActivityDetail() {
 
           {/* Performance Prediction vs Actual */}
           {racePrediction && actualTimeMinutes && (
-            <Card sx={{ mb: 3 }}>
-              <CardContent>
-                <Stack
-                  direction="row"
-                  alignItems="center"
-                  justifyContent="space-between"
-                  mb={2}
-                >
-                  <Typography variant="h5">Performance Analysis</Typography>
-                  <Tooltip title="Based on your training history and race terrain">
-                    <IconButton size="small">
-                      <Info />
-                    </IconButton>
-                  </Tooltip>
-                </Stack>
-
+            <Card
+              sx={{
+                mb: 3,
+                borderRadius: 2,
+                boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+              }}
+            >
+              <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
+                {/* Card Header */}
                 <Box
                   sx={{
-                    display: "flex",
-                    flexDirection: { xs: "column", md: "row" },
-                    gap: 3,
-                    alignItems: "flex-start",
+                    p: 3,
+                    pb: 2,
+                    borderBottom: "1px solid",
+                    borderColor: "divider",
+                    background:
+                      "linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.02) 100%)",
                   }}
                 >
-                  <Box sx={{ flex: { xs: "1", md: "0 0 33%" } }}>
-                    <Stack spacing={2}>
-                      <Box>
-                        <Typography variant="body2" color="text.secondary">
-                          Predicted Time
-                        </Typography>
-                        <Typography variant="h5" color="primary">
-                          {formatDuration(
-                            racePrediction.predictedTimeMinutes * 60
-                          )}
-                        </Typography>
-                      </Box>
-
-                      <Box>
-                        <Typography variant="body2" color="text.secondary">
-                          Actual Time
-                        </Typography>
-                        <Typography
-                          variant="h5"
-                          color={`${getPerformanceColor(performanceStatus!)}.main`}
-                        >
-                          {formatDuration(analysis.totalTime!)}
-                        </Typography>
-                      </Box>
-
-                      <Box>
-                        <Typography variant="body2" color="text.secondary">
-                          Difference
-                        </Typography>
-                        <Typography
-                          variant="h6"
-                          color={`${getPerformanceColor(performanceStatus!)}.main`}
-                        >
-                          {actualTimeMinutes >
-                          racePrediction.predictedTimeMinutes
-                            ? "+"
-                            : ""}
-                          {formatDuration(
-                            Math.abs(
-                              actualTimeMinutes -
-                                racePrediction.predictedTimeMinutes
-                            ) * 60
-                          )}
-                        </Typography>
-                      </Box>
-                    </Stack>
-                  </Box>
-
-                  <Box sx={{ flex: { xs: "1", md: "0 0 67%" } }}>
-                    <Box sx={{ mb: 2 }}>
+                  <Stack
+                    direction="row"
+                    alignItems="center"
+                    justifyContent="space-between"
+                  >
+                    <Box>
                       <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        gutterBottom
+                        variant="h5"
+                        sx={{
+                          fontWeight: 600,
+                          color: "secondary.main",
+                          mb: 0.5,
+                        }}
                       >
-                        Prediction Confidence:{" "}
-                        {(racePrediction.confidenceScore * 100).toFixed(0)}%
+                        Performance Analysis
                       </Typography>
-                      <LinearProgress
-                        variant="determinate"
-                        value={racePrediction.confidenceScore * 100}
-                        color={
-                          racePrediction.confidenceScore >= 0.8
-                            ? "success"
-                            : racePrediction.confidenceScore >= 0.6
-                              ? "info"
-                              : "warning"
-                        }
-                        sx={{ height: 8, borderRadius: 4 }}
-                      />
+                      <Typography variant="body2" color="text.secondary">
+                        Predicted vs actual performance
+                      </Typography>
+                    </Box>
+                    <Tooltip title="Based on your training history and race terrain">
+                      <IconButton size="small" sx={{ color: "secondary.main" }}>
+                        <Info />
+                      </IconButton>
+                    </Tooltip>
+                  </Stack>
+                </Box>
+
+                {/* Card Content */}
+                <Box sx={{ p: 3 }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: { xs: "column", md: "row" },
+                      gap: 3,
+                      alignItems: "flex-start",
+                    }}
+                  >
+                    <Box sx={{ flex: { xs: "1", md: "0 0 33%" } }}>
+                      <Stack spacing={2}>
+                        <Box>
+                          <Typography variant="body2" color="text.secondary">
+                            Predicted Time
+                          </Typography>
+                          <Typography variant="h5" color="primary">
+                            {formatDuration(
+                              racePrediction.predictedTimeMinutes * 60
+                            )}
+                          </Typography>
+                        </Box>
+
+                        <Box>
+                          <Typography variant="body2" color="text.secondary">
+                            Actual Time
+                          </Typography>
+                          <Typography
+                            variant="h5"
+                            color={`${getPerformanceColor(performanceStatus!)}.main`}
+                          >
+                            {formatDuration(analysis.totalTime!)}
+                          </Typography>
+                        </Box>
+
+                        <Box>
+                          <Typography variant="body2" color="text.secondary">
+                            Difference
+                          </Typography>
+                          <Typography
+                            variant="h6"
+                            color={`${getPerformanceColor(performanceStatus!)}.main`}
+                          >
+                            {actualTimeMinutes >
+                            racePrediction.predictedTimeMinutes
+                              ? "+"
+                              : ""}
+                            {formatDuration(
+                              Math.abs(
+                                actualTimeMinutes -
+                                  racePrediction.predictedTimeMinutes
+                              ) * 60
+                            )}
+                          </Typography>
+                        </Box>
+                      </Stack>
                     </Box>
 
-                    {racePrediction.limitingFactors.length > 0 && (
-                      <Alert severity="info" variant="outlined">
-                        <Typography variant="body2" gutterBottom>
-                          <strong>Prediction Limitations:</strong>
+                    <Box sx={{ flex: { xs: "1", md: "0 0 67%" } }}>
+                      <Box sx={{ mb: 2 }}>
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          gutterBottom
+                        >
+                          Prediction Confidence:{" "}
+                          {(racePrediction.confidenceScore * 100).toFixed(0)}%
                         </Typography>
-                        <ul style={{ margin: 0, paddingLeft: 20 }}>
-                          {racePrediction.limitingFactors.map(
-                            (factor, index) => (
-                              <li key={index}>
-                                <Typography variant="body2">
-                                  {factor}
-                                </Typography>
-                              </li>
-                            )
-                          )}
-                        </ul>
-                      </Alert>
-                    )}
+                        <LinearProgress
+                          variant="determinate"
+                          value={racePrediction.confidenceScore * 100}
+                          color={
+                            racePrediction.confidenceScore >= 0.8
+                              ? "success"
+                              : racePrediction.confidenceScore >= 0.6
+                                ? "info"
+                                : "warning"
+                          }
+                          sx={{ height: 8, borderRadius: 4 }}
+                        />
+                      </Box>
+
+                      {racePrediction.limitingFactors.length > 0 && (
+                        <Alert severity="info" variant="outlined">
+                          <Typography variant="body2" gutterBottom>
+                            <strong>Prediction Limitations:</strong>
+                          </Typography>
+                          <ul style={{ margin: 0, paddingLeft: 20 }}>
+                            {racePrediction.limitingFactors.map(
+                              (factor, index) => (
+                                <li key={index}>
+                                  <Typography variant="body2">
+                                    {factor}
+                                  </Typography>
+                                </li>
+                              )
+                            )}
+                          </ul>
+                        </Alert>
+                      )}
+                    </Box>
                   </Box>
                 </Box>
               </CardContent>
             </Card>
           )}
 
-          {/* Terrain Challenge Analysis */}
-          <Card sx={{ mb: 3 }}>
-            <CardContent>
-              <Typography variant="h5" gutterBottom>
-                Terrain Challenge Breakdown
-              </Typography>
-
+          {/* Route Map */}
+          <Card
+            sx={{
+              pb: 0,
+              mb: 3,
+              borderRadius: 2,
+              boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+            }}
+          >
+            <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
+              {/* Card Header */}
               <Box
                 sx={{
-                  display: "flex",
-                  flexDirection: { xs: "column", md: "row" },
-                  gap: 3,
+                  p: 3,
+                  pb: 2,
+                  borderBottom: "1px solid",
+                  borderColor: "divider",
+                  background:
+                    "linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.02) 100%)",
                 }}
               >
-                {/* Difficulty Indicators */}
-                <Box sx={{ flex: { xs: "1", md: "0 0 33%" } }}>
-                  <Stack spacing={2}>
-                    <Paper
-                      sx={{ p: 2, textAlign: "center", bgcolor: "primary.50" }}
-                    >
-                      <Typography
-                        variant="h4"
-                        color="primary"
-                        fontWeight="bold"
-                      >
-                        {formatGrade(analysis.averageGrade)}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Average Grade
-                      </Typography>
-                    </Paper>
+                <Box>
+                  <Typography
+                    variant="h5"
+                    sx={{
+                      fontWeight: 600,
+                      color: "secondary.main",
+                      mb: 0.5,
+                    }}
+                  >
+                    Route Map
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Interactive map showing your route path
+                  </Typography>
+                </Box>
+              </Box>
 
-                    <Paper
-                      sx={{ p: 2, textAlign: "center", bgcolor: "warning.50" }}
-                    >
-                      <Typography
-                        variant="h4"
-                        color="warning.main"
-                        fontWeight="bold"
-                      >
-                        {formatGrade(analysis.maxGrade)}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Steepest Climb
-                      </Typography>
-                    </Paper>
+              {/* Card Content - No padding for full-bleed map */}
+              <RouteMapWrapper analysis={analysis} />
+            </CardContent>
+          </Card>
 
-                    <Paper
-                      sx={{ p: 2, textAlign: "center", bgcolor: "info.50" }}
-                    >
-                      <Typography
-                        variant="h4"
-                        color="info.main"
-                        fontWeight="bold"
+          {/* Elevation Profile */}
+          <Card
+            sx={{
+              mb: 3,
+              borderRadius: 2,
+              boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+            }}
+          >
+            <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
+              {/* Card Header */}
+              <Box
+                sx={{
+                  p: 3,
+                  pb: 2,
+                  borderBottom: "1px solid",
+                  borderColor: "divider",
+                  background:
+                    "linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.02) 100%)",
+                }}
+              >
+                <Box>
+                  <Typography
+                    variant="h5"
+                    sx={{
+                      fontWeight: 600,
+                      color: "secondary.main",
+                      mb: 0.5,
+                    }}
+                  >
+                    Elevation Profile
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Elevation changes and grade analysis along the route
+                  </Typography>
+                </Box>
+              </Box>
+
+              {/* Card Content */}
+              <Box sx={{ p: 3 }}>
+                <ElevationProfileWrapper analysis={analysis} />
+              </Box>
+            </CardContent>
+          </Card>
+
+          {/* Terrain Challenge Analysis */}
+          <Card
+            sx={{
+              mb: 3,
+              borderRadius: 2,
+              boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+            }}
+          >
+            <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
+              {/* Card Header */}
+              <Box
+                sx={{
+                  p: 3,
+                  pb: 2,
+                  borderBottom: "1px solid",
+                  borderColor: "divider",
+                  background:
+                    "linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.02) 100%)",
+                }}
+              >
+                <Box>
+                  <Typography
+                    variant="h5"
+                    sx={{
+                      fontWeight: 600,
+                      color: "secondary.main",
+                      mb: 0.5,
+                    }}
+                  >
+                    Terrain Challenge Breakdown
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Grade distribution and difficulty analysis
+                  </Typography>
+                </Box>
+              </Box>
+
+              {/* Card Content */}
+              <Box sx={{ p: 3 }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: { xs: "column", md: "row" },
+                    gap: 3,
+                  }}
+                >
+                  {/* Difficulty Indicators */}
+                  <Box sx={{ flex: { xs: "1", md: "0 0 33%" } }}>
+                    <Stack spacing={2}>
+                      <Paper
+                        sx={{
+                          p: 2,
+                          textAlign: "center",
+                          bgcolor: "primary.50",
+                        }}
                       >
-                        {formatElevation(analysis.elevationRange)}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Elevation Range
-                      </Typography>
-                    </Paper>
-                  </Stack>
+                        <Typography
+                          variant="h4"
+                          color="primary"
+                          fontWeight="bold"
+                        >
+                          {formatGrade(analysis.averageGrade)}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Average Grade
+                        </Typography>
+                      </Paper>
+
+                      <Paper
+                        sx={{
+                          p: 2,
+                          textAlign: "center",
+                          bgcolor: "warning.50",
+                        }}
+                      >
+                        <Typography
+                          variant="h4"
+                          color="warning.main"
+                          fontWeight="bold"
+                        >
+                          {formatGrade(analysis.maxGrade)}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Steepest Climb
+                        </Typography>
+                      </Paper>
+
+                      <Paper
+                        sx={{ p: 2, textAlign: "center", bgcolor: "info.50" }}
+                      >
+                        <Typography
+                          variant="h4"
+                          color="info.main"
+                          fontWeight="bold"
+                        >
+                          {formatElevation(analysis.elevationRange)}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Elevation Range
+                        </Typography>
+                      </Paper>
+                    </Stack>
+                  </Box>
+
+                  {/* Grade Distribution */}
+                  <Box sx={{ flex: { xs: "1", md: "0 0 67%" } }}>
+                    <Typography variant="h6" gutterBottom>
+                      Grade Distribution Analysis
+                    </Typography>
+
+                    <GradeDistributionChartWrapper
+                      gradeDistribution={analysis.gradeDistribution}
+                      totalDistance={analysis.totalDistance}
+                    />
+                  </Box>
                 </Box>
 
-                {/* Grade Distribution */}
-                <Box sx={{ flex: { xs: "1", md: "0 0 67%" } }}>
-                  <Typography variant="h6" gutterBottom>
-                    Grade Distribution Analysis
-                  </Typography>
-
+                {/* Terrain Analysis Hints - Full Width */}
+                <Box sx={{ mt: 3 }}>
                   <Stack spacing={2}>
                     {/* Significant climbs */}
                     {analysis.gradeDistribution.grade10To15Km +
@@ -592,167 +762,147 @@ export default function ActivityDetail() {
             </CardContent>
           </Card>
 
-          {/* Grade Distribution Chart */}
-          <Card sx={{ mb: 3 }}>
-            <CardContent>
-              <Typography variant="h5" gutterBottom>
-                Grade Distribution
-              </Typography>
-              <Typography
-                variant="body2"
-                color="text.secondary"
-                gutterBottom
-                sx={{ mb: 3 }}
-              >
-                Percentage of route by grade range
-              </Typography>
-
-              <GradeDistributionChartWrapper
-                gradeDistribution={analysis.gradeDistribution}
-                totalDistance={analysis.totalDistance}
-              />
-            </CardContent>
-          </Card>
-
           {/* Activity Metadata */}
           {(analysis.locationCity ||
             analysis.startDate ||
             analysis.kudosCount ||
             analysis.achievementCount) && (
-            <Card sx={{ mb: 3 }}>
-              <CardContent>
-                <Typography variant="h5" gutterBottom>
-                  Activity Details
-                </Typography>
-
+            <Card
+              sx={{
+                mb: 3,
+                borderRadius: 2,
+                boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+              }}
+            >
+              <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
+                {/* Card Header */}
                 <Box
                   sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 3,
+                    p: 3,
+                    pb: 2,
+                    borderBottom: "1px solid",
+                    borderColor: "divider",
+                    background:
+                      "linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.02) 100%)",
                   }}
                 >
+                  <Box>
+                    <Typography
+                      variant="h5"
+                      sx={{
+                        fontWeight: 600,
+                        color: "secondary.main",
+                        mb: 0.5,
+                      }}
+                    >
+                      Activity Details
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Location, date, and social metrics
+                    </Typography>
+                  </Box>
+                </Box>
+
+                {/* Card Content */}
+                <Box sx={{ p: 3 }}>
                   <Box
                     sx={{
                       display: "flex",
-                      flexDirection: { xs: "column", sm: "row" },
+                      flexDirection: "column",
                       gap: 3,
                     }}
                   >
-                    {analysis.startDate && (
-                      <Box sx={{ flex: 1 }}>
-                        <Typography variant="body2" color="text.secondary">
-                          Date
-                        </Typography>
-                        <Typography variant="body1">
-                          {new Date(analysis.startDate).toLocaleDateString(
-                            "en-US",
-                            {
-                              weekday: "long",
-                              year: "numeric",
-                              month: "long",
-                              day: "numeric",
-                            }
-                          )}
-                        </Typography>
-                      </Box>
-                    )}
-
-                    {(analysis.locationCity || analysis.locationState) && (
-                      <Box sx={{ flex: 1 }}>
-                        <Typography variant="body2" color="text.secondary">
-                          Location
-                        </Typography>
-                        <Typography variant="body1">
-                          {[
-                            analysis.locationCity,
-                            analysis.locationState,
-                            analysis.locationCountry,
-                          ]
-                            .filter(Boolean)
-                            .join(", ")}
-                        </Typography>
-                      </Box>
-                    )}
-                  </Box>
-
-                  <Box>
-                    <Divider sx={{ my: 2 }} />
-                    <Stack direction="row" spacing={4}>
-                      {analysis.kudosCount !== undefined && (
-                        <Stack alignItems="center">
-                          <Typography variant="h5" color="primary">
-                            {analysis.kudosCount}
-                          </Typography>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexDirection: { xs: "column", sm: "row" },
+                        gap: 3,
+                      }}
+                    >
+                      {analysis.startDate && (
+                        <Box sx={{ flex: 1 }}>
                           <Typography variant="body2" color="text.secondary">
-                            Kudos
+                            Date
                           </Typography>
-                        </Stack>
+                          <Typography variant="body1">
+                            {new Date(analysis.startDate).toLocaleDateString(
+                              "en-US",
+                              {
+                                weekday: "long",
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                              }
+                            )}
+                          </Typography>
+                        </Box>
                       )}
 
-                      {analysis.achievementCount !== undefined && (
-                        <Stack alignItems="center">
-                          <Typography variant="h5" color="warning.main">
-                            {analysis.achievementCount}
-                          </Typography>
+                      {(analysis.locationCity || analysis.locationState) && (
+                        <Box sx={{ flex: 1 }}>
                           <Typography variant="body2" color="text.secondary">
-                            Achievements
+                            Location
                           </Typography>
-                        </Stack>
+                          <Typography variant="body1">
+                            {[
+                              analysis.locationCity,
+                              analysis.locationState,
+                              analysis.locationCountry,
+                            ]
+                              .filter(Boolean)
+                              .join(", ")}
+                          </Typography>
+                        </Box>
                       )}
+                    </Box>
 
-                      {analysis.sufferScore !== undefined && (
-                        <Stack alignItems="center">
-                          <Typography variant="h5" color="error">
-                            {analysis.sufferScore}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            Suffer Score
-                          </Typography>
-                        </Stack>
-                      )}
-                    </Stack>
+                    <Box>
+                      <Divider sx={{ my: 2 }} />
+                      <Stack direction="row" spacing={4}>
+                        {analysis.kudosCount !== undefined && (
+                          <Stack alignItems="center">
+                            <Typography variant="h5" color="primary">
+                              {analysis.kudosCount}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              Kudos
+                            </Typography>
+                          </Stack>
+                        )}
+
+                        {analysis.achievementCount !== undefined && (
+                          <Stack alignItems="center">
+                            <Typography variant="h5" color="warning.main">
+                              {analysis.achievementCount}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              Achievements
+                            </Typography>
+                          </Stack>
+                        )}
+
+                        {analysis.sufferScore !== undefined && (
+                          <Stack alignItems="center">
+                            <Typography variant="h5" color="error">
+                              {analysis.sufferScore}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              Suffer Score
+                            </Typography>
+                          </Stack>
+                        )}
+                      </Stack>
+                    </Box>
                   </Box>
                 </Box>
               </CardContent>
             </Card>
           )}
-
-          {/* Route Visualization */}
-          <RouteVisualizationWrapper analysis={analysis} />
         </Container>
       </Box>
     </Container>
   );
 }
-
-// Client-only wrapper for RouteVisualization
-const RouteVisualizationWrapper: React.FC<{ analysis: ActivityAnalysis }> = ({
-  analysis,
-}) => {
-  return (
-    <ClientOnly fallback={<div>Loading visualization...</div>}>
-      {() => {
-        // Use dynamic import to avoid SSR issues
-        const RouteVisualization = lazy(() =>
-          import("~/components/RouteVisualization.client").then((module) => ({
-            default: module.RouteVisualization,
-          }))
-        );
-
-        return (
-          <Suspense fallback={<div>Loading visualization...</div>}>
-            <RouteVisualization
-              analysis={analysis}
-              height={300}
-              mapHeight={400}
-            />
-          </Suspense>
-        );
-      }}
-    </ClientOnly>
-  );
-};
 
 // Client-only wrapper for GradeDistributionChart
 const GradeDistributionChartWrapper: React.FC<{
@@ -777,6 +927,54 @@ const GradeDistributionChartWrapper: React.FC<{
               gradeDistribution={gradeDistribution}
               totalDistance={totalDistance}
             />
+          </Suspense>
+        );
+      }}
+    </ClientOnly>
+  );
+};
+
+// Client-only wrapper for Route Map
+const RouteMapWrapper: React.FC<{ analysis: ActivityAnalysis }> = ({
+  analysis,
+}) => {
+  return (
+    <ClientOnly fallback={<div>Loading map...</div>}>
+      {() => {
+        // Use dynamic import to avoid SSR issues
+        const RouteMap = lazy(() =>
+          import("~/components/RouteMap.client").then((module) => ({
+            default: module.RouteMap,
+          }))
+        );
+
+        return (
+          <Suspense fallback={<div>Loading map...</div>}>
+            <RouteMap analysis={analysis} height={400} />
+          </Suspense>
+        );
+      }}
+    </ClientOnly>
+  );
+};
+
+// Client-only wrapper for Elevation Profile
+const ElevationProfileWrapper: React.FC<{ analysis: ActivityAnalysis }> = ({
+  analysis,
+}) => {
+  return (
+    <ClientOnly fallback={<div>Loading elevation profile...</div>}>
+      {() => {
+        // Use dynamic import to avoid SSR issues
+        const ElevationGraph = lazy(() =>
+          import("~/components/ElevationGraph.client").then((module) => ({
+            default: module.ElevationGraph,
+          }))
+        );
+
+        return (
+          <Suspense fallback={<div>Loading elevation profile...</div>}>
+            <ElevationGraph analysis={analysis} height={300} />
           </Suspense>
         );
       }}

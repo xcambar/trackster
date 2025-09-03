@@ -10,8 +10,8 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import type { GPXAnalysis } from "~/lib/gpx/parser";
 import type { RouteAnalysis } from "~/lib/analysis/route-analysis";
+import type { GPXAnalysis } from "~/lib/gpx/parser";
 
 interface ElevationGraphProps {
   analysis: GPXAnalysis | RouteAnalysis;
@@ -20,11 +20,13 @@ interface ElevationGraphProps {
 }
 
 // Combined props type for backward compatibility
-type ElevationGraphPropsUnion = ElevationGraphProps | {
-  gpxAnalysis: GPXAnalysis;
-  height?: number;
-  onHover?: (distance: number | null) => void;
-};
+type ElevationGraphPropsUnion =
+  | ElevationGraphProps
+  | {
+      gpxAnalysis: GPXAnalysis;
+      height?: number;
+      onHover?: (distance: number | null) => void;
+    };
 
 interface ElevationDataPoint {
   distance: number; // km
@@ -70,7 +72,7 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
 export const ElevationGraph: React.FC<ElevationGraphPropsUnion> = React.memo(
   (props) => {
     // Support both prop formats for backward compatibility
-    const analysis = 'analysis' in props ? props.analysis : props.gpxAnalysis;
+    const analysis = "analysis" in props ? props.analysis : props.gpxAnalysis;
     const height = props.height || 300;
     const onHover = props.onHover;
     const chartContainerRef = React.useRef<HTMLDivElement>(null);
@@ -617,10 +619,10 @@ export const ElevationGraph: React.FC<ElevationGraphPropsUnion> = React.memo(
         ? elevationData[elevationData.length - 1]?.distance || 0
         : 0;
 
-    // Round distance to nearest 500m (0.5km)
+    // Round distance to nearest 1000m (1km)
     const xAxisMax = Math.ceil(maxDistance / 0.5) * 0.5;
     const xTicks = [];
-    for (let i = 0; i <= xAxisMax; i += 0.5) {
+    for (let i = 0; i <= xAxisMax; i += 1) {
       xTicks.push(i);
     }
 
