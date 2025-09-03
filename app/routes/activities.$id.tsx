@@ -1,42 +1,45 @@
-import { 
-  AlertColor, 
-  Box, 
-  Container, 
-  Card, 
-  CardContent, 
-  Typography, 
-  Chip, 
-  LinearProgress,
-  Avatar,
-  Alert,
-  Divider,
-  Stack,
-  Paper,
-  IconButton,
-  Tooltip,
-  Badge
-} from "@mui/material";
 import {
-  TrendingUp,
-  TrendingDown,
-  Speed,
-  Timer,
-  Terrain,
-  EmojiEvents,
   CompareArrows,
-  Info
+  EmojiEvents,
+  Info,
+  Speed,
+  Terrain,
+  Timer,
+  TrendingDown,
+  TrendingUp,
 } from "@mui/icons-material";
+import {
+  Alert,
+  AlertColor,
+  Avatar,
+  Badge,
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  Container,
+  Divider,
+  IconButton,
+  LinearProgress,
+  Paper,
+  Stack,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 import type { ActionFunctionArgs, MetaFunction } from "@remix-run/node";
 import { data, redirect, useLoaderData } from "@remix-run/react";
 import React, { lazy, Suspense } from "react";
 import { ClientOnly } from "remix-utils/client-only";
 import { AppBar } from "~/components/AppBar";
 import { FlashMessage } from "~/components/FlashMessage";
+import { ActivityAnalysis } from "~/lib/analysis/activity-adapter";
 import { getActivityAnalysis } from "~/lib/models/activity-analysis";
 import { getUserFromSession } from "~/lib/models/user";
-import { ActivityAnalysis } from "~/lib/analysis/activity-adapter";
+import {
+  racePredictionEngine,
+  RacePredictionInput,
+} from "~/lib/race-predictor/prediction-engine";
 import { formatDistance, formatDuration } from "~/lib/utils/grade-analysis";
-import { racePredictionEngine, RacePredictionInput } from "~/lib/race-predictor/prediction-engine";
 import {
   commitSession,
   getCompleteUserSession,
@@ -45,8 +48,16 @@ import {
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
   return [
-    { title: data ? `${data.analysis.name} - Activity Analysis` : "Activity Analysis" },
-    { name: "description", content: "Detailed analysis of your activity including elevation, grade distribution, and performance metrics" },
+    {
+      title: data
+        ? `${data.analysis.name} - Activity Analysis`
+        : "Activity Analysis",
+    },
+    {
+      name: "description",
+      content:
+        "Detailed analysis of your activity including elevation, grade distribution, and performance metrics",
+    },
   ];
 };
 
@@ -68,7 +79,9 @@ export const loader = async ({ request, params }: ActionFunctionArgs) => {
   const analysis = await getActivityAnalysis(activityId, user);
 
   if (!analysis) {
-    throw new Response("Activity not found or cannot be analyzed", { status: 404 });
+    throw new Response("Activity not found or cannot be analyzed", {
+      status: 404,
+    });
   }
 
   // Generate race prediction for performance comparison
@@ -78,9 +91,10 @@ export const loader = async ({ request, params }: ActionFunctionArgs) => {
       athleteId: Number(user.id),
       totalDistanceKm: analysis.totalDistance / 1000,
       totalElevationGainM: analysis.totalElevationGain,
-      gradeDistribution: analysis.gradeDistribution
+      gradeDistribution: analysis.gradeDistribution,
     };
-    racePrediction = await racePredictionEngine.predictRaceTime(predictionInput);
+    racePrediction =
+      await racePredictionEngine.predictRaceTime(predictionInput);
   } catch (error) {
     console.warn("Could not generate race prediction:", error);
   }
@@ -105,7 +119,7 @@ function formatPace(speed: number): string {
   const minPerKm = 1000 / (speed * 60); // Convert m/s to min/km
   const minutes = Math.floor(minPerKm);
   const seconds = Math.round((minPerKm - minutes) * 60);
-  return `${minutes}:${seconds.toString().padStart(2, '0')}/km`;
+  return `${minutes}:${seconds.toString().padStart(2, "0")}/km`;
 }
 
 function formatElevation(meters: number): string {
@@ -113,30 +127,42 @@ function formatElevation(meters: number): string {
 }
 
 function formatGrade(percent: number): string {
-  return `${percent >= 0 ? '+' : ''}${percent.toFixed(1)}%`;
+  return `${percent >= 0 ? "+" : ""}${percent.toFixed(1)}%`;
 }
 
-function getPerformanceStatus(actual: number, predicted: number, tolerance = 0.1) {
+function getPerformanceStatus(
+  actual: number,
+  predicted: number,
+  tolerance = 0.1
+) {
   const difference = (actual - predicted) / predicted;
-  if (Math.abs(difference) <= tolerance) return 'on-track';
-  return difference < 0 ? 'exceeded' : 'underperformed';
+  if (Math.abs(difference) <= tolerance) return "on-track";
+  return difference < 0 ? "exceeded" : "underperformed";
 }
 
 function getPerformanceColor(status: string) {
   switch (status) {
-    case 'exceeded': return 'success';
-    case 'on-track': return 'info';
-    case 'underperformed': return 'warning';
-    default: return 'primary';
+    case "exceeded":
+      return "success";
+    case "on-track":
+      return "info";
+    case "underperformed":
+      return "warning";
+    default:
+      return "primary";
   }
 }
 
 function getPerformanceIcon(status: string) {
   switch (status) {
-    case 'exceeded': return <TrendingUp />;
-    case 'on-track': return <CompareArrows />;
-    case 'underperformed': return <TrendingDown />;
-    default: return <Speed />;
+    case "exceeded":
+      return <TrendingUp />;
+    case "on-track":
+      return <CompareArrows />;
+    case "underperformed":
+      return <TrendingDown />;
+    default:
+      return <Speed />;
   }
 }
 
@@ -146,8 +172,13 @@ export default function ActivityDetail() {
 
   // Calculate performance metrics vs prediction
   const actualTimeMinutes = analysis.totalTime ? analysis.totalTime / 60 : null;
-  const performanceStatus = actualTimeMinutes && racePrediction ? 
-    getPerformanceStatus(actualTimeMinutes, racePrediction.predictedTimeMinutes) : null;
+  const performanceStatus =
+    actualTimeMinutes && racePrediction
+      ? getPerformanceStatus(
+          actualTimeMinutes,
+          racePrediction.predictedTimeMinutes
+        )
+      : null;
 
   return (
     <Container maxWidth={false} disableGutters>
@@ -161,66 +192,105 @@ export default function ActivityDetail() {
             />
           )
       )}
-      
-      <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100dvh" }}>
+
+      <Box
+        sx={{ display: "flex", flexDirection: "column", minHeight: "100dvh" }}
+      >
         <AppBar showLogout={true} />
-        
+
         <Container maxWidth="lg" sx={{ flexGrow: 1, py: 3 }}>
-          
           {/* Performance Summary Hero */}
-          <Paper elevation={3} sx={{ mb: 3, overflow: 'hidden', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
-            <CardContent sx={{ p: 4, color: 'white' }}>
-              <Stack direction="row" justifyContent="space-between" alignItems="flex-start" mb={2}>
+          <Paper
+            elevation={3}
+            sx={{
+              mb: 3,
+              overflow: "hidden",
+              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            }}
+          >
+            <CardContent sx={{ p: 4, color: "white" }}>
+              <Stack
+                direction="row"
+                justifyContent="space-between"
+                alignItems="flex-start"
+                mb={2}
+              >
                 <Box>
-                  <Typography variant="h3" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
+                  <Typography
+                    variant="h3"
+                    component="h1"
+                    gutterBottom
+                    sx={{ fontWeight: "bold" }}
+                  >
                     {analysis.name}
                   </Typography>
                   <Stack direction="row" spacing={2} alignItems="center">
-                    <Chip 
-                      label={analysis.sportType} 
-                      sx={{ backgroundColor: 'rgba(255,255,255,0.2)', color: 'white' }}
+                    <Chip
+                      label={analysis.sportType}
+                      sx={{
+                        backgroundColor: "rgba(255,255,255,0.2)",
+                        color: "white",
+                      }}
                     />
                     {analysis.achievementCount ? (
-                      <Badge badgeContent={analysis.achievementCount} color="warning">
-                        <EmojiEvents sx={{ color: 'gold' }} />
+                      <Badge
+                        badgeContent={analysis.achievementCount}
+                        color="warning"
+                      >
+                        <EmojiEvents sx={{ color: "gold" }} />
                       </Badge>
                     ) : null}
                   </Stack>
                 </Box>
-                
+
                 {performanceStatus && (
-                  <Paper sx={{ p: 2, textAlign: 'center', minWidth: 120 }}>
-                    <Avatar 
-                      sx={{ 
-                        bgcolor: `${getPerformanceColor(performanceStatus)}.main`, 
-                        mb: 1, 
-                        mx: 'auto' 
+                  <Paper sx={{ p: 2, textAlign: "center", minWidth: 120 }}>
+                    <Avatar
+                      sx={{
+                        bgcolor: `${getPerformanceColor(performanceStatus)}.main`,
+                        mb: 1,
+                        mx: "auto",
                       }}
                     >
                       {getPerformanceIcon(performanceStatus)}
                     </Avatar>
-                    <Typography variant="caption" display="block" color="text.secondary">
+                    <Typography
+                      variant="caption"
+                      display="block"
+                      color="text.secondary"
+                    >
                       Performance
                     </Typography>
-                    <Typography variant="h6" color={`${getPerformanceColor(performanceStatus)}.main`}>
-                      {performanceStatus === 'exceeded' ? 'Exceeded' : 
-                       performanceStatus === 'on-track' ? 'On Track' : 'Below'}
+                    <Typography
+                      variant="h6"
+                      color={`${getPerformanceColor(performanceStatus)}.main`}
+                    >
+                      {performanceStatus === "exceeded"
+                        ? "Exceeded"
+                        : performanceStatus === "on-track"
+                          ? "On Track"
+                          : "Below"}
                     </Typography>
                   </Paper>
                 )}
               </Stack>
 
               {/* Key Performance Metrics */}
-              <Box sx={{ 
-                display: 'flex', 
-                flexWrap: 'wrap', 
-                gap: 3, 
-                mt: 2,
-                '& > *': {
-                  flex: { xs: '1 1 calc(50% - 12px)', md: '1 1 calc(25% - 18px)' },
-                  minWidth: 0
-                }
-              }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: 3,
+                  mt: 2,
+                  "& > *": {
+                    flex: {
+                      xs: "1 1 calc(50% - 12px)",
+                      md: "1 1 calc(25% - 18px)",
+                    },
+                    minWidth: 0,
+                  },
+                }}
+              >
                 {/* 1. Distance */}
                 <Stack alignItems="center" spacing={1}>
                   <Speed sx={{ fontSize: 32, opacity: 0.8 }} />
@@ -231,7 +301,7 @@ export default function ActivityDetail() {
                     Distance
                   </Typography>
                 </Stack>
-                
+
                 {/* 2. Pace */}
                 {analysis.averageSpeed && (
                   <Stack alignItems="center" spacing={1}>
@@ -244,7 +314,7 @@ export default function ActivityDetail() {
                     </Typography>
                   </Stack>
                 )}
-                
+
                 {/* 3. Time */}
                 {analysis.totalTime && (
                   <Stack alignItems="center" spacing={1}>
@@ -257,7 +327,7 @@ export default function ActivityDetail() {
                     </Typography>
                   </Stack>
                 )}
-                
+
                 {/* 4. Elevation Gain */}
                 <Stack alignItems="center" spacing={1}>
                   <Terrain sx={{ fontSize: 32, opacity: 0.8 }} />
@@ -276,10 +346,13 @@ export default function ActivityDetail() {
           {racePrediction && actualTimeMinutes && (
             <Card sx={{ mb: 3 }}>
               <CardContent>
-                <Stack direction="row" alignItems="center" justifyContent="space-between" mb={2}>
-                  <Typography variant="h5">
-                    Performance Analysis
-                  </Typography>
+                <Stack
+                  direction="row"
+                  alignItems="center"
+                  justifyContent="space-between"
+                  mb={2}
+                >
+                  <Typography variant="h5">Performance Analysis</Typography>
                   <Tooltip title="Based on your training history and race terrain">
                     <IconButton size="small">
                       <Info />
@@ -287,72 +360,101 @@ export default function ActivityDetail() {
                   </Tooltip>
                 </Stack>
 
-                <Box sx={{ 
-                  display: 'flex', 
-                  flexDirection: { xs: 'column', md: 'row' },
-                  gap: 3,
-                  alignItems: 'flex-start'
-                }}>
-                  <Box sx={{ flex: { xs: '1', md: '0 0 33%' } }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: { xs: "column", md: "row" },
+                    gap: 3,
+                    alignItems: "flex-start",
+                  }}
+                >
+                  <Box sx={{ flex: { xs: "1", md: "0 0 33%" } }}>
                     <Stack spacing={2}>
                       <Box>
                         <Typography variant="body2" color="text.secondary">
                           Predicted Time
                         </Typography>
                         <Typography variant="h5" color="primary">
-                          {formatDuration(racePrediction.predictedTimeMinutes * 60)}
+                          {formatDuration(
+                            racePrediction.predictedTimeMinutes * 60
+                          )}
                         </Typography>
                       </Box>
-                      
+
                       <Box>
                         <Typography variant="body2" color="text.secondary">
                           Actual Time
                         </Typography>
-                        <Typography variant="h5" color={`${getPerformanceColor(performanceStatus!)}.main`}>
+                        <Typography
+                          variant="h5"
+                          color={`${getPerformanceColor(performanceStatus!)}.main`}
+                        >
                           {formatDuration(analysis.totalTime!)}
                         </Typography>
                       </Box>
-                      
+
                       <Box>
                         <Typography variant="body2" color="text.secondary">
                           Difference
                         </Typography>
-                        <Typography 
-                          variant="h6" 
+                        <Typography
+                          variant="h6"
                           color={`${getPerformanceColor(performanceStatus!)}.main`}
                         >
-                          {actualTimeMinutes > racePrediction.predictedTimeMinutes ? '+' : ''}
-                          {formatDuration(Math.abs(actualTimeMinutes - racePrediction.predictedTimeMinutes) * 60)}
+                          {actualTimeMinutes >
+                          racePrediction.predictedTimeMinutes
+                            ? "+"
+                            : ""}
+                          {formatDuration(
+                            Math.abs(
+                              actualTimeMinutes -
+                                racePrediction.predictedTimeMinutes
+                            ) * 60
+                          )}
                         </Typography>
                       </Box>
                     </Stack>
                   </Box>
-                  
-                  <Box sx={{ flex: { xs: '1', md: '0 0 67%' } }}>
+
+                  <Box sx={{ flex: { xs: "1", md: "0 0 67%" } }}>
                     <Box sx={{ mb: 2 }}>
-                      <Typography variant="body2" color="text.secondary" gutterBottom>
-                        Prediction Confidence: {(racePrediction.confidenceScore * 100).toFixed(0)}%
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        gutterBottom
+                      >
+                        Prediction Confidence:{" "}
+                        {(racePrediction.confidenceScore * 100).toFixed(0)}%
                       </Typography>
-                      <LinearProgress 
-                        variant="determinate" 
+                      <LinearProgress
+                        variant="determinate"
                         value={racePrediction.confidenceScore * 100}
-                        color={racePrediction.confidenceScore >= 0.8 ? 'success' : 
-                               racePrediction.confidenceScore >= 0.6 ? 'info' : 'warning'}
+                        color={
+                          racePrediction.confidenceScore >= 0.8
+                            ? "success"
+                            : racePrediction.confidenceScore >= 0.6
+                              ? "info"
+                              : "warning"
+                        }
                         sx={{ height: 8, borderRadius: 4 }}
                       />
                     </Box>
-                    
+
                     {racePrediction.limitingFactors.length > 0 && (
                       <Alert severity="info" variant="outlined">
                         <Typography variant="body2" gutterBottom>
                           <strong>Prediction Limitations:</strong>
                         </Typography>
                         <ul style={{ margin: 0, paddingLeft: 20 }}>
-                          {racePrediction.limitingFactors.map((factor, index) => (
-                            <li key={index}>
-                              <Typography variant="body2">{factor}</Typography>
-                            </li>
-                          ))}
+                          {racePrediction.limitingFactors.map(
+                            (factor, index) => (
+                              <li key={index}>
+                                <Typography variant="body2">
+                                  {factor}
+                                </Typography>
+                              </li>
+                            )
+                          )}
                         </ul>
                       </Alert>
                     )}
@@ -368,35 +470,55 @@ export default function ActivityDetail() {
               <Typography variant="h5" gutterBottom>
                 Terrain Challenge Breakdown
               </Typography>
-              
-              <Box sx={{ 
-                display: 'flex', 
-                flexDirection: { xs: 'column', md: 'row' },
-                gap: 3
-              }}>
+
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: { xs: "column", md: "row" },
+                  gap: 3,
+                }}
+              >
                 {/* Difficulty Indicators */}
-                <Box sx={{ flex: { xs: '1', md: '0 0 33%' } }}>
+                <Box sx={{ flex: { xs: "1", md: "0 0 33%" } }}>
                   <Stack spacing={2}>
-                    <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'primary.50' }}>
-                      <Typography variant="h4" color="primary" fontWeight="bold">
+                    <Paper
+                      sx={{ p: 2, textAlign: "center", bgcolor: "primary.50" }}
+                    >
+                      <Typography
+                        variant="h4"
+                        color="primary"
+                        fontWeight="bold"
+                      >
                         {formatGrade(analysis.averageGrade)}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
                         Average Grade
                       </Typography>
                     </Paper>
-                    
-                    <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'warning.50' }}>
-                      <Typography variant="h4" color="warning.main" fontWeight="bold">
+
+                    <Paper
+                      sx={{ p: 2, textAlign: "center", bgcolor: "warning.50" }}
+                    >
+                      <Typography
+                        variant="h4"
+                        color="warning.main"
+                        fontWeight="bold"
+                      >
                         {formatGrade(analysis.maxGrade)}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
                         Steepest Climb
                       </Typography>
                     </Paper>
-                    
-                    <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'info.50' }}>
-                      <Typography variant="h4" color="info.main" fontWeight="bold">
+
+                    <Paper
+                      sx={{ p: 2, textAlign: "center", bgcolor: "info.50" }}
+                    >
+                      <Typography
+                        variant="h4"
+                        color="info.main"
+                        fontWeight="bold"
+                      >
                         {formatElevation(analysis.elevationRange)}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
@@ -405,47 +527,56 @@ export default function ActivityDetail() {
                     </Paper>
                   </Stack>
                 </Box>
-                
+
                 {/* Grade Distribution */}
-                <Box sx={{ flex: { xs: '1', md: '0 0 67%' } }}>
+                <Box sx={{ flex: { xs: "1", md: "0 0 67%" } }}>
                   <Typography variant="h6" gutterBottom>
                     Grade Distribution Analysis
                   </Typography>
-                  
+
                   <Stack spacing={2}>
                     {/* Significant climbs */}
-                    {analysis.gradeDistribution.grade10To15Km + 
-                     analysis.gradeDistribution.grade15To25Km + 
-                     analysis.gradeDistribution.gradeOver25Km > 0 && (
+                    {analysis.gradeDistribution.grade10To15Km +
+                      analysis.gradeDistribution.grade15To25Km +
+                      analysis.gradeDistribution.gradeOver25Km >
+                      0 && (
                       <Alert severity="warning" variant="outlined">
                         <Typography variant="body2">
-                          <strong>Challenging Climbs:</strong> This route includes{' '}
-                          {formatDistance((analysis.gradeDistribution.grade10To15Km + 
-                                          analysis.gradeDistribution.grade15To25Km + 
-                                          analysis.gradeDistribution.gradeOver25Km) * 1000)}{' '}
+                          <strong>Challenging Climbs:</strong> This route
+                          includes{" "}
+                          {formatDistance(
+                            (analysis.gradeDistribution.grade10To15Km +
+                              analysis.gradeDistribution.grade15To25Km +
+                              analysis.gradeDistribution.gradeOver25Km) *
+                              1000
+                          )}{" "}
                           of steep terrain (&gt;10% grade)
                         </Typography>
                       </Alert>
                     )}
-                    
+
                     {/* Rolling terrain */}
-                    {analysis.gradeDistribution.grade0To5Km + 
-                     analysis.gradeDistribution.grade5To10Km > analysis.totalDistance / 1000 * 0.6 && (
+                    {analysis.gradeDistribution.grade0To5Km +
+                      analysis.gradeDistribution.grade5To10Km >
+                      (analysis.totalDistance / 1000) * 0.6 && (
                       <Alert severity="info" variant="outlined">
                         <Typography variant="body2">
-                          <strong>Rolling Terrain:</strong> Most of this route features moderate climbs and descents
+                          <strong>Rolling Terrain:</strong> Most of this route
+                          features moderate climbs and descents
                         </Typography>
                       </Alert>
                     )}
 
                     {/* Downhill sections */}
-                    {analysis.gradeDistribution.gradeNeg10ToNeg5Km + 
-                     analysis.gradeDistribution.gradeNeg15ToNeg10Km + 
-                     analysis.gradeDistribution.gradeNeg25ToNeg15Km + 
-                     analysis.gradeDistribution.gradeNegOver25Km > 0.5 && (
+                    {analysis.gradeDistribution.gradeNeg10ToNeg5Km +
+                      analysis.gradeDistribution.gradeNeg15ToNeg10Km +
+                      analysis.gradeDistribution.gradeNeg25ToNeg15Km +
+                      analysis.gradeDistribution.gradeNegOver25Km >
+                      0.5 && (
                       <Alert severity="success" variant="outlined">
                         <Typography variant="body2">
-                          <strong>Fast Descents:</strong> Significant downhill sections provided speed opportunities
+                          <strong>Fast Descents:</strong> Significant downhill
+                          sections provided speed opportunities
                         </Typography>
                       </Alert>
                     )}
@@ -455,123 +586,90 @@ export default function ActivityDetail() {
             </CardContent>
           </Card>
 
-          {/* Detailed Grade Distribution */}
+          {/* Grade Distribution Chart */}
           <Card sx={{ mb: 3 }}>
             <CardContent>
               <Typography variant="h5" gutterBottom>
-                Detailed Grade Distribution
+                Grade Distribution
               </Typography>
-              
-              <Box sx={{ 
-                display: 'flex', 
-                flexDirection: { xs: 'column', sm: 'row' },
-                gap: 3
-              }}>
-                {/* Uphill Grades */}
-                <Box sx={{ flex: 1 }}>
-                  <Typography variant="h6" gutterBottom color="primary">
-                    Climbs
-                  </Typography>
-                  <Stack spacing={1}>
-                    {[
-                      { range: '0-5%', distance: analysis.gradeDistribution.grade0To5Km, color: 'success' },
-                      { range: '5-10%', distance: analysis.gradeDistribution.grade5To10Km, color: 'info' },
-                      { range: '10-15%', distance: analysis.gradeDistribution.grade10To15Km, color: 'warning' },
-                      { range: '15-25%', distance: analysis.gradeDistribution.grade15To25Km, color: 'error' },
-                      { range: '&gt;25%', distance: analysis.gradeDistribution.gradeOver25Km, color: 'error' }
-                    ].filter(item => item.distance > 0).map(item => (
-                      <Paper key={item.range} sx={{ p: 1.5, bgcolor: `${item.color}.50` }}>
-                        <Stack direction="row" justifyContent="space-between" alignItems="center">
-                          <Typography variant="body1" fontWeight="medium">
-                            {item.range}
-                          </Typography>
-                          <Typography variant="h6" color={`${item.color}.main`}>
-                            {formatDistance(item.distance * 1000)}
-                          </Typography>
-                        </Stack>
-                      </Paper>
-                    ))}
-                  </Stack>
-                </Box>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                gutterBottom
+                sx={{ mb: 3 }}
+              >
+                Percentage of route by grade range
+              </Typography>
 
-                {/* Downhill Grades */}
-                <Box sx={{ flex: 1 }}>
-                  <Typography variant="h6" gutterBottom color="secondary">
-                    Descents
-                  </Typography>
-                  <Stack spacing={1}>
-                    {[
-                      { range: '0 to -5%', distance: analysis.gradeDistribution.gradeNeg5To0Km, color: 'success' },
-                      { range: '-5 to -10%', distance: analysis.gradeDistribution.gradeNeg10ToNeg5Km, color: 'info' },
-                      { range: '-10 to -15%', distance: analysis.gradeDistribution.gradeNeg15ToNeg10Km, color: 'warning' },
-                      { range: '-15 to -25%', distance: analysis.gradeDistribution.gradeNeg25ToNeg15Km, color: 'error' },
-                      { range: '&lt;-25%', distance: analysis.gradeDistribution.gradeNegOver25Km, color: 'error' }
-                    ].filter(item => item.distance > 0).map(item => (
-                      <Paper key={item.range} sx={{ p: 1.5, bgcolor: `${item.color}.50` }}>
-                        <Stack direction="row" justifyContent="space-between" alignItems="center">
-                          <Typography variant="body1" fontWeight="medium">
-                            {item.range}
-                          </Typography>
-                          <Typography variant="h6" color={`${item.color}.main`}>
-                            {formatDistance(item.distance * 1000)}
-                          </Typography>
-                        </Stack>
-                      </Paper>
-                    ))}
-                  </Stack>
-                </Box>
-              </Box>
+              <GradeDistributionChartWrapper
+                gradeDistribution={analysis.gradeDistribution}
+                totalDistance={analysis.totalDistance}
+              />
             </CardContent>
           </Card>
 
           {/* Activity Metadata */}
-          {(analysis.locationCity || analysis.startDate || analysis.kudosCount || analysis.achievementCount) && (
+          {(analysis.locationCity ||
+            analysis.startDate ||
+            analysis.kudosCount ||
+            analysis.achievementCount) && (
             <Card sx={{ mb: 3 }}>
               <CardContent>
                 <Typography variant="h5" gutterBottom>
                   Activity Details
                 </Typography>
-                
-                <Box sx={{ 
-                  display: 'flex', 
-                  flexDirection: 'column',
-                  gap: 3
-                }}>
-                  <Box sx={{ 
-                    display: 'flex', 
-                    flexDirection: { xs: 'column', sm: 'row' },
-                    gap: 3
-                  }}>
+
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 3,
+                  }}
+                >
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: { xs: "column", sm: "row" },
+                      gap: 3,
+                    }}
+                  >
                     {analysis.startDate && (
                       <Box sx={{ flex: 1 }}>
                         <Typography variant="body2" color="text.secondary">
                           Date
                         </Typography>
                         <Typography variant="body1">
-                          {new Date(analysis.startDate).toLocaleDateString('en-US', {
-                            weekday: 'long',
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric'
-                          })}
+                          {new Date(analysis.startDate).toLocaleDateString(
+                            "en-US",
+                            {
+                              weekday: "long",
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            }
+                          )}
                         </Typography>
                       </Box>
                     )}
-                    
+
                     {(analysis.locationCity || analysis.locationState) && (
                       <Box sx={{ flex: 1 }}>
                         <Typography variant="body2" color="text.secondary">
                           Location
                         </Typography>
                         <Typography variant="body1">
-                          {[analysis.locationCity, analysis.locationState, analysis.locationCountry]
+                          {[
+                            analysis.locationCity,
+                            analysis.locationState,
+                            analysis.locationCountry,
+                          ]
                             .filter(Boolean)
-                            .join(', ')}
+                            .join(", ")}
                         </Typography>
                       </Box>
                     )}
                   </Box>
-                  
+
                   <Box>
                     <Divider sx={{ my: 2 }} />
                     <Stack direction="row" spacing={4}>
@@ -585,7 +683,7 @@ export default function ActivityDetail() {
                           </Typography>
                         </Stack>
                       )}
-                      
+
                       {analysis.achievementCount !== undefined && (
                         <Stack alignItems="center">
                           <Typography variant="h5" color="warning.main">
@@ -616,7 +714,6 @@ export default function ActivityDetail() {
 
           {/* Route Visualization */}
           <RouteVisualizationWrapper analysis={analysis} />
-
         </Container>
       </Box>
     </Container>
@@ -624,23 +721,55 @@ export default function ActivityDetail() {
 }
 
 // Client-only wrapper for RouteVisualization
-const RouteVisualizationWrapper: React.FC<{ analysis: ActivityAnalysis }> = ({ analysis }) => {
+const RouteVisualizationWrapper: React.FC<{ analysis: ActivityAnalysis }> = ({
+  analysis,
+}) => {
   return (
     <ClientOnly fallback={<div>Loading visualization...</div>}>
       {() => {
         // Use dynamic import to avoid SSR issues
-        const RouteVisualization = lazy(() => 
-          import("~/components/RouteVisualization.client").then(module => ({
-            default: module.RouteVisualization
+        const RouteVisualization = lazy(() =>
+          import("~/components/RouteVisualization.client").then((module) => ({
+            default: module.RouteVisualization,
           }))
         );
-        
+
         return (
           <Suspense fallback={<div>Loading visualization...</div>}>
             <RouteVisualization
               analysis={analysis}
               height={300}
               mapHeight={400}
+            />
+          </Suspense>
+        );
+      }}
+    </ClientOnly>
+  );
+};
+
+// Client-only wrapper for GradeDistributionChart
+const GradeDistributionChartWrapper: React.FC<{
+  gradeDistribution: ActivityAnalysis["gradeDistribution"];
+  totalDistance: number;
+}> = ({ gradeDistribution, totalDistance }) => {
+  return (
+    <ClientOnly fallback={<div>Loading chart...</div>}>
+      {() => {
+        // Use dynamic import to avoid SSR issues
+        const GradeDistributionChart = lazy(() =>
+          import("~/components/GradeDistributionChart.client").then(
+            (module) => ({
+              default: module.GradeDistributionChart,
+            })
+          )
+        );
+
+        return (
+          <Suspense fallback={<div>Loading chart...</div>}>
+            <GradeDistributionChart
+              gradeDistribution={gradeDistribution}
+              totalDistance={totalDistance}
             />
           </Suspense>
         );
