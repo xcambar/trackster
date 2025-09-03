@@ -18,7 +18,7 @@
     "db:flush": "dotenv -- bash -c 'psql ${SUPABASE_DB_URL} -f ./supabase/sql/flush.sql'",
     "db:migrate-schema": "npx drizzle-kit push",
     "db:hooks": "dotenv -- bash -c 'psql --set=webhook_domain=${URL} ${SUPABASE_DB_URL} -f ./supabase/sql/hooks.sql'",
-    "db:gap": "tsx ./scripts/seed_GAP_lookup_table.ts",
+    "db:gap": "tsx ./packages/@xcambar/db/cli/seed_GAP_lookup_table.ts",
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "changeset publish"
