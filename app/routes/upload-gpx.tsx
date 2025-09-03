@@ -196,7 +196,7 @@ export default function UploadGPX() {
   return (
     <>
       <AppBar showLogout />
-      <Container maxWidth="md" sx={{ mt: 4 }}>
+      <Container maxWidth="lg" sx={{ flexGrow: 1, py: 3 }}>
         <Typography variant="h4" gutterBottom>
           Upload GPX Route
         </Typography>

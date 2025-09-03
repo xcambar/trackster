@@ -1,7 +1,7 @@
 import { AlertColor, Box, Container, Card, CardContent, Typography, Chip, Grid } from "@mui/material";
 import type { ActionFunctionArgs, MetaFunction } from "@remix-run/node";
 import { data, redirect, useLoaderData } from "@remix-run/react";
-import { useState } from "react";
+import React, { useState, lazy, Suspense } from "react";
 import { ClientOnly } from "remix-utils/client-only";
 import { AppBar } from "~/components/AppBar";
 import { FlashMessage } from "~/components/FlashMessage";
@@ -386,21 +386,37 @@ export default function ActivityDetail() {
             </Card>
           )}
 
-          {/* TODO: Add visualization components here */}
-          <Card>
-            <CardContent>
-              <Typography variant="h5" gutterBottom>
-                Route Visualization
-              </Typography>
-              <Typography variant="body1" color="text.secondary">
-                Interactive route map and elevation graph will be added here using the unified visualization components.
-              </Typography>
-              {/* This will be implemented in the next step when we update the visualization components */}
-            </CardContent>
-          </Card>
+          {/* Route Visualization */}
+          <RouteVisualizationWrapper analysis={analysis} />
 
         </Container>
       </Box>
     </Container>
   );
 }
+
+// Client-only wrapper for RouteVisualization
+const RouteVisualizationWrapper: React.FC<{ analysis: ActivityAnalysis }> = ({ analysis }) => {
+  return (
+    <ClientOnly fallback={<div>Loading visualization...</div>}>
+      {() => {
+        // Use dynamic import to avoid SSR issues
+        const RouteVisualization = lazy(() => 
+          import("~/components/RouteVisualization.client").then(module => ({
+            default: module.RouteVisualization
+          }))
+        );
+        
+        return (
+          <Suspense fallback={<div>Loading visualization...</div>}>
+            <RouteVisualization
+              analysis={analysis}
+              height={300}
+              mapHeight={400}
+            />
+          </Suspense>
+        );
+      }}
+    </ClientOnly>
+  );
+};
