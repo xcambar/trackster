@@ -1,13 +1,11 @@
-import {
-  CompareArrows,
-  EmojiEvents,
-  Info,
-  Speed,
-  Terrain,
-  Timer,
-  TrendingDown,
-  TrendingUp,
-} from "@mui/icons-material";
+import CompareArrows from "@mui/icons-material/CompareArrows";
+import EmojiEvents from "@mui/icons-material/EmojiEvents";
+import Info from "@mui/icons-material/Info";
+import Speed from "@mui/icons-material/Speed";
+import Terrain from "@mui/icons-material/Terrain";
+import Timer from "@mui/icons-material/Timer";
+import TrendingDown from "@mui/icons-material/TrendingDown";
+import TrendingUp from "@mui/icons-material/TrendingUp";
 import {
   Alert,
   AlertColor,
