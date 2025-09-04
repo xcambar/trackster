@@ -1,5 +1,5 @@
 {
-  "extends": "../../../tsconfig.json",
+  "extends": "../trackster-app/tsconfig.json",
   "compilerOptions": {
     "types": ["node"]
   },

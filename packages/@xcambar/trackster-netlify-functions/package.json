@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "dev": "netlify functions:serve",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

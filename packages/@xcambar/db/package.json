@@ -20,9 +20,14 @@
     "./populateGAPLookup": "./populateGAPLookup.ts"
   },
   "dependencies": {
+    "@xcambar/trackster-env": "workspace:*",
+    "@xcambar/trackster-app": "workspace:*",
+    "change-case": "^5.4.4",
+    "dotenv": "^17.2.0",
     "drizzle-orm": "^0.44.3",
+    "es-toolkit": "^1.39.10",
     "pg": "^8.16.3",
-    "dotenv": "^17.2.0"
+    "strava": "^2.3.0"
   },
   "devDependencies": {
     "@types/pg": "^8.15.4",

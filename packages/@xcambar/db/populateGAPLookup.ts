@@ -1,4 +1,4 @@
-import db from "../../../app/services/db.server";
+import db from "@xcambar/trackster-db/client";
 import { gapLookupTable } from "./schema";
 
 /**

@@ -1,9 +1,9 @@
-import { AccessToken, DetailedActivity, SummaryActivity } from "strava";
-import { isPlainObject } from "es-toolkit";
 import { camelCase } from "change-case";
+import { isPlainObject } from "es-toolkit";
+import { AccessToken, DetailedActivity, SummaryActivity } from "strava";
 
+import db from "@xcambar/trackster-db/client";
 import { activitiesTable } from "./schema";
-import db from "../../../app/services/db.server";
 
 import { getTableColumns, sql } from "drizzle-orm";
 import { PgTable, PgTimestamp } from "drizzle-orm/pg-core";

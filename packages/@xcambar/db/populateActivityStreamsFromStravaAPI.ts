@@ -1,12 +1,12 @@
-import { getStravaAPIClient } from "../../../app/lib/strava/api";
-import { AccessToken, Stream, StreamSet } from "strava";
-import { isPlainObject } from "es-toolkit";
 import { camelCase } from "change-case";
+import { isPlainObject } from "es-toolkit";
+import { AccessToken, StreamSet } from "strava";
+import { getStravaAPIClient } from "../../../app/lib/strava/api";
 
-import { activityStreamsTable, activitiesTable } from "./schema";
-import db from "../../../app/services/db.server";
+import db from "@xcambar/trackster-db/client";
+import { activitiesTable, activityStreamsTable } from "./schema";
 
-import { getTableColumns, eq } from "drizzle-orm";
+import { eq, getTableColumns } from "drizzle-orm";
 import { PgTable, PgTimestamp } from "drizzle-orm/pg-core";
 import { buildStravaAPIScheduler } from "../../../app/services/strava.server";
 
