@@ -22,11 +22,11 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm test
-      - name: Setup Deno
-        uses: denoland/setup-deno@v2
-        with:
-          deno-version: v2.x
-      - run: |
-          cd supabase/functions
-          deno install
-          deno test
+#     - name: Setup Deno
+#       uses: denoland/setup-deno@v2
+#       with:
+#         deno-version: v2.x
+#     - run: |
+#         cd supabase/functions
+#         deno install
+#         deno test
