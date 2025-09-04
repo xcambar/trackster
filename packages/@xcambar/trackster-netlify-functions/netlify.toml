@@ -1,0 +1,14 @@
+[functions]
+directory = "src"
+
+[functions."populate-user-data"]
+methods = ["POST", "OPTIONS"]
+included_files = ["./node_modules/**/*"]
+
+[[redirects]]
+from = "/functions/populate-user-data/:userId"
+to = "/functions/populate-user-data"
+status = 200
+
+[dev]
+functions = "src"
