@@ -1,6 +1,6 @@
 import { OAuth2Tokens } from "arctic";
 import { Authenticator } from "remix-auth";
-import { StravaProfile, StravaStrategy } from "~/lib/strava/oauth/strategy";
+import { StravaProfile, StravaStrategy } from "@xcambar/trackster-strava-api";
 
 import { getEnvironment } from "@xcambar/trackster-env";
 

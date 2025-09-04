@@ -2,12 +2,12 @@ import { camelCase } from "change-case";
 import { isPlainObject } from "es-toolkit";
 import { AccessToken, DetailedActivity, SummaryActivity } from "strava";
 
-import db from "@xcambar/trackster-db/client";
-import { activitiesTable } from "./schema";
+import db from "./client";
+import { activitiesTable } from "./schemas/activities";
 
 import { getTableColumns, sql } from "drizzle-orm";
 import { PgTable, PgTimestamp } from "drizzle-orm/pg-core";
-import { buildStravaAPIScheduler } from "../../../app/services/strava.server";
+import { buildStravaAPIScheduler } from "@xcambar/trackster-strava-api";
 
 function findDateColumns(table: PgTable) {
   const columns = getTableColumns(table);

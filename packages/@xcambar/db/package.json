@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@xcambar/trackster-env": "workspace:*",
-    "@xcambar/trackster-app": "workspace:*",
+    "@xcambar/trackster-strava-api": "workspace:*",
     "change-case": "^5.4.4",
     "dotenv": "^17.2.0",
     "drizzle-orm": "^0.44.3",

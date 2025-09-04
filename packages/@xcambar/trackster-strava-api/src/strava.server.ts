@@ -1,6 +1,6 @@
-export type { StravaRequestFn } from "~/lib/strava/api/scheduler";
+export type { StravaRequestFn } from "./strava/api/scheduler";
 import { AccessToken } from "strava";
-import { StravaAPIScheduler } from "~/lib/strava/api/scheduler";
+import { StravaAPIScheduler } from "./strava/api/scheduler";
 
 const schedulers = new Map<string, StravaAPIScheduler>();
 

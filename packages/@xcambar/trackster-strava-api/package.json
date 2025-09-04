@@ -1,0 +1,35 @@
+{
+  "name": "@xcambar/trackster-strava-api",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@xcambar/trackster-env": "workspace:*",
+    "@mjackson/headers": "^0.11.1",
+    "arctic": "^3.7.0",
+    "change-case": "^5.4.4",
+    "cron": "^4.3.3",
+    "date-fns": "^4.1.0",
+    "drizzle-orm": "^0.44.3",
+    "es-toolkit": "^1.39.8",
+    "pg": "^8.16.3",
+    "remix-auth": "^4.2.0",
+    "remix-auth-oauth2": "^3.4.1",
+    "strava": "^2.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/pg": "^8.15.4",
+    "@vitest/ui": "^3.2.4",
+    "typescript": "^5.1.6",
+    "vitest": "^3.2.4"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

@@ -26,6 +26,7 @@
     "@types/google-polyline": "^1.0.2",
     "@xcambar/trackster-db": "workspace:*",
     "@xcambar/trackster-env": "workspace:*",
+    "@xcambar/trackster-strava-api": "workspace:*",
     "@xmldom/xmldom": "^0.8.11",
     "arctic": "^3.7.0",
     "convert": "^5.12.0",

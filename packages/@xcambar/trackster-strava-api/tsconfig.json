@@ -1,0 +1,8 @@
+{
+  "extends": "../trackster-app/tsconfig.json",
+  "compilerOptions": {
+    "types": ["node", "vitest/globals"]
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
+}

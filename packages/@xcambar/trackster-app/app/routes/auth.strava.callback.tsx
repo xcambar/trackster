@@ -1,5 +1,5 @@
 import type { ActionFunctionArgs } from "@remix-run/node";
-import { redirect } from "~/lib/strava/oauth/lib/redirect";
+import { redirect } from "@xcambar/trackster-strava-api";
 import { authenticator } from "~/services/auth.server";
 import { commitSession, getSession } from "~/services/session.server";
 import { supabase } from "~/services/supabase.server";

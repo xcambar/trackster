@@ -1,14 +1,14 @@
 import { camelCase } from "change-case";
 import { isPlainObject } from "es-toolkit";
 import { AccessToken, StreamSet } from "strava";
-import { getStravaAPIClient } from "../../../app/lib/strava/api";
+import { getStravaAPIClient, buildStravaAPIScheduler } from "@xcambar/trackster-strava-api";
 
-import db from "@xcambar/trackster-db/client";
-import { activitiesTable, activityStreamsTable } from "./schema";
+import db from "./client";
+import { activitiesTable } from "./schemas/activities";
+import { activityStreamsTable } from "./schemas/activity_streams";
 
 import { eq, getTableColumns } from "drizzle-orm";
 import { PgTable, PgTimestamp } from "drizzle-orm/pg-core";
-import { buildStravaAPIScheduler } from "../../../app/services/strava.server";
 
 function findDateColumns(table: PgTable) {
   const columns = getTableColumns(table);

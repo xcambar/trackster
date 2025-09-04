@@ -4,11 +4,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "netlify functions:serve",
+    "dev": "dotenv -- netlify functions:serve",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@xcambar/trackster-db": "workspace:*",
+    "dotenv-cli": "^10.0.0",
     "drizzle-orm": "^0.44.3"
   },
   "devDependencies": {

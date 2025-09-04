@@ -18,16 +18,22 @@ export const getActivitiesForUser = async (
   user: UserSession
 ): Promise<Activity[]> => {
   try {
+    const athleteId = Number(user.user_metadata.strava_profile.id);
+    
+    if (isNaN(athleteId)) {
+      console.error('Invalid athlete ID:', user.user_metadata.strava_profile.id);
+      return [];
+    }
+
     const activities = await db
       .select()
       .from(activitiesTable)
       .orderBy(desc(activitiesTable.createdAt))
-      .where(
-        eq(activitiesTable.athleteId, user.user_metadata.strava_profile.id)
-      );
+      .where(eq(activitiesTable.athleteId, athleteId));
 
     return activities;
   } catch (error) {
+    console.log(error);
     throw new Response("Internal error", {
       status: 500,
     });
@@ -98,15 +104,17 @@ export const getAthletePerformanceProfile = async (
   user: UserSession
 ): Promise<AthletePerformanceProfile | null> => {
   try {
+    const athleteId = Number(user.user_metadata.strava_profile.id);
+    
+    if (isNaN(athleteId)) {
+      console.error('Invalid athlete ID:', user.user_metadata.strava_profile.id);
+      return null;
+    }
+
     const profiles = await db
       .select()
       .from(athletePerformanceProfilesTable)
-      .where(
-        eq(
-          athletePerformanceProfilesTable.athleteId,
-          user.user_metadata.strava_profile.id
-        )
-      )
+      .where(eq(athletePerformanceProfilesTable.athleteId, athleteId))
       .limit(1);
 
     return profiles[0] || null;

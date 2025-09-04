@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import db from "../../../app/services/db.server";
+import db from "./client";
 import {
   activitiesTable,
   activityStreamsTable,
@@ -13,7 +13,7 @@ interface GradeSpeedData {
   grade10To15: number[];
   grade15To25: number[];
   gradeOver25: number[];
-  
+
   // Downhill grades (negative)
   gradeNeg5To0: number[];
   gradeNeg10ToNeg5: number[];
@@ -51,7 +51,7 @@ const GRADE_COVERAGE_FLAGS = {
   GRADE_10_15: 1 << 2,
   GRADE_15_25: 1 << 3,
   GRADE_OVER_25: 1 << 4,
-  
+
   // Downhill grades
   GRADE_NEG_5_TO_0: 1 << 5,
   GRADE_NEG_10_TO_NEG_5: 1 << 6,
@@ -71,7 +71,7 @@ function categorizeByGrade(
     grade10To15: [],
     grade15To25: [],
     gradeOver25: [],
-    
+
     // Downhill grades
     gradeNeg5To0: [],
     gradeNeg10ToNeg5: [],
@@ -176,7 +176,7 @@ function calculateGradeCoverageFlags(gradeData: GradeSpeedData): number {
     flags |= GRADE_COVERAGE_FLAGS.GRADE_OVER_25;
 
   // Downhill grade coverage flags
-  if (gradeData.gradeNeg5To0.length >= 50) 
+  if (gradeData.gradeNeg5To0.length >= 50)
     flags |= GRADE_COVERAGE_FLAGS.GRADE_NEG_5_TO_0;
   if (gradeData.gradeNeg10ToNeg5.length >= 50)
     flags |= GRADE_COVERAGE_FLAGS.GRADE_NEG_10_TO_NEG_5;
@@ -227,7 +227,7 @@ async function buildAthleteProfile(athleteId: number): Promise<void> {
     grade10To15: [],
     grade15To25: [],
     gradeOver25: [],
-    
+
     // Downhill grades
     gradeNeg5To0: [],
     gradeNeg10ToNeg5: [],
@@ -266,7 +266,7 @@ async function buildAthleteProfile(athleteId: number): Promise<void> {
     speedGrade10To15: calculateAverage(allGradeData.grade10To15),
     speedGrade15To25: calculateAverage(allGradeData.grade15To25),
     speedGradeOver25: calculateAverage(allGradeData.gradeOver25),
-    
+
     // Downhill grade speeds
     speedGradeNeg5To0: calculateAverage(allGradeData.gradeNeg5To0),
     speedGradeNeg10ToNeg5: calculateAverage(allGradeData.gradeNeg10ToNeg5),
