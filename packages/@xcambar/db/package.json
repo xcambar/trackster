@@ -6,6 +6,7 @@
   "main": "./schema.ts",
   "exports": {
     ".": "./schema.ts",
+    "./supabase_schema": "./supabase_schema.ts",
     "./client": "./client.ts",
     "./schemas/activities": "./schemas/activities.ts",
     "./schemas/activity_streams": "./schemas/activity_streams.ts",
