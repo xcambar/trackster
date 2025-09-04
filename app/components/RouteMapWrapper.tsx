@@ -1,13 +1,7 @@
 import { Box, CircularProgress } from "@mui/material";
 import { ClientOnly } from "remix-utils/client-only";
-import { lazy, Suspense } from "react";
-
-// Lazy load the client-only RouteMap component
-const RouteMapClient = lazy(() => 
-  import("~/components/leaflet/RouteMap.client").then(module => ({ 
-    default: module.RouteMap 
-  }))
-);
+import { Suspense } from "react";
+import { RouteMap } from "~/components/leaflet/RouteMap.client";
 
 interface RouteMapWrapperProps {
   polyline: string;
@@ -51,7 +45,7 @@ export function RouteMapWrapper({ polyline, height = 400, startLat, startLng }: 
             <CircularProgress />
           </Box>
         }>
-          <RouteMapClient 
+          <RouteMap 
             polyline={polyline} 
             height={height}
             startLat={startLat}

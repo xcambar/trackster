@@ -28,8 +28,11 @@ import {
 } from "@mui/material";
 import type { ActionFunctionArgs, MetaFunction } from "@remix-run/node";
 import { data, redirect, useLoaderData } from "@remix-run/react";
-import React, { lazy, Suspense } from "react";
+import React, { Suspense } from "react";
 import { ClientOnly } from "remix-utils/client-only";
+import { GradeDistributionChart } from "~/components/GradeDistributionChart.client";
+import { RouteMap } from "~/components/RouteMap.client";
+import { ElevationGraph } from "~/components/ElevationGraph.client";
 import { AppBar } from "~/components/AppBar";
 import { FlashMessage } from "~/components/FlashMessage";
 import { ActivityAnalysis } from "~/lib/analysis/activity-adapter";
@@ -911,25 +914,14 @@ const GradeDistributionChartWrapper: React.FC<{
 }> = ({ gradeDistribution, totalDistance }) => {
   return (
     <ClientOnly fallback={<div>Loading chart...</div>}>
-      {() => {
-        // Use dynamic import to avoid SSR issues
-        const GradeDistributionChart = lazy(() =>
-          import("~/components/GradeDistributionChart.client").then(
-            (module) => ({
-              default: module.GradeDistributionChart,
-            })
-          )
-        );
-
-        return (
-          <Suspense fallback={<div>Loading chart...</div>}>
-            <GradeDistributionChart
-              gradeDistribution={gradeDistribution}
-              totalDistance={totalDistance}
-            />
-          </Suspense>
-        );
-      }}
+      {() => (
+        <Suspense fallback={<div>Loading chart...</div>}>
+          <GradeDistributionChart
+            gradeDistribution={gradeDistribution}
+            totalDistance={totalDistance}
+          />
+        </Suspense>
+      )}
     </ClientOnly>
   );
 };
@@ -940,20 +932,11 @@ const RouteMapWrapper: React.FC<{ analysis: ActivityAnalysis }> = ({
 }) => {
   return (
     <ClientOnly fallback={<div>Loading map...</div>}>
-      {() => {
-        // Use dynamic import to avoid SSR issues
-        const RouteMap = lazy(() =>
-          import("~/components/RouteMap.client").then((module) => ({
-            default: module.RouteMap,
-          }))
-        );
-
-        return (
-          <Suspense fallback={<div>Loading map...</div>}>
-            <RouteMap analysis={analysis} height={400} />
-          </Suspense>
-        );
-      }}
+      {() => (
+        <Suspense fallback={<div>Loading map...</div>}>
+          <RouteMap analysis={analysis} height={400} />
+        </Suspense>
+      )}
     </ClientOnly>
   );
 };
@@ -964,20 +947,11 @@ const ElevationProfileWrapper: React.FC<{ analysis: ActivityAnalysis }> = ({
 }) => {
   return (
     <ClientOnly fallback={<div>Loading elevation profile...</div>}>
-      {() => {
-        // Use dynamic import to avoid SSR issues
-        const ElevationGraph = lazy(() =>
-          import("~/components/ElevationGraph.client").then((module) => ({
-            default: module.ElevationGraph,
-          }))
-        );
-
-        return (
-          <Suspense fallback={<div>Loading elevation profile...</div>}>
-            <ElevationGraph analysis={analysis} height={300} />
-          </Suspense>
-        );
-      }}
+      {() => (
+        <Suspense fallback={<div>Loading elevation profile...</div>}>
+          <ElevationGraph analysis={analysis} height={300} />
+        </Suspense>
+      )}
     </ClientOnly>
   );
 };
