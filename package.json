@@ -13,6 +13,7 @@
     "start": "pnpm --filter @xcambar/trackster-app start",
     "typecheck": "pnpm --filter @xcambar/trackster-app typecheck",
     "test": "pnpm --filter @xcambar/trackster-app test",
+    "test:all": "pnpm --filter \\* test",
     "format": "prettier --write ./packages/@xcambar/trackster-app/app",
     "db-seed": "dotenv -- run-s db:*",
     "db:flush": "dotenv -- bash -c 'psql ${SUPABASE_DB_URL} -f ./supabase/sql/flush.sql'",
