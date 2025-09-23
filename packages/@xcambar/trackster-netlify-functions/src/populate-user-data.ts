@@ -5,25 +5,14 @@ import { populateActivityStreamsFromAPI } from "@xcambar/trackster-db/populateAc
 import { authSchemaUsersTable } from "@xcambar/trackster-db/supabase_schema";
 import { eq } from "drizzle-orm";
 
-interface NetlifyEvent {
-  path: string;
-  httpMethod: string;
-  headers: Record<string, string>;
-  body: string | null;
-}
+import { Handler, HandlerContext, HandlerEvent } from "@netlify/functions";
 
-interface NetlifyContext {
-  // Netlify context properties
-}
+const pattern = new URLPattern({ pathname: "populate-user-data/:userId" });
 
-export const handler = async (
-  event: NetlifyEvent,
-  context: NetlifyContext
-): Promise<{
-  statusCode: number;
-  headers?: Record<string, string>;
-  body: string;
-}> => {
+export const handler: Handler = async (
+  event: HandlerEvent,
+  context: HandlerContext
+) => {
   // Extract userId from the URL path
   // Expected format: /populate-user-data/{userId}
   const pathSegments = event.path.split("/");
