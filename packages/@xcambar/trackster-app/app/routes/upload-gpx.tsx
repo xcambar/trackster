@@ -17,17 +17,8 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import {
-  redirect,
-  type ActionFunctionArgs,
-  type LoaderFunctionArgs,
-} from "@remix-run/node";
-import {
-  Form,
-  useActionData,
-  useLoaderData,
-  useNavigation,
-} from "@remix-run/react";
+import { redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from "react-router";
+import { Form, useActionData, useLoaderData, useNavigation } from "react-router";
 import { ClientOnly } from "remix-utils/client-only";
 import { AppBar } from "~/components/AppBar";
 import { GPXVisualization } from "~/components/GPXVisualization.client";

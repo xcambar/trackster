@@ -5,11 +5,11 @@
   "sideEffects": false,
   "type": "module",
   "scripts": {
-    "build": "remix vite:build",
-    "dev": "remix vite:dev",
+    "build": "react-router build",
+    "dev": "react-router dev",
     "lint": "eslint --ignore-path ../../../.gitignore --cache --cache-location ./node_modules/.cache/eslint .",
-    "start": "remix-serve ./build/server/index.js",
-    "typecheck": "tsc",
+    "start": "react-router-serve ./build/server/index.js",
+    "typecheck": "react-router typegen && tsc",
     "test": "vitest"
   },
   "dependencies": {
@@ -18,9 +18,8 @@
     "@mjackson/headers": "^0.11.1",
     "@mui/material": "^7.2.0",
     "@react-leaflet/core": "^2.1.0",
-    "@remix-run/node": "^2.16.8",
-    "@remix-run/react": "^2.16.8",
-    "@remix-run/serve": "^2.16.8",
+    "@react-router/node": "^7.0.0",
+    "@react-router/serve": "^7.0.0",
     "@supabase/supabase-js": "^2.52.0",
     "@tmcw/togeojson": "^7.1.2",
     "@types/google-polyline": "^1.0.2",
@@ -43,6 +42,7 @@
     "react-geolocated": "^4.3.0",
     "react-leaflet": "^4.2.1",
     "react-leaflet-markercluster": "^4.2.1",
+    "react-router": "^7.0.0",
     "recharts": "^3.1.2",
     "remix-utils": "^7.7.0",
     "strava": "^2.3.0"
@@ -50,10 +50,8 @@
   "devDependencies": {
     "@mui/icons-material": "^7.2.0",
     "@netlify/remix-adapter": "^2.6.1",
-    "@remix-run/dev": "^2.16.8",
-    "@remix-run/fs-routes": "^2.17.1",
-    "@remix-run/route-config": "^2.17.1",
-    "@remix-run/testing": "^2.16.8",
+    "@react-router/dev": "^7.0.0",
+    "@react-router/fs-routes": "^7.0.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",

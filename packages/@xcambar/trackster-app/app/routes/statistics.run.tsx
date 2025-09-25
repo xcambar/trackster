@@ -9,8 +9,8 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import { ActionFunctionArgs } from "@remix-run/node";
-import { redirect, useLoaderData } from "@remix-run/react";
+import { ActionFunctionArgs } from "react-router";
+import { redirect, useLoaderData } from "react-router";
 import {
   getActivityStreamsForUser,
   getAthletePerformanceProfile,

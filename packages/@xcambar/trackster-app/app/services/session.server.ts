@@ -1,4 +1,4 @@
-import { createCookieSessionStorage, Session } from "@remix-run/node";
+import { createCookieSessionStorage, Session } from "react-router";
 import { getEnvironment } from "@xcambar/trackster-env";
 import { supabase } from "./supabase.server";
 

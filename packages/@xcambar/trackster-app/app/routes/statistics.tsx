@@ -1,14 +1,7 @@
 import { AlertColor, Box, Container, Tab, Tabs } from "@mui/material";
 
-import type { ActionFunctionArgs, MetaFunction } from "@remix-run/node";
-import {
-  data,
-  Outlet,
-  redirect,
-  useLoaderData,
-  useLocation,
-  useNavigate,
-} from "@remix-run/react";
+import type { ActionFunctionArgs, MetaFunction } from "react-router";
+import { data, Outlet, redirect, useLoaderData, useLocation, useNavigate } from "react-router";
 import { AppBar } from "~/components/AppBar";
 
 import { useEffect, useState } from "react";

@@ -1,6 +1,6 @@
 import { Box, Paper, Typography } from "@mui/material";
-import { ActionFunctionArgs } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import { ActionFunctionArgs } from "react-router";
+import { useLoaderData } from "react-router";
 import { Activity } from "@xcambar/trackster-db";
 import { ActivityTypeIcon } from "~/components/ActivityTypeIcon";
 import { getLastActivityForUser } from "~/lib/models/activity";

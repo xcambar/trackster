@@ -24,8 +24,8 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import type { ActionFunctionArgs, MetaFunction } from "@remix-run/node";
-import { data, redirect, useLoaderData } from "@remix-run/react";
+import type { ActionFunctionArgs, MetaFunction } from "react-router";
+import { data, redirect, useLoaderData } from "react-router";
 import React, { Suspense } from "react";
 import { ClientOnly } from "remix-utils/client-only";
 import { GradeDistributionChart } from "~/components/GradeDistributionChart.client";

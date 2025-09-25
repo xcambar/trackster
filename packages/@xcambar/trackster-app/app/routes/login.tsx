@@ -1,6 +1,6 @@
 import { AlertColor, Box, Container } from "@mui/material";
-import type { ActionFunctionArgs, MetaFunction } from "@remix-run/node";
-import { data, redirect, useLoaderData } from "@remix-run/react";
+import type { ActionFunctionArgs, MetaFunction } from "react-router";
+import { data, redirect, useLoaderData } from "react-router";
 import { getEnvironment } from "@xcambar/trackster-env";
 import { AppBar } from "~/components/AppBar";
 import {

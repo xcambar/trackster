@@ -11,17 +11,8 @@ import {
   Switch,
   Typography,
 } from "@mui/material";
-import {
-  redirect,
-  type ActionFunctionArgs,
-  type LoaderFunctionArgs,
-} from "@remix-run/node";
-import {
-  Form,
-  useActionData,
-  useLoaderData,
-  useNavigation,
-} from "@remix-run/react";
+import { redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from "react-router";
+import { Form, useActionData, useLoaderData, useNavigation } from "react-router";
 import { useState } from "react";
 import { AppBar } from "~/components/AppBar";
 import { RouteMapWrapper } from "~/components/RouteMapWrapper";

@@ -1,4 +1,4 @@
-import { ActionFunctionArgs, data } from "@remix-run/node";
+import { ActionFunctionArgs, data } from "react-router";
 import { getActivitiesForUser } from "~/lib/models/activity";
 import { getUserFromSession } from "~/lib/models/user";
 import { ensureAuthenticatedSession } from "~/services/session.server";

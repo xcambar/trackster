@@ -3,7 +3,7 @@ import {
   CssBaseline,
   unstable_useEnhancedEffect as useEnhancedEffect,
 } from "@mui/material";
-import type { LinksFunction } from "@remix-run/node";
+import type { LinksFunction } from "react-router";
 import {
   isRouteErrorResponse,
   Links,
@@ -12,7 +12,7 @@ import {
   Scripts,
   ScrollRestoration,
   useRouteError,
-} from "@remix-run/react";
+} from "react-router";
 import * as React from "react";
 
 export const links: LinksFunction = () => [
