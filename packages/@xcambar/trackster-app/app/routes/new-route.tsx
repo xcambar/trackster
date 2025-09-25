@@ -12,7 +12,6 @@ import {
   Typography,
 } from "@mui/material";
 import {
-  json,
   redirect,
   type ActionFunctionArgs,
   type LoaderFunctionArgs,
@@ -67,7 +66,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const mostCommonLocation = await getMostCommonStartingLocation(user);
   const startingLocation = mostCommonLocation || getDefaultLocation();
 
-  return json<LoaderData>({
+  return {
     user: {
       id: user.id,
       firstName: user.user_metadata.strava_profile.firstname,
@@ -75,7 +74,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     },
     hasPerformanceProfile: !!performanceProfile,
     startingLocation,
-  });
+  };
 }
 
 interface ActionData {
@@ -106,18 +105,18 @@ export async function action({ request }: ActionFunctionArgs) {
     const preferTrails = formData.get("preferTrails") === "on";
 
     if (!distanceKm || distanceKm < 3 || distanceKm > 50) {
-      return json<ActionData>({
+      return {
         error: "Invalid distance. Must be between 3 and 50 km.",
-      });
+      };
     }
 
     // Get user's performance profile
     const performanceProfile = await getAthletePerformanceProfile(user);
     if (!performanceProfile) {
-      return json<ActionData>({
+      return {
         error:
           "No performance profile found. Please sync some activities first.",
-      });
+      };
     }
 
     // Get user's preferred starting location
@@ -137,7 +136,7 @@ export async function action({ request }: ActionFunctionArgs) {
       performanceProfile
     );
 
-    return json<ActionData>({
+    return {
       success: true,
       route: {
         distance: result.route.distance,
@@ -147,13 +146,13 @@ export async function action({ request }: ActionFunctionArgs) {
         averagePaceMinPerKm: result.estimation.averagePaceMinPerKm,
         confidence: result.estimation.confidence,
       },
-    });
+    };
   } catch (error) {
     console.error("Error generating route:", error);
-    return json<ActionData>({
+    return {
       error:
         error instanceof Error ? error.message : "Failed to generate route",
-    });
+    };
   }
 }
 
