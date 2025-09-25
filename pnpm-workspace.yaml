@@ -1,6 +1,6 @@
 packages:
   - packages/@xcambar/*
-  - supabase/functions/*
+#  - supabase/functions/*
 
 ignoredBuiltDependencies:
   - '@parcel/watcher'
